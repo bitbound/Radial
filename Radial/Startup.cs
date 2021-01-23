@@ -50,8 +50,9 @@ namespace Radial
             services.AddScoped<IEmailSenderEx, EmailSender>();
             services.AddScoped<IDataService, DataService>();
             services.AddScoped<IJsInterop, JsInterop>();
-
             services.AddScoped<IClientConnection, ClientConnection>();
+
+            services.AddSingleton<IClientManager, ClientManager>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -93,7 +94,6 @@ namespace Radial
                 endpoints.MapControllers();
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
-                endpoints.MapHub<GameHub>(GameHub.HubPath);
             });
 
 

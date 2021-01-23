@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.AspNetCore.SignalR.Client;
+using Radial.Models.Dtos;
+using Radial.Models.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,92 +14,65 @@ namespace Radial.Services
 {
     public interface IClientConnection : IDisposable
     {
-        HubConnectionState State { get; }
-        Task Connect();
+        event EventHandler<ChatMessageDto> ChatReceived;
+        event EventHandler<string> Disconnected;
+
+        string Username { get; }
+
+        void InvokeDtoReceived(IBaseDto dto);
+        void Connect();
+        void Disconnect(string reason);
     }
 
     public class ClientConnection : IClientConnection
     {
-        private readonly SemaphoreSlim _connectionLock = new SemaphoreSlim(1, 1);
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly NavigationManager _navigationManager;
-        private HubConnection _connection;
-        private bool _isDisposed;
+        public string Username { get; }
 
-        public ClientConnection(NavigationManager navigationManager, IHttpContextAccessor httpContextAccessor)
+        private readonly IClientManager _clientManager;
+        private readonly IHttpContextAccessor _httpContext;
+
+        public ClientConnection(IClientManager clientManager, 
+            IHttpContextAccessor httpContextAccessor)
         {
-            _navigationManager = navigationManager;
-            _httpContextAccessor = httpContextAccessor;
+            _clientManager = clientManager;
+            _httpContext = httpContextAccessor;
+
+            Username = _httpContext?.HttpContext?.User?.Identity?.Name;
         }
 
-        public HubConnectionState State => _connection?.State ?? HubConnectionState.Disconnected;
+        public event EventHandler<ChatMessageDto> ChatReceived;
+        public event EventHandler<string> Disconnected;
 
-        public async Task Connect()
+        public void Connect()
         {
-            if (!await _connectionLock.WaitAsync(0))
+            if (_httpContext?.HttpContext?.User?.Identity?.IsAuthenticated == true)
             {
-                return;
-            }
-
-            try
-            {
-                if (_connection?.State == HubConnectionState.Connected)
-                {
-                    return;
-                }
-
-                if (_connection != null)
-                {
-                    try
-                    {
-                        await _connection.StopAsync();
-                        await _connection.DisposeAsync();
-                    }
-                    catch { }
-                }
-
-                _connection = new HubConnectionBuilder()
-                    .WithUrl(_navigationManager.BaseUri.TrimEnd('/') + GameHub.HubPath, options => {
-                        var request = _httpContextAccessor.HttpContext.Request;
-                        var cookies = request.Cookies;
-                        foreach (var cookie in cookies)
-                        {
-                            options.Cookies.Add(new Cookie(cookie.Key, cookie.Value, "/", request.Host.Host));
-                        }
-                    })
-                    .Build();
-
-                _connection.Closed += Connection_Closed;
-
-                await _connection.StartAsync();
-            }
-            finally
-            {
-                _connectionLock.Release();
+                _clientManager.AddClient(_httpContext.HttpContext.Connection.Id, this);
             }
         }
 
-        public async void Dispose()
+        public void Dispose()
         {
-            _isDisposed = true;
-
-            if (_connection != null)
-            {
-                await _connection.StopAsync();
-                await _connection.DisposeAsync();
-            }
+            _clientManager.RemoveClient(_httpContext?.HttpContext?.Connection?.Id);
 
             GC.SuppressFinalize(this);
         }
 
-        private Task Connection_Closed(Exception arg)
+        public void InvokeDtoReceived(IBaseDto dto)
         {
-            if (!_isDisposed)
+            switch (dto.DtoType)
             {
-                return Task.Run(async () => await Connect());
+                case DtoType.ChatMessage:
+                    ChatReceived?.Invoke(this, dto as ChatMessageDto);
+                    break;
+                default:
+                    break;
             }
+        }
 
-            return Task.CompletedTask;
+        public void Disconnect(string reason)
+        {
+            Disconnected?.Invoke(this, reason);
         }
     }
 }

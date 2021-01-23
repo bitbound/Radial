@@ -1,30 +1,58 @@
-<CascadingAuthenticationState>
-    <Router AppAssembly="@typeof(Program).Assembly" PreferExactMatches="@true">
-        <Found Context="routeData">
-            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
-        </Found>
-        <NotFound>
-            <LayoutView Layout="@typeof(MainLayout)">
-                <p>Sorry, there's nothing at this address.</p>
-            </LayoutView>
-        </NotFound>
-    </Router>
-</CascadingAuthenticationState>
-
 @inject AuthenticationStateProvider AuthStateProvider
 @inject Radial.Services.IClientConnection ClientConnection
 
+@if (string.IsNullOrWhiteSpace(@_disconnectReason))
+{
+    <CascadingAuthenticationState>
+        <Router AppAssembly="@typeof(Program).Assembly" PreferExactMatches="@true">
+            <Found Context="routeData">
+                <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+            </Found>
+            <NotFound>
+                <LayoutView Layout="@typeof(MainLayout)">
+                    <p>Sorry, there's nothing at this address.</p>
+                </LayoutView>
+            </NotFound>
+        </Router>
+    </CascadingAuthenticationState>
+}
+else
+{
+    <div class="container mt-5">
+        <div class="jumbotron">
+            <h1 class="display-4">Session Disconnected</h1>
+            <p class="lead">@_disconnectReason</p>
+            <hr class="my-4">
+            <p>You can refresh the browser to reconnected, but it will disconnect any existing session in another tab or browser.</p>
+        </div>
+    </div>
+
+}
+
+
 @code {
+    private string _disconnectReason;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-
-        if (authState.User.Identity.IsAuthenticated)
+        if (firstRender)
         {
-            await ClientConnection.Connect();
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+
+            if (authState.User.Identity.IsAuthenticated)
+            {
+                ClientConnection.Connect();
+                ClientConnection.Disconnected += ClientDisconnected;
+            }
         }
 
+
         await base.OnAfterRenderAsync(firstRender);
+    }
+
+    private void ClientDisconnected(object sender, string reason)
+    {
+        _disconnectReason = reason;
+        InvokeAsync(StateHasChanged);
     }
 }
