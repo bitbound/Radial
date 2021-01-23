@@ -1,0 +1,22 @@
+﻿@if (!String.IsNullOrEmpty(Message) && _isVisible)
+{
+    var statusMessageClass = Message.StartsWith("Error") ? "danger" : "success";
+    <div class="alert alert-@statusMessageClass alert-dismissible" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close" @onclick="Close"><span aria-hidden="true">&times;</span></button>
+        @Message
+    </div>
+}
+
+
+@code {
+    private bool _isVisible = true;
+
+    [Parameter]
+    public string Message { get; set; }
+
+    public void Close(MouseEventArgs ev)
+    {
+        _isVisible = false;
+    }
+
+}

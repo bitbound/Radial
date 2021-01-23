@@ -1,0 +1,51 @@
+﻿<div class="top-row pl-4 navbar navbar-dark">
+    <a class="navbar-brand" href="">
+        <img class="brand-image" src="/media/radial.png" />
+        Radial
+    </a>
+    <button class="navbar-toggler" @onclick="ToggleNavMenu">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+</div>
+
+<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+    <ul class="nav flex-column">
+        <AuthorizeView>
+            <Authorized>
+                <li class="nav-item px-3">
+                    <NavLink class="nav-link" href="explore">
+                        <span class="oi oi-map" aria-hidden="true"></span> Explore
+                    </NavLink>
+                </li>
+            </Authorized>
+            <NotAuthorized>
+                <li class="nav-item px-3">
+                    <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                        <span class="oi oi-home" aria-hidden="true"></span> Home
+                    </NavLink>
+                </li>
+            </NotAuthorized>
+        </AuthorizeView>
+        
+        <li class="nav-item px-3">
+            <NavLink class="nav-link" href="contact">
+                <span class="oi oi-envelope-closed" aria-hidden="true"></span> Counter
+            </NavLink>
+        </li>
+    </ul>
+
+    <footer class="text-white small mt-5 ml-4">
+        &copy; 2021 - <a href="https://lucency.co">Translucency Software</a>
+    </footer>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+
+    private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}

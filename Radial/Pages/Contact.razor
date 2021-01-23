@@ -1,0 +1,119 @@
+﻿@page "/contact"
+
+@inject Radial.Services.IJsInterop JsInterop
+@inject Radial.Services.IEmailSenderEx EmailSender
+@inject Radial.Services.IApplicationConfig AppConfig
+@using System.ComponentModel.DataAnnotations
+@using Radial.Shared
+
+
+<h3 class="mt-5">Contact</h3>
+<p class="lead">Send an email to the dev.</p>
+
+<Alert Message="@_statusMessage"></Alert>
+
+<div class="row">
+    <div class="col-sm-6">
+        <EditForm id="contactForm" EditContext="Context" OnValidSubmit="HandleValidSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="form-group">
+                <label for="nameInput">Your Name:</label>
+                <input id="nameInput" class="form-control" @bind-value="Input.Name" />
+                <ValidationMessage For="() => Input.Name"></ValidationMessage>
+            </div>
+            <div class="form-group">
+                <label for="emailInput">Your Email:</label>
+                <input id="emailInput" class="form-control" @bind-value="Input.Email" />
+                <ValidationMessage For="() => Input.Email"></ValidationMessage>
+            </div>
+            <div class="form-group">
+                <label for="messageTextArea">Message:</label>
+                <textarea id="messageTextArea"
+                          class="form-control"
+                          @bind="Input.Message"></textarea>
+
+                <ValidationMessage For="() => Input.Message"></ValidationMessage>
+            </div>
+            <div class="form-group">
+                <label>@Question</label>
+                <input for="answerInput" class="form-control" @bind-value="Input.Answer" />
+                <ValidationMessage For="() => Input.Answer"></ValidationMessage>
+            </div>
+
+            <div class="form-group text-right">
+                <button id="submitButton" type="submit" class="btn btn-secondary">Submit</button>
+            </div>
+
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private string _statusMessage;
+
+    private InputModel Input { get; set; } = new InputModel();
+    private EditContext Context { get; set; }
+
+
+    public string Question { get; set; }
+    public string ExpectedAnswer { get; set; }
+
+    protected override void OnInitialized()
+    {
+        Context = new EditContext(Input);
+
+        var num1 = new Random(DateTime.Now.Second).Next(0, 10);
+        var num2 = new Random(DateTime.Now.Second + 1).Next(0, 10);
+        var num3 = new Random(DateTime.Now.Second + 2).Next(0, 10);
+
+        Question = $"Bot check.  What's {num1} times {num2} plus {num3}?";
+        ExpectedAnswer = (num1 * num2 + num3).ToString();
+
+        base.OnInitialized();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (Input.Answer?.Trim() != ExpectedAnswer)
+        {
+            await JsInterop.Alert("The answer to the bot check is incorrect.");
+            return;
+        }
+
+        var result = await EmailSender.TrySendEmail(AppConfig.SmtpEmail, "AutoUpdateMe Response", $"Message from {Input.Name} ({Input.Email}): <br /> <br />" +
+            $"<br /> <br />" +
+            $"{Input.Message}");
+
+        if (result)
+        {
+            _statusMessage = "Email sent successfully!";
+        }
+        else
+        {
+            _statusMessage = "Error sending email.  Please try again later.";
+        }
+
+        Input = new InputModel();
+    }
+
+    public class InputModel
+    {
+        [StringLength(30)]
+        [Required]
+        public string Name { get; set; }
+
+        [EmailAddress]
+        [Required]
+        public string Email { get; set; }
+
+        [StringLength(2000)]
+        [Required]
+        public string Message { get; set; }
+
+        [RegularExpression("[0-9]+", ErrorMessage = "Must be a number only.")]
+        [Required]
+        public string Answer { get; set; }
+    }
+}

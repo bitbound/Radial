@@ -1,0 +1,34 @@
+﻿@page "/"
+
+@inject NavigationManager NavManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+
+<AuthorizeView>
+    <NotAuthorized>
+        <div class="jumbotron">
+            <h3 class="display-4">Radial</h3>
+            <p class="lead">
+                An online RPG about escaping the center.
+            </p>
+            <hr class="my-4">
+            <p class="lead">
+                <a class="btn btn-primary btn-lg mr-2" href="Identity/Account/Login" role="button">Log In</a>
+                <a class="btn btn-primary btn-lg" href="Identity/Account/Register" role="button">Register</a>
+            </p>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        if (authState.User.Identity.IsAuthenticated)
+        {
+            NavManager.NavigateTo("explore");
+            return;
+        }
+        await base.OnInitializedAsync();
+    }
+} 
