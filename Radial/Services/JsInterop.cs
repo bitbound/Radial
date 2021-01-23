@@ -13,6 +13,8 @@ namespace Radial.Services
 
         ValueTask<string> Prompt(string message);
 
+        void StartDraggingY(string elementId, double clientY);
+
     }
     public class JsInterop : IJsInterop
     {
@@ -36,6 +38,11 @@ namespace Radial.Services
         public ValueTask<string> Prompt(string message)
         {
             return _jsRuntime.InvokeAsync<string>("invokePrompt", message);
+        }
+
+        public void StartDraggingY(string elementId, double clientY)
+        {
+            _jsRuntime.InvokeVoidAsync("startDraggingY", elementId, clientY);
         }
     }
 }

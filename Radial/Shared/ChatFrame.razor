@@ -1,0 +1,148 @@
+﻿@using Radial.Models.Messaging 
+@using Radial.Enums 
+@using System.Collections.Concurrent 
+@inject Radial.Services.Client.IMessagePublisher MessagePublisher
+@inject Radial.Services.IJsInterop JsInterop
+@inject Radial.Services.Client.IClientConnection ClientConnection
+@inject Radial.Services.IClientManager ClientManager 
+@inherits AuthComponentBase
+
+<button id="chat-button" class="chat-button" @onpointerdown="ChatButton_OnPointerDown" @onclick="ChatButton_OnClick">
+    <span class="oi oi-chat"></span>
+</button>
+
+<div class="chat-frame @_chatFrameOpenClass">
+    <div>
+        <button type="button" class="close float-left ml-2 mt-2" style="font-size:2em" aria-label="Close" @onclick="CloseChatFrame">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="text-center mt-2 mb-1">Chat</h4>
+    </div>
+    <div class="chat-message-window">
+        @foreach (var chatMessage in _chatMessages)
+        {
+            <div class="chat-bubble-frame  @(IsMessageFromSelf(chatMessage) ? "self" : chatMessage.Channel.ToString().ToLower())">
+                <div class="chat-timestamp small">
+                    @chatMessage.Channel.ToString() - @chatMessage.Timestamp.ToString()
+                </div>
+                <div class="chat-bubble">
+                    <span class="chat-sender font-weight-bold">
+                        @(IsMessageFromSelf(chatMessage) ? "You" : chatMessage.Sender):
+                    </span>
+                    <span class="chat-message">@chatMessage.Message</span>
+                </div>
+            </div>
+        }
+    </div>
+    <div class="chat-input">
+        <div>
+            <select class="small" @bind="_chatChannel">
+                @foreach (var channel in Enum.GetValues(typeof(ChatChannel)))
+                {
+                    <option value="@channel">@channel</option>
+                }
+            </select>
+            <input class="form-control mb-1" placeholder="Enter a chat message"
+                   @onkeypress="ChatInput_OnKeyPress"
+                   @bind="CurrentInputText"
+                   @bind:event="oninput" />
+        </div>
+    </div>
+</div>
+
+@code {
+    private string _chatFrameOpenClass;
+    private string _currentInputText;
+    private ChatChannel _chatChannel = ChatChannel.Global;
+    private bool _isRendered;
+
+    private string CurrentInputText
+    {
+        get => _currentInputText;
+        set
+        {
+            if (value.Length > 200)
+            {
+                _currentInputText = String.Join("", value.Take(200));
+            }
+            else
+            {
+                _currentInputText = value;
+            }
+        }
+    }
+
+    private bool IsChatOpen => _chatFrameOpenClass == "open";
+
+    private readonly ConcurrentQueue<ChatMessage> _chatMessages = new ConcurrentQueue<ChatMessage>();
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        _isRendered = true;
+        if (firstRender)
+        {
+            MessagePublisher.ChatReceived += ChatReceived;
+        }
+        return base.OnAfterRenderAsync(firstRender);
+    }
+
+    private void ChatButton_OnClick(MouseEventArgs args)
+    {
+        if (string.IsNullOrWhiteSpace(_chatFrameOpenClass))
+        {
+            _chatFrameOpenClass = "open";
+        }
+        else
+        {
+            _chatFrameOpenClass = string.Empty;
+        }
+
+        StateHasChanged();
+    }
+
+    private void ChatButton_OnPointerDown(PointerEventArgs args)
+    {
+        JsInterop.StartDraggingY("chat-button", args.ClientY);
+    }
+
+    private void ChatInput_OnKeyPress(KeyboardEventArgs args)
+    {
+        if (args.Key.Equals("Enter", StringComparison.OrdinalIgnoreCase))
+        {
+            var message = new ChatMessage()
+            {
+                Channel = _chatChannel,
+                Message = _currentInputText,
+                Sender = Username
+            };
+
+            ClientManager.Broadcast(message);
+
+            _currentInputText = string.Empty;
+            StateHasChanged();
+        }
+    }
+
+    private void ChatReceived(object sender, ChatMessage chatMessage)
+    {
+        while (_chatMessages.Count > 100)
+        {
+            _chatMessages.TryDequeue(out _);
+        }
+
+        _chatMessages.Enqueue(chatMessage);
+
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void CloseChatFrame(MouseEventArgs args)
+    {
+        _chatFrameOpenClass = string.Empty;
+        StateHasChanged();
+    }
+
+    private bool IsMessageFromSelf(ChatMessage message)
+    {
+        return message.Sender == Username;
+    }
+}

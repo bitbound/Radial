@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Radial.Models.Enums
 {
-    public enum DtoType
+    public enum MessageType
     {
         ChatMessage
     }

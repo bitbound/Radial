@@ -15,6 +15,7 @@ using Radial.Areas.Identity;
 using Radial.Data;
 using Radial.Data.Entities;
 using Radial.Services;
+using Radial.Services.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -51,6 +52,7 @@ namespace Radial
             services.AddScoped<IDataService, DataService>();
             services.AddScoped<IJsInterop, JsInterop>();
             services.AddScoped<IClientConnection, ClientConnection>();
+            services.AddScoped<IMessagePublisher, MessagePublisher>();
 
             services.AddSingleton<IClientManager, ClientManager>();
         }

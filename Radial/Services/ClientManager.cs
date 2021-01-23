@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
-using Radial.Models.Dtos;
+using Radial.Models.Messaging;
+using Radial.Services.Client;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -12,9 +13,11 @@ namespace Radial.Services
     public interface IClientManager
     {
         void AddClient(string connectionId, IClientConnection clientConnection);
+        void Broadcast(IMessageBase message);
+
         void RemoveClient(string connectionId);
 
-        bool SendToClient(string recipient, IBaseDto dto);
+        bool SendToClient(string recipient, IMessageBase message);
     }
 
     public class ClientManager : IClientManager
@@ -24,6 +27,11 @@ namespace Radial.Services
 
         public void AddClient(string connectionId, IClientConnection clientConnection)
         {
+            if (string.IsNullOrWhiteSpace(connectionId))
+            {
+                return;
+            }
+
             var existingConnection = ClientConnections.FirstOrDefault(x => x.Value.Username == clientConnection.Username);
 
             if (existingConnection.Value != null)
@@ -36,27 +44,41 @@ namespace Radial.Services
 
             foreach (var other in ClientConnections.Where(x => x.Key != connectionId))
             {
-                other.Value.InvokeDtoReceived(new ChatMessageDto()
+                other.Value.InvokeMessageReceived(new ChatMessage()
                 {
-                    Message = "Signed in.",
-                    Sender = clientConnection.Username
+                    Message = $"{clientConnection.Username} has signed in.",
+                    Sender = "System",
+                    Channel = Enums.ChatChannel.System
                 });
             }
         }
 
+        public void Broadcast(IMessageBase message)
+        {
+            foreach (var clientConnection in ClientConnections.Values)
+            {
+                clientConnection.InvokeMessageReceived(message);
+            };
+        }
+
         public void RemoveClient(string connectionId)
         {
+            if (string.IsNullOrWhiteSpace(connectionId))
+            {
+                return;
+            }
+
             if (ClientConnections.TryRemove(connectionId, out var connection))
             {
                 connection.Disconnect("Session closed by server.");
             }
         }
 
-        public bool SendToClient(string recipient, IBaseDto dto)
+        public bool SendToClient(string recipient, IMessageBase dto)
         {
             if (ClientConnections.TryGetValue(recipient, out var connection))
             {
-                connection.InvokeDtoReceived(dto);
+                connection.InvokeMessageReceived(dto);
                 return true;
             }
             return false;

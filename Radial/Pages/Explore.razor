@@ -1,25 +1,14 @@
 ﻿@page "/explore"
 @attribute [Authorize]
-@inject Radial.Services.IClientConnection ClientConnection
+@inject Radial.Services.Client.IMessagePublisher MessagePublisher
 @inject Radial.Services.IJsInterop JsInterop
-
-<h3>Explore</h3>
 
 
 @code {
 
     protected override Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
-        {
-            ClientConnection.ChatReceived += ChatReceived;
-        }
-
         return base.OnAfterRenderAsync(firstRender);
     }
 
-    private void ChatReceived(object sender, Radial.Models.Dtos.ChatMessageDto chatMessage)
-    {
-        JsInterop.Alert($"Message from {chatMessage.Sender}: {chatMessage.Message}");
-    }
 } 

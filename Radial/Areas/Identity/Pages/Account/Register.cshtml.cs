@@ -48,6 +48,12 @@ namespace Radial.Areas.Identity.Pages.Account
         public class InputModel
         {
             [Required]
+            [StringLength(20, MinimumLength = 4)]
+            [RegularExpression(@"^[a-zA-Z0-9_\-]*$", ErrorMessage = "Username can only contain letters, numbers, hyphens, and underscores.")]
+            [Display(Name = "Username")]
+            public string Username { get; set; }
+
+            [Required]
             [EmailAddress]
             [Display(Name = "Email")]
             public string Email { get; set; }
@@ -76,7 +82,7 @@ namespace Radial.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
             {
-                var user = new RadialUser { UserName = Input.Email, Email = Input.Email };
+                var user = new RadialUser { UserName = Input.Username, Email = Input.Email };
                 var result = await _userManager.CreateAsync(user, Input.Password);
                 if (result.Succeeded)
                 {

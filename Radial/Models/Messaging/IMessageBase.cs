@@ -5,10 +5,10 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 
-namespace Radial.Models.Dtos
+namespace Radial.Models.Messaging
 {
-    public interface IBaseDto
+    public interface IMessageBase
     {
-        public DtoType DtoType { get; }
+        public MessageType MessageType { get; }
     }
 }
