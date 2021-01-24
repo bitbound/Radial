@@ -109,6 +109,7 @@ a, .btn-link {
 
     .chat-frame .chat-message-window {
         background-color: white;
+        overflow-y: auto;
     }
 
 .chat-bubble-frame {
@@ -136,6 +137,9 @@ a, .btn-link {
     }
     .chat-bubble-frame.party .chat-bubble {
         background-color: magenta;
+    }
+    .chat-bubble-frame.local .chat-bubble {
+        background-color: darkkhaki;
     }
     .chat-bubble-frame.system .chat-bubble {
         background-color: palevioletred;

@@ -53,6 +53,7 @@ namespace Radial
             services.AddScoped<IJsInterop, JsInterop>();
             services.AddScoped<IClientConnection, ClientConnection>();
             services.AddScoped<IMessagePublisher, MessagePublisher>();
+            services.AddScoped<IToastService, ToastService>();
 
             services.AddSingleton<IClientManager, ClientManager>();
         }

@@ -10,6 +10,15 @@ window.invokePrompt = async (message) => {
     return prompt(message);
 }
 
+window.scrollToEnd = (elementId) => {
+    var element = document.getElementById(elementId);
+
+    if (!element) {
+        return;
+    }
+
+    element.scrollTop = element.scrollHeight;
+}
 
 window.startDraggingY = (elementId, clientY) => {
     var element = document.getElementById(elementId);

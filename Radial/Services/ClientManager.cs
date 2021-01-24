@@ -13,11 +13,16 @@ namespace Radial.Services
     public interface IClientManager
     {
         void AddClient(string connectionId, IClientConnection clientConnection);
+        bool IsPlayerOnline(string username);
         void Broadcast(IMessageBase message);
 
         void RemoveClient(string connectionId);
 
         bool SendToClient(string recipient, IMessageBase message);
+        void SendToLocal(IClientConnection senderConnection, IMessageBase message);
+
+        bool SendToParty(IClientConnection senderConnection, IMessageBase message);
+
     }
 
     public class ClientManager : IClientManager
@@ -32,7 +37,7 @@ namespace Radial.Services
                 return;
             }
 
-            var existingConnection = ClientConnections.FirstOrDefault(x => x.Value.Username == clientConnection.Username);
+            var existingConnection = ClientConnections.FirstOrDefault(x => x.Value.PlayerInfo.Username == clientConnection.PlayerInfo.Username);
 
             if (existingConnection.Value != null)
             {
@@ -46,7 +51,7 @@ namespace Radial.Services
             {
                 other.Value.InvokeMessageReceived(new ChatMessage()
                 {
-                    Message = $"{clientConnection.Username} has signed in.",
+                    Message = $"{clientConnection.PlayerInfo.Username} has signed in.",
                     Sender = "System",
                     Channel = Enums.ChatChannel.System
                 });
@@ -59,6 +64,11 @@ namespace Radial.Services
             {
                 clientConnection.InvokeMessageReceived(message);
             };
+        }
+
+        public bool IsPlayerOnline(string username)
+        {
+            return ClientConnections.Values.Any(x => x.PlayerInfo.Username.Equals(username.Trim(), StringComparison.OrdinalIgnoreCase));
         }
 
         public void RemoveClient(string connectionId)
@@ -76,12 +86,43 @@ namespace Radial.Services
 
         public bool SendToClient(string recipient, IMessageBase dto)
         {
-            if (ClientConnections.TryGetValue(recipient, out var connection))
+            if (recipient is null)
             {
-                connection.InvokeMessageReceived(dto);
-                return true;
+                return false;
             }
-            return false;
+
+            var clientConnection = ClientConnections.Values.FirstOrDefault(x => 
+                x.PlayerInfo.Username.Equals(recipient?.Trim(), StringComparison.OrdinalIgnoreCase));
+
+            if (clientConnection is null)
+            {
+                return false;
+            }
+
+            clientConnection.InvokeMessageReceived(dto);
+            return true;
+        }
+
+        public void SendToLocal(IClientConnection senderConnection, IMessageBase message)
+        {
+            foreach (var connection in ClientConnections.Values.Where(x => x.PlayerInfo.XYZ == senderConnection.PlayerInfo.XYZ))
+            {
+                connection.InvokeMessageReceived(message);
+            }
+        }
+
+        public bool SendToParty(IClientConnection senderConnection, IMessageBase message)
+        {
+            if (string.IsNullOrWhiteSpace(senderConnection.PlayerInfo.PartyId))
+            {
+                return false;
+            }
+
+            foreach (var connection in ClientConnections.Values.Where(x=>x.PlayerInfo.PartyId == senderConnection.PlayerInfo.PartyId))
+            {
+                connection.InvokeMessageReceived(message);
+            }
+            return true;
         }
     }
 }

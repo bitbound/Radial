@@ -1,14 +1,22 @@
 ﻿@using Radial.Models.Messaging 
 @using Radial.Enums 
-@using System.Collections.Concurrent 
+@using System.Collections.Concurrent
+@using System.Linq 
 @inject Radial.Services.Client.IMessagePublisher MessagePublisher
 @inject Radial.Services.IJsInterop JsInterop
 @inject Radial.Services.Client.IClientConnection ClientConnection
 @inject Radial.Services.IClientManager ClientManager 
+@inject Radial.Services.Client.IToastService ToastService 
 @inherits AuthComponentBase
 
 <button id="chat-button" class="chat-button" @onpointerdown="ChatButton_OnPointerDown" @onclick="ChatButton_OnClick">
     <span class="oi oi-chat"></span>
+    @if (_missedChatsCount > 0)
+    {
+        <span id="consoleAlert" class="badge badge-info badge-pill align-top">
+            @_missedChatsCount
+        </span>
+    }
 </button>
 
 <div class="chat-frame @_chatFrameOpenClass">
@@ -18,7 +26,8 @@
         </button>
         <h4 class="text-center mt-2 mb-1">Chat</h4>
     </div>
-    <div class="chat-message-window">
+
+    <div id="chat-message-window" class="chat-message-window">
         @foreach (var chatMessage in _chatMessages)
         {
             <div class="chat-bubble-frame  @(IsMessageFromSelf(chatMessage) ? "self" : chatMessage.Channel.ToString().ToLower())">
@@ -26,7 +35,7 @@
                     @chatMessage.Channel.ToString() - @chatMessage.Timestamp.ToString()
                 </div>
                 <div class="chat-bubble">
-                    <span class="chat-sender font-weight-bold">
+                    <span class="chat-sender font-weight-bold" style="cursor: pointer" @onclick="() => StartPrivateChat(chatMessage.Sender)">
                         @(IsMessageFromSelf(chatMessage) ? "You" : chatMessage.Sender):
                     </span>
                     <span class="chat-message">@chatMessage.Message</span>
@@ -37,24 +46,34 @@
     <div class="chat-input">
         <div>
             <select class="small" @bind="_chatChannel">
-                @foreach (var channel in Enum.GetValues(typeof(ChatChannel)))
+                @foreach (var channel in GetSelectableChannels())
                 {
                     <option value="@channel">@channel</option>
                 }
             </select>
-            <input class="form-control mb-1" placeholder="Enter a chat message"
-                   @onkeypress="ChatInput_OnKeyPress"
-                   @bind="CurrentInputText"
-                   @bind:event="oninput" />
+            <input class="small" 
+                   @bind="_privateChatRecipient" 
+                   @bind:event="oninput" 
+                   hidden="@(_chatChannel != ChatChannel.Private)"
+                   placeholder="Enter recipient"/>
         </div>
+
+        <input class="form-control mb-1" placeholder="Enter a chat message"
+               @onkeypress="ChatInput_OnKeyPress"
+               @bind="CurrentInputText"
+               @bind:event="oninput" />
     </div>
 </div>
 
 @code {
+    private readonly ConcurrentQueue<ChatMessage> _chatMessages = new ConcurrentQueue<ChatMessage>();
     private string _chatFrameOpenClass;
     private string _currentInputText;
     private ChatChannel _chatChannel = ChatChannel.Global;
     private bool _isRendered;
+    private int _missedChatsCount;
+    private string _privateChatRecipient;
+    private bool _scrollChatWindowOnRender;
 
     private string CurrentInputText
     {
@@ -71,10 +90,8 @@
             }
         }
     }
-
     private bool IsChatOpen => _chatFrameOpenClass == "open";
 
-    private readonly ConcurrentQueue<ChatMessage> _chatMessages = new ConcurrentQueue<ChatMessage>();
 
     protected override Task OnAfterRenderAsync(bool firstRender)
     {
@@ -83,11 +100,20 @@
         {
             MessagePublisher.ChatReceived += ChatReceived;
         }
+
+        if (_scrollChatWindowOnRender)
+        {
+            JsInterop.ScrollToEnd("chat-message-window");
+            _scrollChatWindowOnRender = false;
+        }
+
         return base.OnAfterRenderAsync(firstRender);
     }
 
     private void ChatButton_OnClick(MouseEventArgs args)
     {
+        _missedChatsCount = 0;
+
         if (string.IsNullOrWhiteSpace(_chatFrameOpenClass))
         {
             _chatFrameOpenClass = "open";
@@ -109,21 +135,52 @@
     {
         if (args.Key.Equals("Enter", StringComparison.OrdinalIgnoreCase))
         {
+            if (string.IsNullOrWhiteSpace(_currentInputText))
+            {
+                return;
+            }
+
             var message = new ChatMessage()
             {
                 Channel = _chatChannel,
                 Message = _currentInputText,
-                Sender = Username
+                Sender = Username,
+                Recipient = _privateChatRecipient
             };
 
-            ClientManager.Broadcast(message);
+            switch (_chatChannel)
+            {
+                case ChatChannel.Global:
+                    ClientManager.Broadcast(message);
+                    break;
+                case ChatChannel.Party:
+                    if (string.IsNullOrWhiteSpace(ClientConnection.PlayerInfo.PartyId))
+                    {
+                        ToastService.ShowToast("You are not in a party.", classString: "bg-warning");
+                        return;
+                    }
+                    ClientManager.SendToParty(ClientConnection, message);
+                    break;
+                case ChatChannel.Local:
+                    ClientManager.SendToLocal(ClientConnection, message);
+                    break;
+                case ChatChannel.Private:
+                    if (!ClientManager.SendToClient(_privateChatRecipient, message))
+                    {
+                        ToastService.ShowToast("Player is not online.", classString: "bg-warning");
+                        return;
+                    }
+                    break;
+                default:
+                    break;
+            }
 
             _currentInputText = string.Empty;
             StateHasChanged();
         }
     }
 
-    private void ChatReceived(object sender, ChatMessage chatMessage)
+    private async void ChatReceived(object sender, ChatMessage chatMessage)
     {
         while (_chatMessages.Count > 100)
         {
@@ -132,7 +189,13 @@
 
         _chatMessages.Enqueue(chatMessage);
 
-        InvokeAsync(StateHasChanged);
+        if (!IsChatOpen)
+        {
+            _missedChatsCount++;
+        }
+
+        _scrollChatWindowOnRender = true;
+        await InvokeAsync(StateHasChanged);
     }
 
     private void CloseChatFrame(MouseEventArgs args)
@@ -141,8 +204,22 @@
         StateHasChanged();
     }
 
+    private IEnumerable<ChatChannel> GetSelectableChannels()
+    {
+        return Enum.GetValues(typeof(ChatChannel))
+            .Cast<ChatChannel>()
+            .Except(new[] { ChatChannel.System });
+    }
+
     private bool IsMessageFromSelf(ChatMessage message)
     {
         return message.Sender == Username;
+    }
+
+    private void StartPrivateChat(string recipientName)
+    {
+        _chatChannel = ChatChannel.Private;
+        _privateChatRecipient = recipientName;
+        StateHasChanged();
     }
 }

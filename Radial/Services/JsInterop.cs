@@ -15,6 +15,8 @@ namespace Radial.Services
 
         void StartDraggingY(string elementId, double clientY);
 
+        void ScrollToEnd(string elementId);
+
     }
     public class JsInterop : IJsInterop
     {
@@ -39,7 +41,10 @@ namespace Radial.Services
         {
             return _jsRuntime.InvokeAsync<string>("invokePrompt", message);
         }
-
+        public void ScrollToEnd(string elementId)
+        {
+            _jsRuntime.InvokeVoidAsync("scrollToEnd", elementId);
+        }
         public void StartDraggingY(string elementId, double clientY)
         {
             _jsRuntime.InvokeVoidAsync("startDraggingY", elementId, clientY);

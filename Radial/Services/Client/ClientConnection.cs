@@ -9,6 +9,7 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Radial.Models;
 
 namespace Radial.Services.Client
 {
@@ -17,7 +18,7 @@ namespace Radial.Services.Client
         event EventHandler<IMessageBase> MessageReceived;
         event EventHandler<string> Disconnected;
 
-        string Username { get; }
+        PlayerInfo PlayerInfo { get; }
 
         void InvokeMessageReceived(IMessageBase message);
         void Connect();
@@ -26,7 +27,7 @@ namespace Radial.Services.Client
 
     public class ClientConnection : IClientConnection
     {
-        public string Username { get; }
+        public PlayerInfo PlayerInfo { get; } = new PlayerInfo();
 
         private readonly IClientManager _clientManager;
         private readonly IHttpContextAccessor _httpContext;
@@ -37,7 +38,7 @@ namespace Radial.Services.Client
             _clientManager = clientManager;
             _httpContext = httpContextAccessor;
 
-            Username = _httpContext?.HttpContext?.User?.Identity?.Name;
+            PlayerInfo.Username = _httpContext?.HttpContext?.User?.Identity?.Name;
         }
 
         public event EventHandler<IMessageBase> MessageReceived;
