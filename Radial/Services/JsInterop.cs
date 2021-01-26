@@ -9,6 +9,9 @@ namespace Radial.Services
    public interface IJsInterop
     {
         ValueTask Alert(string message);
+
+        void AutoHeight();
+
         ValueTask<bool> Confirm(string message);
 
         ValueTask<string> Prompt(string message);
@@ -30,6 +33,11 @@ namespace Radial.Services
         public ValueTask Alert(string message)
         {
             return _jsRuntime.InvokeVoidAsync("invokeAlert", message);
+        }
+
+        public void AutoHeight()
+        {
+            _jsRuntime.InvokeVoidAsync("autoHeight");
         }
 
         public ValueTask<bool> Confirm(string message)

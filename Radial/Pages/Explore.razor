@@ -3,12 +3,21 @@
 @inject Radial.Services.Client.IMessagePublisher MessagePublisher
 @inject Radial.Services.IJsInterop JsInterop
 
+<div class="explore-container auto-height">
+    <div style="align-self: center">
+        Two
+    </div>
+    <div class="mb-2">
+        Three
+    </div>
+</div>
 
 @code {
 
-    protected override Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        return base.OnAfterRenderAsync(firstRender);
+        await base.OnAfterRenderAsync(firstRender);
+        JsInterop.AutoHeight();
     }
 
 } 

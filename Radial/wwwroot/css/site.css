@@ -150,3 +150,26 @@ a, .btn-link {
     .chat-bubble-frame.self .chat-bubble {
         background-color: lightgreen;
     }
+
+#missed-chat-badge {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translate(-50%, 50%);
+}
+
+/* Explore */
+.explore-container {
+    display: grid;
+    grid-template-rows: 1fr auto;
+    grid-row-gap: 10px;
+}
+
+    .explore-container :nth-child(2) {
+        border: 2px solid gray;
+        border-radius: 5px;
+    }
+
+.auto-height {
+    opacity: 0;
+}

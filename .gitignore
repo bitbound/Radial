@@ -339,3 +339,5 @@ ASALocalRun/
 # BeatPulse healthcheck temp database
 healthchecksdb
 /Radial/Radial.db
+Radial/Radial.db-shm
+Radial/Radial.db-wal

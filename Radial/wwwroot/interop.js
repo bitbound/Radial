@@ -51,3 +51,18 @@ window.startDraggingY = (elementId, clientY) => {
     window.addEventListener("pointerup", pointerUpOrLeave);
     window.addEventListener("pointerleave", pointerUpOrLeave);
 }
+
+window.autoHeight = () => {
+    document.querySelectorAll(".auto-height").forEach(x => {
+        var desiredHeight = window.innerHeight - x.getBoundingClientRect().top;
+        x.style.height = `${desiredHeight}px`;
+        x.style.opacity = 1;
+    })
+}
+
+window.addEventListener("load", () => {
+    window.addEventListener("resize", () => {
+        autoHeight();
+    });
+    autoHeight();
+})
