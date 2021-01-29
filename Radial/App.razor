@@ -41,7 +41,7 @@ else
 
             if (authState.User.Identity.IsAuthenticated)
             {
-                ClientConnection.Connect();
+                await ClientConnection.Connect();
                 ClientConnection.Disconnected += ClientDisconnected;
             }
         }

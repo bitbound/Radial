@@ -1,23 +1,42 @@
 ﻿@page "/explore"
 @attribute [Authorize]
-@inject Radial.Services.Client.IMessagePublisher MessagePublisher
-@inject Radial.Services.IJsInterop JsInterop
+@using Radial.Data.Entities
+@using Radial.Services.Client
+@using Microsoft.AspNetCore.Identity
+@inject IMessagePublisher MessagePublisher
+@inject IJsInterop JsInterop
+@inject UserManager<RadialUser> UserManager
+@inject AuthenticationStateProvider AuthStateProvider 
 
 <div class="explore-container auto-height">
-    <div style="align-self: center">
+    <div style="align-self: baseline">
+        One
+    </div>
+    <div class="p-2">
         Two
     </div>
-    <div class="mb-2">
-        Three
+    <div class="mb-2 p-2 text-center">
+        <div class="d-inline-block">
+            <progress value="@_radialUser?.CurrentEnergy" max="@_radialUser?.EnergyMax" />
+        </div>
     </div>
 </div>
 
 @code {
 
+    private RadialUser _radialUser;
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await base.OnAfterRenderAsync(firstRender);
-        JsInterop.AutoHeight();
+        if (firstRender)
+        {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            _radialUser = await UserManager.GetUserAsync(authState.User);
+            await base.OnAfterRenderAsync(firstRender);
+            JsInterop.AutoHeight();
+            StateHasChanged();
+        }
+
     }
 
 } 

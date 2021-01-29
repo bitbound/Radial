@@ -66,3 +66,13 @@ window.addEventListener("load", () => {
     });
     autoHeight();
 })
+window.addEventListener("beforeunload", (ev) => {
+    if (location.href.indexOf("localhost") == -1) {
+        // All three methods have been implemented in different browsers at some point.
+        // Might as well cover all bases.
+        ev.preventDefault();
+        var msg = "This will disconnect your session.  Are you sure you want to exit?";
+        ev.returnValue = msg;
+        return msg;
+    }
+})

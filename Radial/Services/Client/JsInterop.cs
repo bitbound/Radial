@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Radial.Services
+namespace Radial.Services.Client
 {
    public interface IJsInterop
     {

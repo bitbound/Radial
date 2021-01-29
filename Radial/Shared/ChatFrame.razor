@@ -3,7 +3,7 @@
 @using System.Collections.Concurrent
 @using System.Linq 
 @inject Radial.Services.Client.IMessagePublisher MessagePublisher
-@inject Radial.Services.IJsInterop JsInterop
+@inject Radial.Services.Client.IJsInterop JsInterop
 @inject Radial.Services.Client.IClientConnection ClientConnection
 @inject Radial.Services.IClientManager ClientManager 
 @inject Radial.Services.Client.IToastService ToastService 
@@ -154,7 +154,7 @@
                     ClientManager.Broadcast(message);
                     break;
                 case ChatChannel.Party:
-                    if (string.IsNullOrWhiteSpace(ClientConnection.PlayerInfo.PartyId))
+                    if (string.IsNullOrWhiteSpace(ClientConnection.User.PartyId))
                     {
                         ToastService.ShowToast("You are not in a party.", classString: "bg-warning");
                         return;

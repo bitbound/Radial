@@ -3,10 +3,13 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Radial.Data.Entities;
+using Radial.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
+using System.Text.Json;
 
 namespace Radial.Data
 {
@@ -19,11 +22,13 @@ namespace Radial.Data
 
         public new DbSet<RadialUser> Users { get; set; }
 
+        public DbSet<CharacterEffect> CharacterEffects { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
-            builder.Entity<IdentityUser>().ToTable("RadialUsers");
+            builder.Entity<IdentityUser>().ToTable("Users");
 
             if (Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite")
             {

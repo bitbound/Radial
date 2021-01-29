@@ -10,6 +10,9 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Radial.Models;
+using Microsoft.AspNetCore.Identity;
+using Radial.Data.Entities;
+using Microsoft.AspNetCore.Components.Authorization;
 
 namespace Radial.Services.Client
 {
@@ -17,38 +20,43 @@ namespace Radial.Services.Client
     {
         event EventHandler<IMessageBase> MessageReceived;
         event EventHandler<string> Disconnected;
-
-        PlayerInfo PlayerInfo { get; }
-
+        RadialUser User { get; }
         void InvokeMessageReceived(IMessageBase message);
-        void Connect();
+        Task Connect();
         void Disconnect(string reason);
     }
 
     public class ClientConnection : IClientConnection
     {
-        public PlayerInfo PlayerInfo { get; } = new PlayerInfo();
+        
 
         private readonly IClientManager _clientManager;
         private readonly IHttpContextAccessor _httpContext;
+        private readonly AuthenticationStateProvider _authStateProvider;
+        private UserManager<RadialUser> _userManager;
 
         public ClientConnection(IClientManager clientManager, 
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            AuthenticationStateProvider authStateProvider,
+            UserManager<RadialUser> userManager)
         {
             _clientManager = clientManager;
             _httpContext = httpContextAccessor;
-
-            PlayerInfo.Username = _httpContext?.HttpContext?.User?.Identity?.Name;
+            _authStateProvider = authStateProvider;
+            _userManager = userManager;
         }
 
         public event EventHandler<IMessageBase> MessageReceived;
         
         public event EventHandler<string> Disconnected;
 
-        public void Connect()
+        public RadialUser User { get; private set; }
+
+        public async Task Connect()
         {
             if (_httpContext?.HttpContext?.User?.Identity?.IsAuthenticated == true)
             {
+                User = await _userManager.GetUserAsync(_httpContext.HttpContext.User);
                 _clientManager.AddClient(_httpContext.HttpContext.Connection.Id, this);
             }
         }

@@ -88,7 +88,12 @@ namespace Radial.Areas.Identity.Pages.Account
                     return Page();
                 }
 
-                var user = new RadialUser { UserName = Input.Username, Email = Input.Email };
+                var user = new RadialUser 
+                {
+                    UserName = Input.Username, 
+                    Email = Input.Email,
+                    CoreEnergy = 100
+                };
                 var result = await _userManager.CreateAsync(user, Input.Password);
                 if (result.Succeeded)
                 {

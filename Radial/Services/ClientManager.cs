@@ -37,7 +37,7 @@ namespace Radial.Services
                 return;
             }
 
-            var existingConnection = ClientConnections.FirstOrDefault(x => x.Value.PlayerInfo.Username == clientConnection.PlayerInfo.Username);
+            var existingConnection = ClientConnections.FirstOrDefault(x => x.Value?.User?.UserName == clientConnection.User.UserName);
 
             if (existingConnection.Value != null)
             {
@@ -51,7 +51,7 @@ namespace Radial.Services
             {
                 other.Value.InvokeMessageReceived(new ChatMessage()
                 {
-                    Message = $"{clientConnection.PlayerInfo.Username} has signed in.",
+                    Message = $"{clientConnection.User.UserName} has signed in.",
                     Sender = "System",
                     Channel = Enums.ChatChannel.System
                 });
@@ -68,7 +68,7 @@ namespace Radial.Services
 
         public bool IsPlayerOnline(string username)
         {
-            return ClientConnections.Values.Any(x => x.PlayerInfo.Username.Equals(username.Trim(), StringComparison.OrdinalIgnoreCase));
+            return ClientConnections.Values.Any(x => x.User.UserName.Equals(username.Trim(), StringComparison.OrdinalIgnoreCase));
         }
 
         public void RemoveClient(string connectionId)
@@ -92,7 +92,7 @@ namespace Radial.Services
             }
 
             var clientConnection = ClientConnections.Values.FirstOrDefault(x => 
-                x.PlayerInfo.Username.Equals(recipient?.Trim(), StringComparison.OrdinalIgnoreCase));
+                x.User.UserName.Equals(recipient?.Trim(), StringComparison.OrdinalIgnoreCase));
 
             if (clientConnection is null)
             {
@@ -105,7 +105,7 @@ namespace Radial.Services
 
         public void SendToLocal(IClientConnection senderConnection, IMessageBase message)
         {
-            foreach (var connection in ClientConnections.Values.Where(x => x.PlayerInfo.XYZ == senderConnection.PlayerInfo.XYZ))
+            foreach (var connection in ClientConnections.Values.Where(x => x.User.XYZ == senderConnection.User.XYZ))
             {
                 connection.InvokeMessageReceived(message);
             }
@@ -113,12 +113,12 @@ namespace Radial.Services
 
         public bool SendToParty(IClientConnection senderConnection, IMessageBase message)
         {
-            if (string.IsNullOrWhiteSpace(senderConnection.PlayerInfo.PartyId))
+            if (string.IsNullOrWhiteSpace(senderConnection.User.PartyId))
             {
                 return false;
             }
 
-            foreach (var connection in ClientConnections.Values.Where(x=>x.PlayerInfo.PartyId == senderConnection.PlayerInfo.PartyId))
+            foreach (var connection in ClientConnections.Values.Where(x=>x.User.PartyId == senderConnection.User.PartyId))
             {
                 connection.InvokeMessageReceived(message);
             }
