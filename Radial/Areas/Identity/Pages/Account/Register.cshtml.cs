@@ -92,7 +92,8 @@ namespace Radial.Areas.Identity.Pages.Account
                 {
                     UserName = Input.Username, 
                     Email = Input.Email,
-                    CoreEnergy = 100
+                    CoreEnergy = 100,
+                    EnergyCurrent = 100
                 };
                 var result = await _userManager.CreateAsync(user, Input.Password);
                 if (result.Succeeded)

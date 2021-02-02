@@ -17,9 +17,28 @@
     </div>
     <div class="mb-2 p-2 text-center">
         <div class="d-inline-block">
-            <progress value="@_radialUser?.CurrentEnergy" max="@_radialUser?.EnergyMax" />
+            <div id="energy-bar-wrapper" class="d-inline-block text-center">
+                <strong class="d-block">Energy</strong>
+                <div class="progress" style="width: 125px">
+                    <div id="energy-bar" class="progress-bar" style="width: @(GetFormattedPercent(_radialUser?.EnergyPercent)); overflow: visible;">
+                        <div class="text-white">
+                            @(_radialUser?.EnergyCurrent ?? 0)
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="charge-bar-wrapper" class="d-inline-block text-center">
+                <strong class="d-block">Charge</strong>
+                <div class="progress" style="width: 125px">
+                    <div id="charge-bar" class="progress-bar" style="width: @(GetFormattedPercent(_radialUser?.ChargePercent)); overflow: visible;">
+                        <div class="text-white">
+                            @(_radialUser?.ChargeCurrent ?? 0)
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
         </div>
-    </div>
 </div>
 
 @code {
@@ -37,6 +56,16 @@
             StateHasChanged();
         }
 
+    }
+
+    private string GetFormattedPercent(double? percent)
+    {
+        if (!percent.HasValue)
+        {
+            return "0%";
+        }
+
+        return Math.Round(percent.Value * 100).ToString() + "%";
     }
 
 } 

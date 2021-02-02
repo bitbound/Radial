@@ -11,33 +11,57 @@ namespace Radial.Data.Entities
 {
     public class RadialUser : IdentityUser, ICharacter
     {
+        private static readonly long _lowestStatValue = 10;
+        public RadialUser()
+        {
+            EnergyCurrent = EnergyMax;
+        }
+
+        public long ChargeCurrent { get; set; }
+        [NotMapped]
+        public long ChargeMax => Math.Max(_lowestStatValue, CoreEnergy + ChargeMaxMod);
+        [NotMapped]
+        public long ChargeMaxMod => Effects
+            .Where(x => x.TargetStat == Enums.CharacterEffectStat.ChargeMax)
+            .Sum(x => x.StatChange);
+
+        [NotMapped]
+        public double ChargePercent => ChargeCurrent / ChargeMax;
+
+        [NotMapped]
+        public long ChargeRate => Math.Max(_lowestStatValue, CoreEnergy + ChargeRateMod);
+        [NotMapped]
+        public long ChargeRateMod => Effects
+            .Where(x => x.TargetStat == Enums.CharacterEffectStat.ChargeRate)
+            .Sum(x => x.StatChange);
+
         public long CoreEnergy { get; set; }
-        public long CurrentEnergy { get; set; }
 
         public List<CharacterEffect> Effects { get; set; } = new List<CharacterEffect>();
 
-        [NotMapped]
-        public long EnergyMax
-        {
-            get
-            {
-                return CoreEnergy + EnergyMod;
-            }
-        }
+        public long EnergyCurrent { get; set; }
 
         [NotMapped]
-        public long EnergyMod => Effects
-            .Where(x => x.TargetStat == Enums.CharacterEffectStat.MaxEnergy)
+        public long EnergyMax => CoreEnergy + EnergyMaxMod;
+
+        [NotMapped]
+        public long EnergyMaxMod => Effects
+            .Where(x => x.TargetStat == Enums.CharacterEffectStat.EnergyMax)
             .Sum(x => x.StatChange);
 
-        public long XCoord { get; set; }
-        public long YCoord { get; set; }
-        public string ZCoord { get; set; }
-
         [NotMapped]
-        public string XYZ => $"{XCoord},{YCoord},{ZCoord}";
+        public double EnergyPercent => EnergyCurrent / EnergyMax;
+
+        public bool IsServerAdmin { get; set; }
 
         [NotMapped]
         public string PartyId { get; set; }
+
+        public long XCoord { get; set; }
+        [NotMapped]
+        public string XYZ => $"{XCoord},{YCoord},{ZCoord}";
+
+        public long YCoord { get; set; }
+        public string ZCoord { get; set; }
     }
 }

@@ -7,6 +7,8 @@ namespace Radial.Enums
 {
     public enum CharacterEffectStat
     {
-        MaxEnergy
+        ChargeMax,
+        ChargeRate,
+        EnergyMax,
     }
 }

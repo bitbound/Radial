@@ -1,29 +1,52 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using Radial.Data;
+using Radial.Data.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Radial.Services
 {
     public interface IDataService
     {
-        Task WriteLog(LogLevel logLevel, string categoryName, EventId eventId, string state, Exception exception, List<string> scopeStack);
-        Task WriteLog(LogLevel logLevel, string categoryName, EventId eventId, string state, Exception exception, List<string> scopeStack, string projectId);
+        Task WriteLog(LogLevel logLevel, string category, EventId eventId, string state, Exception exception, List<string> scopeStack);
     }
 
     public class DataService : IDataService
     {
-        public async Task WriteLog(LogLevel logLevel, string categoryName, EventId eventId, string state, Exception exception, List<string> lists)
+
+        private readonly ApplicationDbContext _dbContext;
+
+        public DataService(ApplicationDbContext applicationDbContext)
         {
-            // TODO
-            await Task.Delay(0);
+            _dbContext = applicationDbContext;
         }
 
-        public async Task WriteLog(LogLevel logLevel, string categoryName, EventId eventId, string state, Exception exception, List<string> scopeStack, string projectId)
+        public async Task WriteLog(LogLevel logLevel, string category, EventId eventId, string state, Exception exception, List<string> scopeStack)
         {
-            // TODO
-            await Task.Delay(0);
+            try
+            {
+                // Prevent re-entrancy.
+                if (eventId.Name?.Contains("EntityFrameworkCore") == true)
+                {
+                    return;
+                }
+
+                _dbContext.EventLogs.Add(new EventLogEntry()
+                {
+                    StackTrace = exception?.StackTrace,
+                    LogLevel = logLevel,
+                    Message = $"[{logLevel}] [{string.Join(" - ", scopeStack)} - {category}] | Message: {state} | Exception: {exception?.Message}",
+                    TimeStamp = DateTimeOffset.Now
+                });
+
+                await _dbContext.SaveChangesAsync();
+            }
+            catch { }
         }
+
     }
 }

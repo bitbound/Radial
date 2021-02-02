@@ -20,9 +20,9 @@ namespace Radial.Data
         {
         }
 
-        public new DbSet<RadialUser> Users { get; set; }
-
         public DbSet<CharacterEffect> CharacterEffects { get; set; }
+        public DbSet<EventLogEntry> EventLogs { get; set; }
+        public new DbSet<RadialUser> Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

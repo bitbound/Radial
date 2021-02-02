@@ -1,0 +1,105 @@
+﻿.chat-button {
+    height: 40px;
+    width: 40px;
+    position: fixed;
+    top: 40%;
+    right: 5px;
+    z-index: 2;
+    border-radius: 100%;
+    border: 1px solid black;
+    background-color: rebeccapurple;
+    color: white;
+    transition: .5s linear background-color;
+}
+
+    .chat-button:hover {
+        background-color: mediumpurple;
+        transition: .25s linear background-color;
+    }
+
+    .chat-button:focus {
+        outline: none;
+    }
+
+.chat-frame {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 0;
+    opacity: 0;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    grid-row-gap: 10px;
+    z-index: 3;
+    border: 1px solid gray;
+    box-shadow: rgba(150, 150, 150, 0.35) 0px 5px 15px;
+    background-color: rgb(40,40,40);
+    transition: .25s linear all;
+    pointer-events: none;
+}
+
+    .chat-frame.open {
+        width: 400px;
+        max-width: 80%;
+        opacity: 1;
+        transition: .25s linear all;
+        pointer-events: unset;
+    }
+
+    .chat-frame .chat-message-window {
+        background-color: rgb(25,25,25);
+        overflow-y: auto;
+    }
+
+.chat-bubble-frame {
+    margin-right: 30px;
+    margin-left: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+    .chat-bubble-frame.self {
+        margin-right: 5px;
+        margin-left: 30px;
+    }
+
+.chat-timestamp {
+    color: gray;
+}
+
+.chat-bubble-frame .chat-bubble {
+    border-radius: .4em;
+    padding: 10px;
+}
+
+.chat-bubble-frame.global .chat-bubble {
+    background-color: steelblue;
+}
+
+.chat-bubble-frame.party .chat-bubble {
+    background-color: darkmagenta;
+}
+
+.chat-bubble-frame.local .chat-bubble {
+    background-color: darkgoldenrod;
+}
+
+.chat-bubble-frame.system .chat-bubble {
+    background-color: darkred;
+}
+
+.chat-bubble-frame.private .chat-bubble {
+    background-color: dimgray;
+}
+
+.chat-bubble-frame.self .chat-bubble {
+    background-color: seagreen;
+}
+
+#missed-chat-badge {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translate(-50%, 50%);
+}

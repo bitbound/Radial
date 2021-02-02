@@ -50,6 +50,7 @@
     color: white;
 }
 
+
 @media (min-width: 641px) {
     .navbar-toggler {
         display: none;
@@ -59,4 +60,14 @@
         /* Never collapse the sidebar for wide screens */
         display: block;
     }
+}
+
+
+/* Custom */
+.brand-image {
+    height: 1.5em;
+    background-color: white;
+    padding: 5px;
+    border-radius: 5px;
+    margin-right: 5px;
 }
