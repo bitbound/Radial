@@ -56,6 +56,8 @@ namespace Radial
             services.AddScoped<IToastService, ToastService>();
 
             services.AddSingleton<IClientManager, ClientManager>();
+
+            services.AddHostedService<GameEngine>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

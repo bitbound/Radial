@@ -1,0 +1,48 @@
+﻿@attribute [Authorize]
+@inherits AuthComponentBase
+@inject Radial.Services.Client.IMessagePublisher MessagePublisher
+
+<div class="resource-bars-container mx-4">
+    <div class="text-center">
+        <strong class="d-block">Energy</strong>
+        <div class="progress">
+            <div id="energy-bar" class="progress-bar" style="width: @(GetFormattedPercent(User?.EnergyPercent)); overflow: visible;"></div>
+        </div>
+        <div class="text-white resource-bar-label">
+            @(User?.EnergyCurrent ?? 0)
+        </div>
+    </div>
+    <div class="text-center">
+        <strong class="d-block">Charge</strong>
+        <div class="progress">
+            <div id="charge-bar" class="progress-bar" style="width: @(GetFormattedPercent(User?.ChargePercent)); overflow: visible;"></div>
+        </div>
+        <div class="text-white resource-bar-label">
+            @(User?.ChargeCurrent ?? 0)
+        </div>
+    </div>
+</div>
+
+@code {
+    private string GetFormattedPercent(double? percent)
+    {
+        if (!percent.HasValue)
+        {
+            return "0%";
+        }
+
+        return Math.Round(percent.Value * 100).ToString() + "%";
+    }
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            MessagePublisher.CharacterStatsChanged += async (sender, args) =>
+            {
+                await InvokeAsync(StateHasChanged);
+            };
+        }
+        return base.OnAfterRenderAsync(firstRender);
+    }
+}

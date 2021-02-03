@@ -28,8 +28,6 @@ namespace Radial.Services.Client
 
     public class ClientConnection : IClientConnection
     {
-        
-
         private readonly IClientManager _clientManager;
         private readonly IHttpContextAccessor _httpContext;
         private readonly AuthenticationStateProvider _authStateProvider;

@@ -26,7 +26,7 @@ namespace Radial.Data.Entities
             .Sum(x => x.StatChange);
 
         [NotMapped]
-        public double ChargePercent => ChargeCurrent / ChargeMax;
+        public double ChargePercent => (double)ChargeCurrent / ChargeMax;
 
         [NotMapped]
         public long ChargeRate => Math.Max(_lowestStatValue, CoreEnergy + ChargeRateMod);
@@ -50,7 +50,7 @@ namespace Radial.Data.Entities
             .Sum(x => x.StatChange);
 
         [NotMapped]
-        public double EnergyPercent => EnergyCurrent / EnergyMax;
+        public double EnergyPercent => (double)EnergyCurrent / EnergyMax;
 
         public bool IsServerAdmin { get; set; }
 

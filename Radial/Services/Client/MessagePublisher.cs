@@ -1,4 +1,5 @@
-﻿using Radial.Models.Enums;
+﻿using Radial.Data.Entities;
+using Radial.Models.Enums;
 using Radial.Models.Messaging;
 using System;
 using System.Collections.Generic;
@@ -9,14 +10,16 @@ namespace Radial.Services.Client
 {
     public interface IMessagePublisher
     {
+        event EventHandler CharacterStatsChanged;
         event EventHandler<ChatMessage> ChatReceived;
     }
     public class MessagePublisher : IMessagePublisher
     {
         private readonly IClientConnection _clientConnection;
 
+        public event EventHandler CharacterStatsChanged;
         public event EventHandler<ChatMessage> ChatReceived;
-      
+
         public MessagePublisher(IClientConnection clientConnection)
         {
             _clientConnection = clientConnection;
@@ -29,6 +32,9 @@ namespace Radial.Services.Client
             {
                 case MessageType.ChatMessage:
                     ChatReceived?.Invoke(this, message as ChatMessage);
+                    break;
+                case MessageType.CharacterStatsUpdated:
+                    CharacterStatsChanged?.Invoke(this, null);
                     break;
                 default:
                     break;

@@ -1,0 +1,17 @@
+﻿.resource-bars-container {
+    display: grid;
+    grid-column-gap: 40px;
+    grid-template-columns: 1fr 1fr;
+}
+
+#energy-bar {
+    background-color: deepskyblue;
+}
+
+#charge-bar {
+    background-color: magenta;
+}
+
+.resource-bar-label {
+    font-size: .9em;
+}

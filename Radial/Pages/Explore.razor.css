@@ -3,23 +3,3 @@
     grid-template-rows: 1fr auto auto;
     grid-row-gap: 10px;
 }
-
-.auto-height {
-    opacity: 0;
-}
-
-#energy-bar-wrapper {
-    margin-right: 10px;
-}
-
-#energy-bar {
-    background-color: deepskyblue;
-}
-
-#charge-bar-wrapper {
-    margin-left: 10px;
-}
-
-#charge-bar {
-    background-color: magenta;
-}

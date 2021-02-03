@@ -7,6 +7,7 @@ namespace Radial.Models.Enums
 {
     public enum MessageType
     {
-        ChatMessage
+        ChatMessage,
+        CharacterStatsUpdated
     }
 }

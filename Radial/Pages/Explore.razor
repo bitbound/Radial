@@ -5,67 +5,32 @@
 @using Microsoft.AspNetCore.Identity
 @inject IMessagePublisher MessagePublisher
 @inject IJsInterop JsInterop
-@inject UserManager<RadialUser> UserManager
-@inject AuthenticationStateProvider AuthStateProvider 
+@inherits AuthComponentBase
 
 <div class="explore-container auto-height">
     <div style="align-self: baseline">
-        One
+       
     </div>
+
     <div class="p-2">
-        Two
+       
     </div>
-    <div class="mb-2 p-2 text-center">
-        <div class="d-inline-block">
-            <div id="energy-bar-wrapper" class="d-inline-block text-center">
-                <strong class="d-block">Energy</strong>
-                <div class="progress" style="width: 125px">
-                    <div id="energy-bar" class="progress-bar" style="width: @(GetFormattedPercent(_radialUser?.EnergyPercent)); overflow: visible;">
-                        <div class="text-white">
-                            @(_radialUser?.EnergyCurrent ?? 0)
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div id="charge-bar-wrapper" class="d-inline-block text-center">
-                <strong class="d-block">Charge</strong>
-                <div class="progress" style="width: 125px">
-                    <div id="charge-bar" class="progress-bar" style="width: @(GetFormattedPercent(_radialUser?.ChargePercent)); overflow: visible;">
-                        <div class="text-white">
-                            @(_radialUser?.ChargeCurrent ?? 0)
-                        </div>
-                    </div>
-                </div>
-            </div>
-            </div>
-        </div>
+
+    <div class="mb-2">
+       <ResourceBars />
+    </div>
 </div>
 
 @code {
 
-    private RadialUser _radialUser;
-
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        await base.OnAfterRenderAsync(firstRender);
         if (firstRender)
         {
-            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-            _radialUser = await UserManager.GetUserAsync(authState.User);
-            await base.OnAfterRenderAsync(firstRender);
             JsInterop.AutoHeight();
             StateHasChanged();
         }
-
-    }
-
-    private string GetFormattedPercent(double? percent)
-    {
-        if (!percent.HasValue)
-        {
-            return "0%";
-        }
-
-        return Math.Round(percent.Value * 100).ToString() + "%";
     }
 
 } 
