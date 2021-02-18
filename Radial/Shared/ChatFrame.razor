@@ -1,12 +1,12 @@
-﻿@using Radial.Models.Messaging 
-@using Radial.Enums 
+﻿@using Radial.Models.Messaging
+@using Radial.Enums
 @using System.Collections.Concurrent
-@using System.Linq 
+@using System.Linq
 @inject Radial.Services.Client.IMessagePublisher MessagePublisher
 @inject Radial.Services.Client.IJsInterop JsInterop
 @inject Radial.Services.Client.IClientConnection ClientConnection
-@inject Radial.Services.IClientManager ClientManager 
-@inject Radial.Services.Client.IToastService ToastService 
+@inject Radial.Services.IClientManager ClientManager
+@inject Radial.Services.Client.IToastService ToastService
 @inherits AuthComponentBase
 
 <button id="chat-button" class="chat-button" @onpointerdown="ChatButton_OnPointerDown" @onclick="ChatButton_OnClick">
@@ -32,7 +32,7 @@
         {
             <div class="chat-bubble-frame  @(IsMessageFromSelf(chatMessage) ? "self" : chatMessage.Channel.ToString().ToLower())">
                 <div class="chat-timestamp small">
-                    @chatMessage.Channel.ToString() - @chatMessage.Timestamp.ToString()
+                    @GetMessageTitle(chatMessage)
                 </div>
                 <div class="chat-bubble">
                     <span class="chat-sender font-weight-bold" style="cursor: pointer" @onclick="() => StartPrivateChat(chatMessage.Sender)">
@@ -51,11 +51,11 @@
                     <option value="@channel">@channel</option>
                 }
             </select>
-            <input class="small" 
-                   @bind="_privateChatRecipient" 
-                   @bind:event="oninput" 
+            <input class="small"
+                   @bind="_privateChatRecipient"
+                   @bind:event="oninput"
                    hidden="@(_chatChannel != ChatChannel.Private)"
-                   placeholder="Enter recipient"/>
+                   placeholder="Enter recipient" />
         </div>
 
         <input class="form-control mb-1" placeholder="Enter a chat message"
@@ -154,7 +154,7 @@
                     ClientManager.Broadcast(message);
                     break;
                 case ChatChannel.Party:
-                    if (string.IsNullOrWhiteSpace(ClientConnection.User.PartyId))
+                    if (string.IsNullOrWhiteSpace(ClientConnection.User.Info.PartyId))
                     {
                         ToastService.ShowToast("You are not in a party.", classString: "bg-warning");
                         return;
@@ -165,7 +165,7 @@
                     ClientManager.SendToLocal(ClientConnection, message);
                     break;
                 case ChatChannel.Private:
-                    if (!ClientManager.SendToClient(_privateChatRecipient, message))
+                    if (!ClientManager.SendToClient(ClientConnection, _privateChatRecipient, message, true))
                     {
                         ToastService.ShowToast("Player is not online.", classString: "bg-warning");
                         return;
@@ -202,6 +202,20 @@
     {
         _chatFrameOpenClass = string.Empty;
         StateHasChanged();
+    }
+
+    private string GetMessageTitle(ChatMessage chatMessage)
+    {
+        if (chatMessage.Channel == ChatChannel.Private)
+        {
+            return IsMessageFromSelf(chatMessage) ?
+                $"{chatMessage.Channel} to {chatMessage.Recipient} - {chatMessage.Timestamp}" :
+                $"{chatMessage.Channel} from {chatMessage.Sender} - {chatMessage.Timestamp}";
+        }
+        else
+        {
+            return $"{chatMessage.Channel} - {chatMessage.Timestamp}";
+        }
     }
 
     private IEnumerable<ChatChannel> GetSelectableChannels()

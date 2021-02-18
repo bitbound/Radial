@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Radial.Data;
 using Radial.Data.Entities;
@@ -12,6 +13,7 @@ namespace Radial.Services
 {
     public interface IDataService
     {
+        Task<CharacterInfo> GetCharacterInfo(string userId);
         Task WriteLog(LogLevel logLevel, string category, EventId eventId, string state, Exception exception, List<string> scopeStack);
     }
 
@@ -23,6 +25,15 @@ namespace Radial.Services
         public DataService(ApplicationDbContext applicationDbContext)
         {
             _dbContext = applicationDbContext;
+        }
+
+        public async Task<CharacterInfo> GetCharacterInfo(string userId)
+        {
+            return await _dbContext.Users
+                .Include(x => x.Info)
+                .Where(x => x.Id == userId)
+                .Select(x => x.Info)
+                .FirstOrDefaultAsync();
         }
 
         public async Task WriteLog(LogLevel logLevel, string category, EventId eventId, string state, Exception exception, List<string> scopeStack)

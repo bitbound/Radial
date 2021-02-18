@@ -18,7 +18,7 @@ namespace Radial.Services
 
         void RemoveClient(string connectionId);
 
-        bool SendToClient(string recipient, IMessageBase message);
+        bool SendToClient(IClientConnection senderConnection, string recipient, IMessageBase message, bool copyToSelf = false);
         void SendToLocal(IClientConnection senderConnection, IMessageBase message);
 
         bool SendToParty(IClientConnection senderConnection, IMessageBase message);
@@ -84,7 +84,7 @@ namespace Radial.Services
             }
         }
 
-        public bool SendToClient(string recipient, IMessageBase dto)
+        public bool SendToClient(IClientConnection senderConnection, string recipient, IMessageBase dto, bool copyToSelf = false)
         {
             if (recipient is null)
             {
@@ -100,12 +100,17 @@ namespace Radial.Services
             }
 
             clientConnection.InvokeMessageReceived(dto);
+
+            if (copyToSelf)
+            {
+                senderConnection.InvokeMessageReceived(dto);
+            }
             return true;
         }
 
         public void SendToLocal(IClientConnection senderConnection, IMessageBase message)
         {
-            foreach (var connection in ClientConnections.Values.Where(x => x.User.XYZ == senderConnection.User.XYZ))
+            foreach (var connection in ClientConnections.Values.Where(x => x.User.Info.XYZ == senderConnection.User.Info.XYZ))
             {
                 connection.InvokeMessageReceived(message);
             }
@@ -113,12 +118,12 @@ namespace Radial.Services
 
         public bool SendToParty(IClientConnection senderConnection, IMessageBase message)
         {
-            if (string.IsNullOrWhiteSpace(senderConnection.User.PartyId))
+            if (string.IsNullOrWhiteSpace(senderConnection.User.Info.PartyId))
             {
                 return false;
             }
 
-            foreach (var connection in ClientConnections.Values.Where(x=>x.User.PartyId == senderConnection.User.PartyId))
+            foreach (var connection in ClientConnections.Values.Where(x=>x.User.Info.PartyId == senderConnection.User.Info.PartyId))
             {
                 connection.InvokeMessageReceived(message);
             }

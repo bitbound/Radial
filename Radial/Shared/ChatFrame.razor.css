@@ -26,8 +26,10 @@
     top: 0;
     right: 0;
     bottom: 0;
-    width: 0;
     opacity: 0;
+    transform: translateX(100%);
+    width: 400px;
+    max-width: 80%;
     display: grid;
     grid-template-rows: auto 1fr auto;
     grid-row-gap: 10px;
@@ -40,11 +42,10 @@
 }
 
     .chat-frame.open {
-        width: 400px;
-        max-width: 80%;
         opacity: 1;
         transition: .25s linear all;
         pointer-events: unset;
+        transform: translateX(0);
     }
 
     .chat-frame .chat-message-window {

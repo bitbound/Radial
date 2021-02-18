@@ -10,13 +10,15 @@ namespace Radial.Data.Entities
 {
     public class CharacterEffect
     {
+
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; init; }
 
-        public CharacterEffectStat TargetStat { get; init; }
-        public long StatChange { get; init; }
         public TimeSpan Duration { get; init; }
         public DateTimeOffset StartTime { get; init; }
+        public long StatChange { get; init; }
+        public CharacterEffectStat TargetStat { get; init; }
+        public EffectType Type { get; init; }
     }
 }

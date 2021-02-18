@@ -24,7 +24,19 @@ namespace Radial.Services
         }
 
 
-     
+        public Task SendEmailAsync(string email, string subject, string htmlMessage)
+        {
+            try
+            {
+                SendEmail(email, subject, htmlMessage);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending email.");
+            }
+
+            return Task.CompletedTask;
+        }
 
         public Task<bool> TrySendEmail(string email, string subject, string htmlMessage)
         {

@@ -1,29 +1,36 @@
 ﻿@attribute [Authorize]
 @inherits AuthComponentBase
-@inject Radial.Services.Client.IMessagePublisher MessagePublisher
+@using Radial.Data.Entities
+@using Radial.Services
+@using Radial.Services.Client
+@inject IMessagePublisher MessagePublisher
+@inject IDataService DataService
 
 <div class="resource-bars-container mx-4">
     <div class="text-center">
         <strong class="d-block">Energy</strong>
         <div class="progress">
-            <div id="energy-bar" class="progress-bar" style="width: @(GetFormattedPercent(User?.EnergyPercent)); overflow: visible;"></div>
+            <div id="energy-bar" class="progress-bar" style="width: @(GetFormattedPercent(CharacterInfo?.EnergyPercent)); overflow: visible;"></div>
         </div>
         <div class="text-white resource-bar-label">
-            @(User?.EnergyCurrent ?? 0)
+            @(CharacterInfo?.EnergyCurrent ?? 0)
         </div>
     </div>
     <div class="text-center">
         <strong class="d-block">Charge</strong>
         <div class="progress">
-            <div id="charge-bar" class="progress-bar" style="width: @(GetFormattedPercent(User?.ChargePercent)); overflow: visible;"></div>
+            <div id="charge-bar" class="progress-bar" style="width: @(GetFormattedPercent(CharacterInfo?.ChargePercent)); overflow: visible;"></div>
         </div>
         <div class="text-white resource-bar-label">
-            @(User?.ChargeCurrent ?? 0)
+            @(CharacterInfo?.ChargeCurrent ?? 0)
         </div>
     </div>
 </div>
 
 @code {
+
+    private CharacterInfo CharacterInfo { get; set; }
+
     private string GetFormattedPercent(double? percent)
     {
         if (!percent.HasValue)
@@ -34,7 +41,13 @@
         return Math.Round(percent.Value * 100).ToString() + "%";
     }
 
-    protected override Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnInitializedAsync()
+    {
+        CharacterInfo = await DataService.GetCharacterInfo(User.Id);
+        await base.OnInitializedAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
@@ -43,6 +56,6 @@
                 await InvokeAsync(StateHasChanged);
             };
         }
-        return base.OnAfterRenderAsync(firstRender);
+        await base.OnAfterRenderAsync(firstRender);
     }
 }

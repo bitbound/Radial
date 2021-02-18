@@ -14,7 +14,7 @@ namespace Radial.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "5.0.2");
+                .HasAnnotation("ProductVersion", "5.0.3");
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
@@ -224,10 +224,10 @@ namespace Radial.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<TimeSpan>("Duration")
+                    b.Property<Guid?>("CharacterInfoId")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("RadialUserId")
+                    b.Property<TimeSpan>("Duration")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("StartTime")
@@ -240,11 +240,46 @@ namespace Radial.Data.Migrations
                     b.Property<int>("TargetStat")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("Type")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("RadialUserId");
+                    b.HasIndex("CharacterInfoId");
 
                     b.ToTable("CharacterEffects");
+                });
+
+            modelBuilder.Entity("Radial.Data.Entities.CharacterInfo", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("ChargeCurrent")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("CoreEnergy")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("EnergyCurrent")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsServerAdmin")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("XCoord")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("YCoord")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ZCoord")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CharacterInfo");
                 });
 
             modelBuilder.Entity("Radial.Data.Entities.EventLogEntry", b =>
@@ -277,26 +312,10 @@ namespace Radial.Data.Migrations
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
 
-                    b.Property<long>("ChargeCurrent")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("CoreEnergy")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("EnergyCurrent")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsServerAdmin")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("XCoord")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("YCoord")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("ZCoord")
+                    b.Property<Guid?>("InfoId")
                         .HasColumnType("TEXT");
+
+                    b.HasIndex("InfoId");
 
                     b.HasDiscriminator().HasValue("RadialUser");
                 });
@@ -354,12 +373,21 @@ namespace Radial.Data.Migrations
 
             modelBuilder.Entity("Radial.Data.Entities.CharacterEffect", b =>
                 {
-                    b.HasOne("Radial.Data.Entities.RadialUser", null)
+                    b.HasOne("Radial.Data.Entities.CharacterInfo", null)
                         .WithMany("Effects")
-                        .HasForeignKey("RadialUserId");
+                        .HasForeignKey("CharacterInfoId");
                 });
 
             modelBuilder.Entity("Radial.Data.Entities.RadialUser", b =>
+                {
+                    b.HasOne("Radial.Data.Entities.CharacterInfo", "Info")
+                        .WithMany()
+                        .HasForeignKey("InfoId");
+
+                    b.Navigation("Info");
+                });
+
+            modelBuilder.Entity("Radial.Data.Entities.CharacterInfo", b =>
                 {
                     b.Navigation("Effects");
                 });

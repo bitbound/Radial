@@ -82,6 +82,13 @@ namespace Radial.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
             {
+                if (Input.Username.ToLower().Contains("system") ||
+                    Input.Username.ToLower().Contains("admin"))
+                {
+                    ModelState.AddModelError("Input.Username", "Invalid username.");
+                    return Page();
+                }
+
                 if (await _userManager.FindByEmailAsync(Input.Email) != null)
                 {
                     ModelState.AddModelError("Input.Email", "Email address is already in use.");
@@ -92,8 +99,12 @@ namespace Radial.Areas.Identity.Pages.Account
                 {
                     UserName = Input.Username, 
                     Email = Input.Email,
-                    CoreEnergy = 100,
-                    EnergyCurrent = 100
+                    Info = new CharacterInfo()
+                    {
+                        CoreEnergy = 100,
+                        EnergyCurrent = 100
+                    }
+                  
                 };
                 var result = await _userManager.CreateAsync(user, Input.Password);
                 if (result.Succeeded)
