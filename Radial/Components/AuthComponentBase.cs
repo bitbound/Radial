@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Radial.Shared
+namespace Radial.Components
 {
     public interface IAuthComponentBase
     {
