@@ -1,9 +1,11 @@
 ﻿@page "/explore"
 @attribute [Authorize]
-@using Radial.Data.Entities
 @using Radial.Services.Client
 @using Radial.Components
+@using Radial.Services
+@inject IInputDispatcher InputDispatcher
 @inject IMessagePublisher MessagePublisher
+@inject IClientConnection ClientConnection
 @inject IJsInterop JsInterop
 @inherits AuthComponentBase
 
@@ -13,7 +15,7 @@
     </div>
 
     <div class="p-2">
-       
+       <ActionBar />
     </div>
 
     <div class="mb-2">
@@ -22,7 +24,6 @@
 </div>
 
 @code {
-
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         await base.OnAfterRenderAsync(firstRender);
@@ -32,5 +33,4 @@
             StateHasChanged();
         }
     }
-
 } 

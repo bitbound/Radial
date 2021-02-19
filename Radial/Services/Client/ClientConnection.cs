@@ -18,36 +18,40 @@ namespace Radial.Services.Client
 {
     public interface IClientConnection : IDisposable
     {
-        event EventHandler<IMessageBase> MessageReceived;
         event EventHandler<string> Disconnected;
+
+        event EventHandler<IMessageBase> MessageReceived;
         RadialUser User { get; }
-        void InvokeMessageReceived(IMessageBase message);
         Task Connect();
+
         void Disconnect(string reason);
+
+        Action ExchangeInput(Action inputAction);
+
+        void InvokeMessageReceived(IMessageBase message);
     }
 
     public class ClientConnection : IClientConnection
     {
         private readonly IClientManager _clientManager;
         private readonly IHttpContextAccessor _httpContext;
-        private readonly AuthenticationStateProvider _authStateProvider;
+        private readonly IDataService _dataService;
+        private Action _queuedInput;
         private UserManager<RadialUser> _userManager;
-
         public ClientConnection(IClientManager clientManager, 
             IHttpContextAccessor httpContextAccessor,
-            AuthenticationStateProvider authStateProvider,
+            IDataService dataService,
             UserManager<RadialUser> userManager)
         {
             _clientManager = clientManager;
             _httpContext = httpContextAccessor;
-            _authStateProvider = authStateProvider;
+            _dataService = dataService;
             _userManager = userManager;
         }
 
-        public event EventHandler<IMessageBase> MessageReceived;
-        
         public event EventHandler<string> Disconnected;
 
+        public event EventHandler<IMessageBase> MessageReceived;
         public RadialUser User { get; private set; }
 
         public async Task Connect()
@@ -59,6 +63,11 @@ namespace Radial.Services.Client
             }
         }
 
+        public void Disconnect(string reason)
+        {
+            Disconnected?.Invoke(this, reason);
+        }
+
         public void Dispose()
         {
             _clientManager.RemoveClient(_httpContext?.HttpContext?.Connection?.Id);
@@ -66,14 +75,18 @@ namespace Radial.Services.Client
             GC.SuppressFinalize(this);
         }
 
-        public void InvokeMessageReceived(IMessageBase message)
+        public Action ExchangeInput(Action inputAction)
         {
-            MessageReceived?.Invoke(this, message);
+            return Interlocked.Exchange(ref _queuedInput, inputAction);
         }
 
-        public void Disconnect(string reason)
+        public void InvokeMessageReceived(IMessageBase message)
         {
-            Disconnected?.Invoke(this, reason);
+            if (message.MessageType == MessageType.CharacterStatsUpdated)
+            {
+                _dataService.ReloadEntity(User);
+            }
+            _ = Task.Run(() => MessageReceived?.Invoke(this, message));
         }
     }
 }

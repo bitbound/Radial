@@ -1,0 +1,56 @@
+﻿@using Radial.Enums
+@using Radial.Services
+@using Radial.Services.Client
+@inject IInputDispatcher InputDispatcher
+@inject IClientConnection ClientConnection
+
+<div class="action-bar-frame" tabindex="0" @onkeydown="OnKeyDown">
+    <div class="movement-control-frame">
+        <button id="moveButtonN" class="btn btn-primary movement-button" @onclick="() => Move(MovementDirection.North)">N</button>
+        <button id="moveButtonE" class="btn btn-primary movement-button" @onclick="() => Move(MovementDirection.East)">E</button>
+        <button id="moveButtonS" class="btn btn-primary movement-button" @onclick="() => Move(MovementDirection.South)">S</button>
+        <button id="moveButtonW" class="btn btn-primary movement-button" @onclick="() => Move(MovementDirection.West)">W</button>
+    </div>
+</div>
+
+@code {
+    public void Move(MovementDirection direction)
+    {
+        ClientConnection.ExchangeInput(() =>
+        {
+            InputDispatcher.MoveCharacter(ClientConnection, direction);
+        });
+    }
+
+    private void OnKeyDown(KeyboardEventArgs args)
+    {
+        var direction = MovementDirection.None;
+
+        switch (args.Key)
+        {
+            case "ArrowLeft":
+            case "Left":
+                direction = MovementDirection.West;
+                break;
+            case "ArrowUp":
+            case "Up":
+                direction = MovementDirection.North;
+                break;
+            case "ArrowRight":
+            case "Right":
+                direction = MovementDirection.East;
+                break;
+            case "ArrowDown":
+            case "Down":
+                direction = MovementDirection.South;
+                break;
+            default:
+                return;
+        }
+
+        ClientConnection.ExchangeInput(() =>
+        {
+            InputDispatcher.MoveCharacter(ClientConnection, direction);
+        });
+    }
+}

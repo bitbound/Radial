@@ -14,6 +14,8 @@ namespace Radial.Services
     public interface IDataService
     {
         Task<CharacterInfo> GetCharacterInfo(string userId);
+        Task ReloadEntity<T>(T entity);
+
         Task WriteLog(LogLevel logLevel, string category, EventId eventId, string state, Exception exception, List<string> scopeStack);
     }
 
@@ -34,6 +36,11 @@ namespace Radial.Services
                 .Where(x => x.Id == userId)
                 .Select(x => x.Info)
                 .FirstOrDefaultAsync();
+        }
+
+        public Task ReloadEntity<T>(T entity)
+        {
+            return _dbContext.Entry(entity).ReloadAsync();
         }
 
         public async Task WriteLog(LogLevel logLevel, string category, EventId eventId, string state, Exception exception, List<string> scopeStack)

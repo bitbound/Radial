@@ -1,4 +1,5 @@
-﻿using Radial.Data.Entities;
+﻿using Microsoft.Extensions.Logging;
+using Radial.Data.Entities;
 using Radial.Models.Enums;
 using Radial.Models.Messaging;
 using System;
@@ -16,29 +17,39 @@ namespace Radial.Services.Client
     public class MessagePublisher : IMessagePublisher
     {
         private readonly IClientConnection _clientConnection;
+        private readonly ILogger<MessagePublisher> _logger;
+
+        public MessagePublisher(IClientConnection clientConnection, ILogger<MessagePublisher> logger)
+        {
+            _clientConnection = clientConnection;
+            _clientConnection.MessageReceived += MessageReceived;
+            _logger = logger;
+        }
 
         public event EventHandler CharacterStatsChanged;
         public event EventHandler<ChatMessage> ChatReceived;
 
-        public MessagePublisher(IClientConnection clientConnection)
-        {
-            _clientConnection = clientConnection;
-            _clientConnection.MessageReceived += MessageReceived;
-        }
-
         private void MessageReceived(object sender, IMessageBase message)
         {
-            switch (message.MessageType)
+            try
             {
-                case MessageType.ChatMessage:
-                    ChatReceived?.Invoke(this, message as ChatMessage);
-                    break;
-                case MessageType.CharacterStatsUpdated:
-                    CharacterStatsChanged?.Invoke(this, null);
-                    break;
-                default:
-                    break;
+                switch (message.MessageType)
+                {
+                    case MessageType.ChatMessage:
+                        ChatReceived?.Invoke(this, message as ChatMessage);
+                        break;
+                    case MessageType.CharacterStatsUpdated:
+                        CharacterStatsChanged?.Invoke(this, null);
+                        break;
+                    default:
+                        break;
+                }
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while processing message.");
+            }
+  
         }
     }
 }
