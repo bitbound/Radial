@@ -17,11 +17,11 @@ namespace Radial.Services
         Task ReloadEntity<T>(T entity);
 
         Task WriteLog(LogLevel logLevel, string category, EventId eventId, string state, Exception exception, List<string> scopeStack);
+        Task<RadialUser> LoadUser(string username);
     }
 
     public class DataService : IDataService
     {
-
         private readonly ApplicationDbContext _dbContext;
 
         public DataService(ApplicationDbContext applicationDbContext)
@@ -36,6 +36,13 @@ namespace Radial.Services
                 .Where(x => x.Id == userId)
                 .Select(x => x.Info)
                 .FirstOrDefaultAsync();
+        }
+
+        public async Task<RadialUser> LoadUser(string username)
+        {
+            return await _dbContext.Users
+                .Include(x=>x.Info)
+                .FirstOrDefaultAsync(x => x.UserName == username);
         }
 
         public Task ReloadEntity<T>(T entity)

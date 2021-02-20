@@ -1,4 +1,6 @@
-﻿<div class="top-row pl-4 navbar navbar-dark">
+﻿@inject Radial.Services.Client.IJsInterop JsInterop 
+
+<div class="top-row pl-4 navbar navbar-dark">
     <a class="navbar-brand" href="">
         <img class="brand-image" src="/media/radial.png" />
         Radial
@@ -80,11 +82,23 @@
 
 @code {
     private bool collapseNavMenu = true;
+    private bool callAutoheight;
 
     private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
 
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
+        callAutoheight = true;
+    }
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (callAutoheight)
+        {
+            callAutoheight = false;
+            JsInterop.AutoHeight();
+        }
+        return base.OnAfterRenderAsync(firstRender);
     }
 }

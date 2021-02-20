@@ -34,9 +34,10 @@ namespace Radial.Services.Client
     public class ClientConnection : IClientConnection
     {
         private readonly IClientManager _clientManager;
-        private readonly IHttpContextAccessor _httpContext;
         private readonly IDataService _dataService;
+        private readonly IHttpContextAccessor _httpContext;
         private Action _queuedInput;
+        private RadialUser _user;
         private UserManager<RadialUser> _userManager;
         public ClientConnection(IClientManager clientManager, 
             IHttpContextAccessor httpContextAccessor,
@@ -52,15 +53,26 @@ namespace Radial.Services.Client
         public event EventHandler<string> Disconnected;
 
         public event EventHandler<IMessageBase> MessageReceived;
-        public RadialUser User { get; private set; }
+        public RadialUser User
+        {
+            get
+            {
+                if (_httpContext?.HttpContext?.User?.Identity?.IsAuthenticated != true)
+                {
+                    return null;
+                }
+                
+                return _user ??= _dataService.LoadUser(_httpContext.HttpContext.User.Identity.Name).GetAwaiter().GetResult();
+            }
+        }
 
-        public async Task Connect()
+        public Task Connect()
         {
             if (_httpContext?.HttpContext?.User?.Identity?.IsAuthenticated == true)
             {
-                User = await _userManager.GetUserAsync(_httpContext.HttpContext.User);
                 _clientManager.AddClient(_httpContext.HttpContext.Connection.Id, this);
             }
+            return Task.CompletedTask;
         }
 
         public void Disconnect(string reason)

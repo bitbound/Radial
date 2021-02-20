@@ -2,14 +2,16 @@
     overflow-x: auto;
     padding: 20px;
     height: 120px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
 }
 
-.movement-control-frame {
-    margin-left: 20px;
-    margin-top: 20px;
+.button-control-frame {
+    justify-self: center;
+    align-self: center;
 }
 
-.movement-button {
+.dpad-button {
     border-radius: 100%;
     position: absolute;
     height: 40px;
@@ -17,27 +19,37 @@
     cursor: pointer;
 }
 
-#moveInput {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    text-align: center;
+.top-button {
+    transform: translate(-50%, -140%);
+}
+
+.right-button {
+    transform: translate(40%, -50%);
+}
+
+.bottom-button {
+    transform: translate(-50%, 40%);
+}
+
+.left-button {
+    transform: translate(-140%, -50%);
+}
+
+#respawnButton {
+    grid-column: span 2;
+    justify-self: center;
+    align-self: center;
+    height: 60px;
+    border-radius: 10px;
+}
+
+.action-bonus-ring {
+    border: 5px solid magenta;
+    transition: .15s linear transform, .15s linear opacity;
+    width: 150px;
+    height: 150px;
+    border-radius: 100%;
     position: absolute;
-    background-color: lightgray;
-}
-
-#moveButtonN {
-    transform: translate(0, -80%);
-}
-
-#moveButtonE {
-    transform: translate(80%, 0);
-}
-
-#moveButtonS {
-    transform: translate(0, 80%);
-}
-
-#moveButtonW {
-    transform: translate(-80%, 0);
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0,0);
 }

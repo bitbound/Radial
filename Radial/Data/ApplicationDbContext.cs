@@ -6,6 +6,7 @@ using Radial.Data.Entities;
 using Radial.Models;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -48,6 +49,10 @@ namespace Radial.Data
                                                                                 || p.PropertyType == typeof(DateTimeOffset?));
                     foreach (var property in properties)
                     {
+                        if (property.CustomAttributes.Any(x => x.AttributeType == typeof(NotMappedAttribute)))
+                        {
+                            continue;
+                        }
                         builder
                              .Entity(entityType.Name)
                              .Property(property.Name)

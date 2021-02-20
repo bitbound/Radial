@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Radial.Enums;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -20,6 +21,10 @@ namespace Radial.Data.Entities
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; }
 
+        [NotMapped]
+        public int ActionBonus { get; set; }
+
+        [NotMapped]
         public long ChargeCurrent { get; set; }
 
         [NotMapped]
@@ -52,23 +57,26 @@ namespace Radial.Data.Entities
 
         [NotMapped]
         public long EnergyMaxMod => Effects
-            .Where(x => x.TargetStat == Enums.CharacterEffectStat.EnergyMax)
+            .Where(x => x.TargetStat == CharacterEffectStat.EnergyMax)
             .Sum(x => x.StatChange);
 
         [NotMapped]
         public double EnergyPercent => (double)EnergyCurrent / EnergyMax;
 
-        public bool IsServerAdmin { get; set; }
+        [NotMapped]
+        public DateTimeOffset LastMoveTime { get; set; }
 
         [NotMapped]
         public string PartyId { get; set; }
+
+        [NotMapped]
+        public CharacterState State { get; set; }
 
         public long XCoord { get; set; }
 
         [NotMapped]
         public string XYZ => $"{XCoord},{YCoord},{ZCoord}";
-
         public long YCoord { get; set; }
-        public string ZCoord { get; set; }
+        public string ZCoord { get; set; } = "0";
     }
 }
