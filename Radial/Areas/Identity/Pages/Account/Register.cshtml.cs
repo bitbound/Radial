@@ -43,7 +43,7 @@ namespace Radial.Areas.Identity.Pages.Account
 
         public string ReturnUrl { get; set; }
 
-        public IList<AuthenticationScheme> ExternalLogins { get; set; }
+        public List<AuthenticationScheme> ExternalLogins { get; set; }
 
         public class InputModel
         {
@@ -99,10 +99,12 @@ namespace Radial.Areas.Identity.Pages.Account
                 {
                     UserName = Input.Username, 
                     Email = Input.Email,
-                    Info = new CharacterInfo()
+                    Character = new CharacterInfo()
                     {
                         CoreEnergy = 100,
-                        EnergyCurrent = 100
+                        EnergyCurrent = 100,
+                        Name = Input.Username,
+                        Type = Enums.CharacterType.Player
                     }
                   
                 };

@@ -44,7 +44,7 @@
 
     protected override Task OnInitializedAsync()
     {
-        CharacterInfo = ClientConnection.User?.Info;
+        CharacterInfo = ClientConnection.User?.Character;
         return base.OnInitializedAsync();
     }
 

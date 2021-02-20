@@ -1,5 +1,4 @@
 ﻿using Radial.Enums;
-using Radial.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -24,6 +23,8 @@ namespace Radial.Data.Entities
 
         [NotMapped]
         public int ActionBonus { get; set; }
+
+        public Location Location { get; set; }
 
         [NotMapped]
         public long ChargeCurrent { get; set; }
@@ -67,6 +68,8 @@ namespace Radial.Data.Entities
         [NotMapped]
         public DateTimeOffset LastMoveTime { get; set; }
 
+        public string Name { get; init; }
+
         [NotMapped]
         public string PartyId { get; set; }
 
@@ -74,13 +77,18 @@ namespace Radial.Data.Entities
         public CharacterState State { get; set; }
 
         [NotMapped]
-        public ICharacter Target { get; set; }
+        public CharacterInfo Target { get; set; }
 
-        public long XCoord { get; set; }
+        public CharacterType Type { get; set; }
+
 
         [NotMapped]
-        public string XYZ => $"{XCoord},{YCoord},{ZCoord}";
-        public long YCoord { get; set; }
-        public string ZCoord { get; set; } = "0";
+        public long XCoord => Location?.XCoord ?? 0;
+        [NotMapped]
+        public string XYZ => Location?.XYZ ?? "0,0,0";
+        [NotMapped]
+        public long YCoord => Location?.YCoord ?? 0;
+        [NotMapped]
+        public string ZCoord => Location?.ZCoord ?? "0";
     }
 }

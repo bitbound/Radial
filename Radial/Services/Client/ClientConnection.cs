@@ -38,16 +38,13 @@ namespace Radial.Services.Client
         private readonly IHttpContextAccessor _httpContext;
         private Action _queuedInput;
         private RadialUser _user;
-        private UserManager<RadialUser> _userManager;
         public ClientConnection(IClientManager clientManager, 
             IHttpContextAccessor httpContextAccessor,
-            IDataService dataService,
-            UserManager<RadialUser> userManager)
+            IDataService dataService)
         {
             _clientManager = clientManager;
             _httpContext = httpContextAccessor;
             _dataService = dataService;
-            _userManager = userManager;
         }
 
         public event EventHandler<string> Disconnected;
@@ -70,6 +67,7 @@ namespace Radial.Services.Client
         {
             if (_httpContext?.HttpContext?.User?.Identity?.IsAuthenticated == true)
             {
+                _dataService.InitializePlayer(User);
                 _clientManager.AddClient(_httpContext.HttpContext.Connection.Id, this);
             }
             return Task.CompletedTask;

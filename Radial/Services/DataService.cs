@@ -3,6 +3,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Radial.Data;
 using Radial.Data.Entities;
+using Radial.Enums;
+using Radial.Services.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,11 +15,14 @@ namespace Radial.Services
 {
     public interface IDataService
     {
-        Task<CharacterInfo> GetCharacterInfo(string userId);
+        Task<CharacterInfo> GetPlayerCharacter(string userId);
+        Task InitializePlayer(RadialUser user);
+
+        Task<RadialUser> LoadUser(string username);
+
         Task ReloadEntity<T>(T entity);
 
         Task WriteLog(LogLevel logLevel, string category, EventId eventId, string state, Exception exception, List<string> scopeStack);
-        Task<RadialUser> LoadUser(string username);
     }
 
     public class DataService : IDataService
@@ -29,19 +34,34 @@ namespace Radial.Services
             _dbContext = applicationDbContext;
         }
 
-        public async Task<CharacterInfo> GetCharacterInfo(string userId)
+        public async Task<CharacterInfo> GetPlayerCharacter(string userId)
         {
             return await _dbContext.Users
-                .Include(x => x.Info)
+                .Include(x => x.Character)
                 .Where(x => x.Id == userId)
-                .Select(x => x.Info)
+                .Select(x => x.Character)
                 .FirstOrDefaultAsync();
+        }
+
+        public async Task InitializePlayer(RadialUser user)
+        {
+            if (user.Character.Location is null)
+            {
+                user.Character.Location = await _dbContext.Locations.FirstOrDefaultAsync(x => 
+                    x.XCoord == 0 &&
+                    x.YCoord == 0 &&
+                    x.ZCoord == "0");
+                user.Character.Location.Players.Add(user);
+            }
+
+            await _dbContext.SaveChangesAsync();
         }
 
         public async Task<RadialUser> LoadUser(string username)
         {
             return await _dbContext.Users
-                .Include(x=>x.Info)
+                .Include(x=>x.Character)
+                .ThenInclude(x=>x.Location)
                 .FirstOrDefaultAsync(x => x.UserName == username);
         }
 

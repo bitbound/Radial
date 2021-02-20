@@ -4,15 +4,16 @@
 @using Radial.Data.Entities 
 @inject IInputDispatcher InputDispatcher
 @inject IClientConnection ClientConnection
+@inject IDataService DataService
 
 <div class="action-bar-frame" tabindex="0" @onkeydown="OnKeyDown">
-    @if (ClientConnection.User?.Info?.EnergyCurrent < 1)
+    @if (ClientConnection.User?.Character?.EnergyCurrent < 1)
     {
         <button id="respawnButton" class="btn btn-danger" @onkeydown="Respawn">Respawn</button>
     }
     else
     {
-        @if (ClientConnection.User?.Info?.State == CharacterState.InCombat)
+        @if (ClientConnection.User?.Character?.State == CharacterState.InCombat)
         {
             <button id="respawnButton" class="btn btn-danger" @onkeydown="Escape">Escape</button>
         }
@@ -63,7 +64,7 @@
 
     protected override Task OnInitializedAsync()
     {
-        CharacterInfo = ClientConnection.User?.Info;
+        CharacterInfo = ClientConnection.User?.Character;
 
         return base.OnInitializedAsync();
     }
@@ -95,12 +96,38 @@
 
     private void CycleEnemyTarget()
     {
-        
+        var character = ClientConnection.User.Character;
+        var location = ClientConnection.User.Character.Location;
+
+        var currentIndex = location.Characters.FindIndex(x => x.Id == character.Target?.Id);
+        if (currentIndex == -1)
+        {
+            character.Target = location.Characters.Find(x => x.Type == CharacterType.Npc);
+        }
+        else
+        {
+            character.Target = location.Characters
+                .Skip(currentIndex + 1)
+                .FirstOrDefault(x => x.Type == CharacterType.Npc);
+        }
     }
 
     private void CycleFriendlyTarget()
     {
+        var character = ClientConnection.User.Character;
+        var location = ClientConnection.User.Character.Location;
 
+        var currentIndex = location.Characters.FindIndex(x => x.Id == character.Target?.Id);
+        if (currentIndex == -1)
+        {
+            character.Target = location.Characters.Find(x => x.Type == CharacterType.Player);
+        }
+        else
+        {
+            character.Target = location.Characters
+                .Skip(currentIndex + 1)
+                .FirstOrDefault(x => x.Type == CharacterType.Player);
+        }
     }
 
     private void Escape()
@@ -121,12 +148,12 @@
 
     private void Move(MovementDirection direction)
     {
-        if (DateTimeOffset.Now - ClientConnection.User.Info.LastMoveTime < TimeSpan.FromSeconds(1))
+        if (DateTimeOffset.Now - ClientConnection.User.Character.LastMoveTime < TimeSpan.FromSeconds(1))
         {
             return;
         }
 
-        ClientConnection.User.Info.LastMoveTime = DateTimeOffset.Now;
+        ClientConnection.User.Character.LastMoveTime = DateTimeOffset.Now;
 
         ClientConnection.ExchangeInput(() =>
         {

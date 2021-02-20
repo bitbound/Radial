@@ -110,7 +110,7 @@ namespace Radial.Services
 
         public void SendToLocal(IClientConnection senderConnection, IMessageBase message)
         {
-            foreach (var connection in ClientConnections.Values.Where(x => x.User.Info.XYZ == senderConnection.User.Info.XYZ))
+            foreach (var connection in ClientConnections.Values.Where(x => x.User.Character.XYZ == senderConnection.User.Character.XYZ))
             {
                 connection.InvokeMessageReceived(message);
             }
@@ -118,12 +118,12 @@ namespace Radial.Services
 
         public bool SendToParty(IClientConnection senderConnection, IMessageBase message)
         {
-            if (string.IsNullOrWhiteSpace(senderConnection.User.Info.PartyId))
+            if (string.IsNullOrWhiteSpace(senderConnection.User.Character.PartyId))
             {
                 return false;
             }
 
-            foreach (var connection in ClientConnections.Values.Where(x=>x.User.Info.PartyId == senderConnection.User.Info.PartyId))
+            foreach (var connection in ClientConnections.Values.Where(x=>x.User.Character.PartyId == senderConnection.User.Character.PartyId))
             {
                 connection.InvokeMessageReceived(message);
             }

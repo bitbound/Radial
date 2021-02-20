@@ -12,6 +12,7 @@ using Radial.Data;
 using Radial.Data.Entities;
 using Radial.Services;
 using Radial.Services.Client;
+using Radial.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -98,6 +99,7 @@ namespace Radial
                 endpoints.MapFallbackToPage("/_Host");
             });
 
+            DataInitializer.LoadRecords(dbContext);
 
             loggerFactory.AddProvider(new DbLoggerProvider(env, app.ApplicationServices));
         }
