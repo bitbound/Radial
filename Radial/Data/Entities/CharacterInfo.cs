@@ -1,4 +1,5 @@
 ﻿using Radial.Enums;
+using Radial.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -71,6 +72,9 @@ namespace Radial.Data.Entities
 
         [NotMapped]
         public CharacterState State { get; set; }
+
+        [NotMapped]
+        public ICharacter Target { get; set; }
 
         public long XCoord { get; set; }
 

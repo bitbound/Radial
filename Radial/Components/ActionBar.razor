@@ -24,27 +24,37 @@
                 <button class="btn btn-primary dpad-button bottom-button" title="Move South" @onclick="  () => Move(MovementDirection.South)">S</button>
                 <button class="btn btn-primary dpad-button left-button" title="Move West" @onclick=" () => Move(MovementDirection.West)">W</button>
             </div>
-            <div class="button-control-frame">
-                <div class="action-bonus-ring"
-                     style="opacity: @CharacterInfo.ActionBonus; transform: translate(-50%, -50%) scale(@($"{CharacterInfo.ActionBonus},{CharacterInfo.ActionBonus}"))">
-
-                </div>
-                <div>
-                    <button class="btn btn-primary dpad-button top-button" title="Attack" @onclick="Attack">
-                        <img src="/media/svg/sword.svg" />
-                    </button>
-                    <button class="btn btn-primary dpad-button right-button" title="Block" @onclick="Block">
-                        <img src="/media/svg/shield.svg" />
-                    </button>
-                    <button class="btn btn-primary dpad-button bottom-button" title="Heal" @onclick="Heal">
-                        <img src="/media/svg/heal.svg" />
-                    </button>
-                    <button class="btn btn-primary dpad-button left-button" title="Blast" @onclick="Blast">
-                        <img src="/media/svg/blast.svg" />
-                    </button>
-                </div>
-            </div>
         }
+
+        <div class="button-control-frame">
+            <div class="action-bonus-ring"
+                 style="opacity: @CharacterInfo.ActionBonus; transform: translate(-50%, -50%) scale(@($"{CharacterInfo.ActionBonus},{CharacterInfo.ActionBonus}"))">
+
+            </div>
+            <div>
+                <button class="btn btn-primary dpad-button top-button" title="Attack" @onclick="Attack">
+                    <img src="/media/svg/sword.svg" />
+                </button>
+                <button class="btn btn-primary dpad-button right-button" title="Block" @onclick="Block">
+                    <img src="/media/svg/shield.svg" />
+                </button>
+                <button class="btn btn-primary dpad-button bottom-button" title="Heal" @onclick="Heal">
+                    <img src="/media/svg/heal.svg" />
+                </button>
+                <button class="btn btn-primary dpad-button left-button" title="Blast" @onclick="Blast">
+                    <img src="/media/svg/blast.svg" />
+                </button>
+            </div>
+        </div>
+
+        <div class="target-button-frame">
+            <button class="btn btn-sm btn-success target-button" title="Cycle Friendly Target" @onclick="CycleFriendlyTarget">
+                <span class="oi oi-target"></span>
+            </button>
+            <button class="btn btn-sm btn-danger target-button" title="Cycle Enemy Target" @onclick="CycleEnemyTarget">
+                <span class="oi oi-target"></span>
+            </button>
+        </div>
     }
 </div>
 
@@ -58,7 +68,8 @@
         return base.OnInitializedAsync();
     }
 
-    public void Attack()
+
+    private void Attack()
     {
         ClientConnection.ExchangeInput(() =>
         {
@@ -66,7 +77,7 @@
         });
     }
 
-    public void Blast()
+    private void Blast()
     {
         ClientConnection.ExchangeInput(() =>
         {
@@ -74,7 +85,7 @@
         });
     }
 
-    public void Block()
+    private void Block()
     {
         ClientConnection.ExchangeInput(() =>
         {
@@ -82,7 +93,17 @@
         });
     }
 
-    public void Escape()
+    private void CycleEnemyTarget()
+    {
+        
+    }
+
+    private void CycleFriendlyTarget()
+    {
+
+    }
+
+    private void Escape()
     {
         ClientConnection.ExchangeInput(() =>
         {
@@ -90,7 +111,7 @@
         });
     }
 
-    public void Heal()
+    private void Heal()
     {
         ClientConnection.ExchangeInput(() =>
         {
@@ -98,7 +119,7 @@
         });
     }
 
-    public void Move(MovementDirection direction)
+    private void Move(MovementDirection direction)
     {
         if (DateTimeOffset.Now - ClientConnection.User.Info.LastMoveTime < TimeSpan.FromSeconds(1))
         {
@@ -110,14 +131,6 @@
         ClientConnection.ExchangeInput(() =>
         {
             InputDispatcher.MoveCharacter(ClientConnection, direction);
-        });
-    }
-
-    public void Respawn()
-    {
-        ClientConnection.ExchangeInput(() =>
-        {
-            InputDispatcher.Respawn(ClientConnection);
         });
     }
 
@@ -142,5 +155,13 @@
                 Move(MovementDirection.South);
                 break;
         }
+    }
+
+    private void Respawn()
+    {
+        ClientConnection.ExchangeInput(() =>
+        {
+            InputDispatcher.Respawn(ClientConnection);
+        });
     }
 }

@@ -3,7 +3,7 @@
     padding: 20px;
     height: 120px;
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr auto;
 }
 
 .button-control-frame {
@@ -52,4 +52,16 @@
     position: absolute;
     opacity: 0;
     transform: translate(-50%, -50%) scale(0,0);
+}
+
+.target-button-frame {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    justify-items: center;
+    align-items: center;
+}
+
+.target-button {
+    border-radius: 100%;
+    cursor: pointer;
 }
