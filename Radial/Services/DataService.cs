@@ -16,11 +16,14 @@ namespace Radial.Services
     public interface IDataService
     {
         Task<CharacterInfo> GetPlayerCharacter(string userId);
+        Task<Location> GetXyzLocation(string xyz);
         Task InitializePlayer(RadialUser user);
 
         Task<RadialUser> LoadUser(string username);
 
         Task ReloadEntity<T>(T entity);
+
+        Task SaveEntity<T>(T entity);
 
         Task WriteLog(LogLevel logLevel, string category, EventId eventId, string state, Exception exception, List<string> scopeStack);
     }
@@ -37,21 +40,31 @@ namespace Radial.Services
         public async Task<CharacterInfo> GetPlayerCharacter(string userId)
         {
             return await _dbContext.Users
-                .Include(x => x.Character)
-                .Where(x => x.Id == userId)
-                .Select(x => x.Character)
-                .FirstOrDefaultAsync();
+                  .Where(x => x.Id == userId)
+                  .Select(x => x.Character)
+                  .FirstOrDefaultAsync();
+        }
+
+        public async Task<Location> GetXyzLocation(string xyz)
+        {
+            var split = xyz.Split(",");
+            var x = long.Parse(split[0].Trim());
+            var y = long.Parse(split[1].Trim());
+            var z = split[2].Trim();
+
+            return await _dbContext.Locations
+                .FirstOrDefaultAsync(loc =>
+                    loc.XCoord == x &&
+                    loc.YCoord == y &&
+                    loc.ZCoord == z);
         }
 
         public async Task InitializePlayer(RadialUser user)
         {
             if (user.Character.Location is null)
             {
-                user.Character.Location = await _dbContext.Locations.FirstOrDefaultAsync(x => 
-                    x.XCoord == 0 &&
-                    x.YCoord == 0 &&
-                    x.ZCoord == "0");
-                user.Character.Location.Players.Add(user);
+                user.Character.Location = await GetXyzLocation("0,0,0");
+                user.Character.Location.Players.Add(user.Character);
             }
 
             await _dbContext.SaveChangesAsync();
@@ -59,16 +72,20 @@ namespace Radial.Services
 
         public async Task<RadialUser> LoadUser(string username)
         {
-            return await _dbContext.Users
-                .Include(x=>x.Character)
-                .ThenInclude(x=>x.Location)
-                .FirstOrDefaultAsync(x => x.UserName == username);
+            return await _dbContext.Users.FirstOrDefaultAsync(x => x.UserName == username);
         }
 
         public Task ReloadEntity<T>(T entity)
         {
             return _dbContext.Entry(entity).ReloadAsync();
         }
+
+        public async Task SaveEntity<T>(T entity)
+        {
+            _dbContext.Entry(entity);
+            await _dbContext.SaveChangesAsync();
+        }
+
 
         public async Task WriteLog(LogLevel logLevel, string category, EventId eventId, string state, Exception exception, List<string> scopeStack)
         {

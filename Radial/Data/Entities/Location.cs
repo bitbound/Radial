@@ -15,19 +15,19 @@ namespace Radial.Data.Entities
         public Guid Id { get; init; }
 
 
-        [NotMapped]
-        public List<CharacterInfo> Characters =>
-            Players
-                .Select(x => x.Character)
-                .Concat(Npcs.Select(x => x.Character))
-                .ToList();
+        public virtual List<CharacterInfo> Characters { get; set; } = new List<CharacterInfo>();
 
         public string Description { get; init; }
 
-        public List<Interactable> Interactables { get; set; }
+        public virtual List<Interactable> Interactables { get; set; }
         public bool IsEditable { get; set; }
-        public List<Npc> Npcs { get; init; } = new List<Npc>();
-        public List<RadialUser> Players { get; init; } = new List<RadialUser>();
+
+        [NotMapped]
+        public List<Npc> Npcs => Characters.OfType<Npc>().ToList();
+
+        [NotMapped]
+        public List<PlayerCharacter> Players => Characters.OfType<PlayerCharacter>().ToList();
+
         public string Title { get; init; }
         public long XCoord { get; init; }
 

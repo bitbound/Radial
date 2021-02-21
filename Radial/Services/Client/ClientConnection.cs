@@ -92,7 +92,7 @@ namespace Radial.Services.Client
 
         public void InvokeMessageReceived(IMessageBase message)
         {
-            if (message.MessageType == MessageType.CharacterStatsUpdated)
+            if (message.MessageType == MessageType.CharacterInfoUpdated)
             {
                 _dataService.ReloadEntity(User);
             }

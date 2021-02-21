@@ -26,13 +26,39 @@ namespace Radial.Data
 
         public DbSet<Location> Locations { get; set; }
 
+        public DbSet<PlayerCharacter> PlayerCharacters { get; set; }
+
+        public DbSet<CharacterInfo> Characters { get; set; }
+
+        public DbSet<Npc> Npcs { get; set; }
+
         public new DbSet<RadialUser> Users { get; set; }
 
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseLazyLoadingProxies();
+            base.OnConfiguring(optionsBuilder);
+        }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
             builder.Entity<IdentityUser>().ToTable("Users");
+
+            builder.Entity<CharacterInfo>()
+                .HasOne(x => x.Location)
+                .WithMany(x => x.Characters);
+
+            builder.Entity<Location>()
+                .HasMany(x => x.Characters)
+                .WithOne(x => x.Location);
+
+            builder.Entity<PlayerCharacter>()
+                .HasOne(x => x.User)
+                .WithOne(x => x.Character)
+                .HasForeignKey<PlayerCharacter>(x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
 
             if (Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite")
             {

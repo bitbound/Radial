@@ -25,17 +25,20 @@ namespace Radial.Areas.Identity.Pages.Account
         private readonly UserManager<RadialUser> _userManager;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSenderEx _emailSender;
+        private readonly IDataService _dataService;
 
         public RegisterModel(
             UserManager<RadialUser> userManager,
             SignInManager<RadialUser> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSenderEx emailSender)
+            IEmailSenderEx emailSender,
+            IDataService dataService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            _dataService = dataService;
         }
 
         [BindProperty]
@@ -95,23 +98,29 @@ namespace Radial.Areas.Identity.Pages.Account
                     return Page();
                 }
 
+                var startLocation = await _dataService.GetXyzLocation("0,0,0");
+
                 var user = new RadialUser 
                 {
                     UserName = Input.Username, 
                     Email = Input.Email,
-                    Character = new CharacterInfo()
+                    Character = new PlayerCharacter()
                     {
                         CoreEnergy = 100,
                         EnergyCurrent = 100,
                         Name = Input.Username,
-                        Type = Enums.CharacterType.Player
+                        Type = Enums.CharacterType.Player,
+                        Location = startLocation
                     }
-                  
                 };
+
                 var result = await _userManager.CreateAsync(user, Input.Password);
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
+
+                    startLocation.Players.Add(user.Character);
+                    await _dataService.SaveEntity(startLocation);
 
                     var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     var code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));

@@ -13,10 +13,12 @@ namespace Radial.Data.Entities
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; init; }
 
-        public string Description { get; init; }
+        public string Content { get; init; }
+
+        public string LookSummary { get; set; }
 
         public string Title { get; init; }
 
-        public List<Interactable> Interactables { get; init; } = new List<Interactable>();
+        public virtual List<Interactable> Interactables { get; init; } = new List<Interactable>();
     }
 }

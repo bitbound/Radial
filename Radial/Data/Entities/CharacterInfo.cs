@@ -12,50 +12,54 @@ namespace Radial.Data.Entities
     {
         private static readonly long _lowestStatValue = 10;
 
-        public CharacterInfo()
-        {
-            EnergyCurrent = EnergyMax;
-        }
-
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; }
 
         [NotMapped]
-        public int ActionBonus { get; set; }
+        public double ActionBonus { get; set; }
 
-        public Location Location { get; set; }
+        public virtual Location Location { get; set; }
 
         [NotMapped]
         public long ChargeCurrent { get; set; }
 
         [NotMapped]
-        public long ChargeMax => Math.Max(_lowestStatValue, CoreEnergy + ChargeMaxMod);
+        public long ChargeMax => Math.Max(_lowestStatValue, CoreEnergyCurrent + ChargeMaxMod);
 
         [NotMapped]
         public long ChargeMaxMod => Effects
-            .Where(x => x.TargetStat == Enums.CharacterEffectStat.ChargeMax)
+            .Where(x => x.TargetStat == CharacterEffectStat.ChargeMax)
             .Sum(x => x.StatChange);
 
         [NotMapped]
         public double ChargePercent => (double)ChargeCurrent / ChargeMax;
 
         [NotMapped]
-        public long ChargeRate => Math.Max(_lowestStatValue, CoreEnergy + ChargeRateMod);
+        public long ChargeRate => Math.Max(_lowestStatValue, CoreEnergyCurrent + ChargeRateMod);
 
         [NotMapped]
         public long ChargeRateMod => Effects
-            .Where(x => x.TargetStat == Enums.CharacterEffectStat.ChargeRate)
+            .Where(x => x.TargetStat == CharacterEffectStat.ChargeRate)
             .Sum(x => x.StatChange);
+
 
         public long CoreEnergy { get; set; }
 
-        public List<CharacterEffect> Effects { get; set; } = new List<CharacterEffect>();
+        [NotMapped]
+        public long CoreEnergyCurrent => Math.Max(_lowestStatValue, CoreEnergy + CoreEnergyMod);
+
+        [NotMapped]
+        public long CoreEnergyMod => Effects
+            .Where(x => x.TargetStat == CharacterEffectStat.CoreEnergy)
+            .Sum(x => x.StatChange);
+
+        public virtual List<CharacterEffect> Effects { get; set; } = new List<CharacterEffect>();
 
         public long EnergyCurrent { get; set; }
 
         [NotMapped]
-        public long EnergyMax => CoreEnergy + EnergyMaxMod;
+        public long EnergyMax => CoreEnergyCurrent + EnergyMaxMod;
 
         [NotMapped]
         public long EnergyMaxMod => Effects
@@ -64,6 +68,11 @@ namespace Radial.Data.Entities
 
         [NotMapped]
         public double EnergyPercent => (double)EnergyCurrent / EnergyMax;
+
+        public long Experience { get; set; }
+
+        [NotMapped]
+        public Interactable Interaction { get; set; }
 
         [NotMapped]
         public DateTimeOffset LastMoveTime { get; set; }

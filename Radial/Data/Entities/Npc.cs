@@ -9,14 +9,9 @@ using System.Threading.Tasks;
 
 namespace Radial.Models
 {
-    public class Npc
+    public class Npc : CharacterInfo
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public Guid Id { get; init; }
-
         public AggressionModel AggressionModel { get; init; }
-        public CharacterInfo Character { get; init; }
-        public Interactable Dialog { get; init; }
+        public virtual Interactable Dialog { get; init; }
     }
 }

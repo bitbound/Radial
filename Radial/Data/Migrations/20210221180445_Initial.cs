@@ -43,6 +43,7 @@ namespace Radial.Data.Migrations
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     Description = table.Column<string>(type: "TEXT", nullable: true),
+                    IsEditable = table.Column<bool>(type: "INTEGER", nullable: false),
                     Title = table.Column<string>(type: "TEXT", nullable: true),
                     XCoord = table.Column<long>(type: "INTEGER", nullable: false),
                     YCoord = table.Column<long>(type: "INTEGER", nullable: false),
@@ -51,6 +52,33 @@ namespace Radial.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Locations", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "TEXT", nullable: false),
+                    Discriminator = table.Column<string>(type: "TEXT", nullable: false),
+                    IsServerAdmin = table.Column<bool>(type: "INTEGER", nullable: true),
+                    UserName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
+                    NormalizedUserName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
+                    Email = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
+                    NormalizedEmail = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
+                    EmailConfirmed = table.Column<bool>(type: "INTEGER", nullable: false),
+                    PasswordHash = table.Column<string>(type: "TEXT", nullable: true),
+                    SecurityStamp = table.Column<string>(type: "TEXT", nullable: true),
+                    ConcurrencyStamp = table.Column<string>(type: "TEXT", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "TEXT", nullable: true),
+                    PhoneNumberConfirmed = table.Column<bool>(type: "INTEGER", nullable: false),
+                    TwoFactorEnabled = table.Column<bool>(type: "INTEGER", nullable: false),
+                    LockoutEnd = table.Column<string>(type: "TEXT", nullable: true),
+                    LockoutEnabled = table.Column<bool>(type: "INTEGER", nullable: false),
+                    AccessFailedCount = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -75,33 +103,12 @@ namespace Radial.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "CharacterInfo",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    LocationId = table.Column<Guid>(type: "TEXT", nullable: true),
-                    CoreEnergy = table.Column<long>(type: "INTEGER", nullable: false),
-                    EnergyCurrent = table.Column<long>(type: "INTEGER", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: true),
-                    Type = table.Column<int>(type: "INTEGER", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_CharacterInfo", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_CharacterInfo_Locations_LocationId",
-                        column: x => x.LocationId,
-                        principalTable: "Locations",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Interactable",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Description = table.Column<string>(type: "TEXT", nullable: true),
+                    Content = table.Column<string>(type: "TEXT", nullable: true),
+                    LookSummary = table.Column<string>(type: "TEXT", nullable: true),
                     Title = table.Column<string>(type: "TEXT", nullable: true),
                     InteractableId = table.Column<Guid>(type: "TEXT", nullable: true),
                     LocationId = table.Column<Guid>(type: "TEXT", nullable: true)
@@ -117,103 +124,6 @@ namespace Radial.Data.Migrations
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Interactable_Locations_LocationId",
-                        column: x => x.LocationId,
-                        principalTable: "Locations",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "CharacterEffects",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Duration = table.Column<TimeSpan>(type: "TEXT", nullable: false),
-                    StartTime = table.Column<string>(type: "TEXT", nullable: false),
-                    StatChange = table.Column<long>(type: "INTEGER", nullable: false),
-                    TargetStat = table.Column<int>(type: "INTEGER", nullable: false),
-                    Type = table.Column<int>(type: "INTEGER", nullable: false),
-                    CharacterInfoId = table.Column<Guid>(type: "TEXT", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_CharacterEffects", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_CharacterEffects_CharacterInfo_CharacterInfoId",
-                        column: x => x.CharacterInfoId,
-                        principalTable: "CharacterInfo",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Users",
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "TEXT", nullable: false),
-                    Discriminator = table.Column<string>(type: "TEXT", nullable: false),
-                    CharacterId = table.Column<Guid>(type: "TEXT", nullable: true),
-                    IsServerAdmin = table.Column<bool>(type: "INTEGER", nullable: true),
-                    LocationId = table.Column<Guid>(type: "TEXT", nullable: true),
-                    UserName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
-                    NormalizedUserName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
-                    Email = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
-                    NormalizedEmail = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
-                    EmailConfirmed = table.Column<bool>(type: "INTEGER", nullable: false),
-                    PasswordHash = table.Column<string>(type: "TEXT", nullable: true),
-                    SecurityStamp = table.Column<string>(type: "TEXT", nullable: true),
-                    ConcurrencyStamp = table.Column<string>(type: "TEXT", nullable: true),
-                    PhoneNumber = table.Column<string>(type: "TEXT", nullable: true),
-                    PhoneNumberConfirmed = table.Column<bool>(type: "INTEGER", nullable: false),
-                    TwoFactorEnabled = table.Column<bool>(type: "INTEGER", nullable: false),
-                    LockoutEnd = table.Column<string>(type: "TEXT", nullable: true),
-                    LockoutEnabled = table.Column<bool>(type: "INTEGER", nullable: false),
-                    AccessFailedCount = table.Column<int>(type: "INTEGER", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Users", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Users_CharacterInfo_CharacterId",
-                        column: x => x.CharacterId,
-                        principalTable: "CharacterInfo",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Users_Locations_LocationId",
-                        column: x => x.LocationId,
-                        principalTable: "Locations",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Npc",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    AggressionModel = table.Column<int>(type: "INTEGER", nullable: false),
-                    CharacterId = table.Column<Guid>(type: "TEXT", nullable: true),
-                    DialogId = table.Column<Guid>(type: "TEXT", nullable: true),
-                    LocationId = table.Column<Guid>(type: "TEXT", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Npc", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Npc_CharacterInfo_CharacterId",
-                        column: x => x.CharacterId,
-                        principalTable: "CharacterInfo",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Npc_Interactable_DialogId",
-                        column: x => x.DialogId,
-                        principalTable: "Interactable",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Npc_Locations_LocationId",
                         column: x => x.LocationId,
                         principalTable: "Locations",
                         principalColumn: "Id",
@@ -305,6 +215,68 @@ namespace Radial.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Characters",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    LocationId = table.Column<Guid>(type: "TEXT", nullable: true),
+                    CoreEnergy = table.Column<long>(type: "INTEGER", nullable: false),
+                    EnergyCurrent = table.Column<long>(type: "INTEGER", nullable: false),
+                    Experience = table.Column<long>(type: "INTEGER", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", nullable: true),
+                    Type = table.Column<int>(type: "INTEGER", nullable: false),
+                    Discriminator = table.Column<string>(type: "TEXT", nullable: false),
+                    UserId = table.Column<string>(type: "TEXT", nullable: true),
+                    AggressionModel = table.Column<int>(type: "INTEGER", nullable: true),
+                    DialogId = table.Column<Guid>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Characters", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Characters_Interactable_DialogId",
+                        column: x => x.DialogId,
+                        principalTable: "Interactable",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Characters_Locations_LocationId",
+                        column: x => x.LocationId,
+                        principalTable: "Locations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Characters_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CharacterEffects",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Duration = table.Column<TimeSpan>(type: "TEXT", nullable: false),
+                    StartTime = table.Column<string>(type: "TEXT", nullable: false),
+                    StatChange = table.Column<long>(type: "INTEGER", nullable: false),
+                    TargetStat = table.Column<int>(type: "INTEGER", nullable: false),
+                    Type = table.Column<int>(type: "INTEGER", nullable: false),
+                    CharacterInfoId = table.Column<Guid>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CharacterEffects", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CharacterEffects_Characters_CharacterInfoId",
+                        column: x => x.CharacterInfoId,
+                        principalTable: "Characters",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -337,9 +309,20 @@ namespace Radial.Data.Migrations
                 column: "CharacterInfoId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CharacterInfo_LocationId",
-                table: "CharacterInfo",
+                name: "IX_Characters_DialogId",
+                table: "Characters",
+                column: "DialogId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Characters_LocationId",
+                table: "Characters",
                 column: "LocationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Characters_UserId",
+                table: "Characters",
+                column: "UserId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Interactable_InteractableId",
@@ -352,34 +335,9 @@ namespace Radial.Data.Migrations
                 column: "LocationId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Npc_CharacterId",
-                table: "Npc",
-                column: "CharacterId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Npc_DialogId",
-                table: "Npc",
-                column: "DialogId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Npc_LocationId",
-                table: "Npc",
-                column: "LocationId");
-
-            migrationBuilder.CreateIndex(
                 name: "EmailIndex",
                 table: "Users",
                 column: "NormalizedEmail");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Users_CharacterId",
-                table: "Users",
-                column: "CharacterId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Users_LocationId",
-                table: "Users",
-                column: "LocationId");
 
             migrationBuilder.CreateIndex(
                 name: "UserNameIndex",
@@ -412,19 +370,16 @@ namespace Radial.Data.Migrations
                 name: "EventLogs");
 
             migrationBuilder.DropTable(
-                name: "Npc");
-
-            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "Characters");
 
             migrationBuilder.DropTable(
                 name: "Interactable");
 
             migrationBuilder.DropTable(
-                name: "CharacterInfo");
+                name: "Users");
 
             migrationBuilder.DropTable(
                 name: "Locations");

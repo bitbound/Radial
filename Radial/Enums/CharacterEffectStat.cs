@@ -9,6 +9,7 @@ namespace Radial.Enums
     {
         ChargeMax,
         ChargeRate,
+        CoreEnergy,
         EnergyMax,
     }
 }

@@ -9,8 +9,8 @@ using Radial.Data;
 namespace Radial.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20210220211502_Location.IsEditable")]
-    partial class LocationIsEditable
+    [Migration("20210221180445_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -261,7 +261,14 @@ namespace Radial.Data.Migrations
                     b.Property<long>("CoreEnergy")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<long>("EnergyCurrent")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("Experience")
                         .HasColumnType("INTEGER");
 
                     b.Property<Guid?>("LocationId")
@@ -277,7 +284,9 @@ namespace Radial.Data.Migrations
 
                     b.HasIndex("LocationId");
 
-                    b.ToTable("CharacterInfo");
+                    b.ToTable("Characters");
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("CharacterInfo");
                 });
 
             modelBuilder.Entity("Radial.Data.Entities.EventLogEntry", b =>
@@ -312,13 +321,16 @@ namespace Radial.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("Content")
                         .HasColumnType("TEXT");
 
                     b.Property<Guid?>("InteractableId")
                         .HasColumnType("TEXT");
 
                     b.Property<Guid?>("LocationId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("LookSummary")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Title")
@@ -362,53 +374,42 @@ namespace Radial.Data.Migrations
                     b.ToTable("Locations");
                 });
 
-            modelBuilder.Entity("Radial.Models.Npc", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("AggressionModel")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<Guid?>("CharacterId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid?>("DialogId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid?>("LocationId")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CharacterId");
-
-                    b.HasIndex("DialogId");
-
-                    b.HasIndex("LocationId");
-
-                    b.ToTable("Npc");
-                });
-
             modelBuilder.Entity("Radial.Data.Entities.RadialUser", b =>
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
 
-                    b.Property<Guid?>("CharacterId")
-                        .HasColumnType("TEXT");
-
                     b.Property<bool>("IsServerAdmin")
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid?>("LocationId")
+                    b.HasDiscriminator().HasValue("RadialUser");
+                });
+
+            modelBuilder.Entity("Radial.Data.Entities.PlayerCharacter", b =>
+                {
+                    b.HasBaseType("Radial.Data.Entities.CharacterInfo");
+
+                    b.Property<string>("UserId")
                         .HasColumnType("TEXT");
 
-                    b.HasIndex("CharacterId");
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
-                    b.HasIndex("LocationId");
+                    b.HasDiscriminator().HasValue("PlayerCharacter");
+                });
 
-                    b.HasDiscriminator().HasValue("RadialUser");
+            modelBuilder.Entity("Radial.Models.Npc", b =>
+                {
+                    b.HasBaseType("Radial.Data.Entities.CharacterInfo");
+
+                    b.Property<int>("AggressionModel")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid?>("DialogId")
+                        .HasColumnType("TEXT");
+
+                    b.HasIndex("DialogId");
+
+                    b.HasDiscriminator().HasValue("Npc");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -472,7 +473,7 @@ namespace Radial.Data.Migrations
             modelBuilder.Entity("Radial.Data.Entities.CharacterInfo", b =>
                 {
                     b.HasOne("Radial.Data.Entities.Location", "Location")
-                        .WithMany()
+                        .WithMany("Characters")
                         .HasForeignKey("LocationId");
 
                     b.Navigation("Location");
@@ -489,36 +490,23 @@ namespace Radial.Data.Migrations
                         .HasForeignKey("LocationId");
                 });
 
+            modelBuilder.Entity("Radial.Data.Entities.PlayerCharacter", b =>
+                {
+                    b.HasOne("Radial.Data.Entities.RadialUser", "User")
+                        .WithOne("Character")
+                        .HasForeignKey("Radial.Data.Entities.PlayerCharacter", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Radial.Models.Npc", b =>
                 {
-                    b.HasOne("Radial.Data.Entities.CharacterInfo", "Character")
-                        .WithMany()
-                        .HasForeignKey("CharacterId");
-
                     b.HasOne("Radial.Data.Entities.Interactable", "Dialog")
                         .WithMany()
                         .HasForeignKey("DialogId");
 
-                    b.HasOne("Radial.Data.Entities.Location", null)
-                        .WithMany("Npcs")
-                        .HasForeignKey("LocationId");
-
-                    b.Navigation("Character");
-
                     b.Navigation("Dialog");
-                });
-
-            modelBuilder.Entity("Radial.Data.Entities.RadialUser", b =>
-                {
-                    b.HasOne("Radial.Data.Entities.CharacterInfo", "Character")
-                        .WithMany()
-                        .HasForeignKey("CharacterId");
-
-                    b.HasOne("Radial.Data.Entities.Location", null)
-                        .WithMany("Players")
-                        .HasForeignKey("LocationId");
-
-                    b.Navigation("Character");
                 });
 
             modelBuilder.Entity("Radial.Data.Entities.CharacterInfo", b =>
@@ -533,11 +521,14 @@ namespace Radial.Data.Migrations
 
             modelBuilder.Entity("Radial.Data.Entities.Location", b =>
                 {
+                    b.Navigation("Characters");
+
                     b.Navigation("Interactables");
+                });
 
-                    b.Navigation("Npcs");
-
-                    b.Navigation("Players");
+            modelBuilder.Entity("Radial.Data.Entities.RadialUser", b =>
+                {
+                    b.Navigation("Character");
                 });
 #pragma warning restore 612, 618
         }

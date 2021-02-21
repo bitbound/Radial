@@ -1,36 +1,82 @@
 ﻿@page "/explore"
 @attribute [Authorize]
-@using Radial.Services.Client
-@using Radial.Components
-@using Radial.Services
 @inject IInputDispatcher InputDispatcher
 @inject IMessagePublisher MessagePublisher
 @inject IClientConnection ClientConnection
 @inject IJsInterop JsInterop
+@inject IDataService DataService
 @inherits AuthComponentBase
 
 <div class="explore-container auto-height">
     <div style="align-self: baseline">
-       
-    </div>
+        @if (CurrentInteraction is null)
+        {
+            <h3>@Location.Title</h3>
+            <p>
+                @Location.Description
+            </p>
 
+            @if (Location.Interactables?.Any() == true)
+            {
+                <p>
+                    @foreach (var interactable in Location.Interactables)
+                    {
+                        <div>@interactable.LookSummary</div>
+                    }
+                </p>
+            }
+
+            <p>
+                @foreach (var character in Location.Characters.Where(x => x.Id != CharacterInfo.Id))
+                {
+                    <div>@($"{character.Name} ({character.Type}) is here.")</div>
+                }
+            </p>
+        }
+        else
+        {
+
+        }
+    </div>
+    <div style="align-self: baseline">
+
+    </div>
     <div class="p-2">
-       <ActionBar />
+        <ActionBar />
     </div>
 
     <div class="mb-2">
-       <ResourceBars />
+        <ResourceBars />
     </div>
 </div>
 
 @code {
+    private CharacterInfo CharacterInfo { get; set; }
+    private Interactable CurrentInteraction { get; set; }
+    private Location Location { get; set; }
+
+    protected override Task OnInitializedAsync()
+    {
+        LoadCharacter();
+        return base.OnInitializedAsync();
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await base.OnAfterRenderAsync(firstRender);
         if (firstRender)
         {
+            LoadCharacter();
             JsInterop.AutoHeight();
             StateHasChanged();
         }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    private void LoadCharacter()
+    {
+        CharacterInfo = ClientConnection.User.Character;
+        CurrentInteraction = ClientConnection.User.Character.Interaction;
+        Location = ClientConnection.User.Character.Location;
     }
 } 

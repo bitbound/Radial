@@ -1,5 +1,5 @@
 ﻿.explore-container {
     display: grid;
-    grid-template-rows: 1fr auto auto;
+    grid-template-rows: 1fr 1fr auto auto;
     grid-row-gap: 10px;
 }

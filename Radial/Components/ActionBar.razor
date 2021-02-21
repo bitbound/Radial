@@ -29,7 +29,9 @@
 
         <div class="button-control-frame">
             <div class="action-bonus-ring"
-                 style="opacity: @CharacterInfo.ActionBonus; transform: translate(-50%, -50%) scale(@($"{CharacterInfo.ActionBonus},{CharacterInfo.ActionBonus}"))">
+                 style="opacity: @CharacterInfo.ActionBonus; 
+                        transform: translate(-50%, -50%) scale(@($"{CharacterInfo.ActionBonus},{CharacterInfo.ActionBonus}"));
+                        border-color: @(CharacterInfo.ActionBonus > .9 ? "limegreen" : "unset")">
 
             </div>
             <div>
