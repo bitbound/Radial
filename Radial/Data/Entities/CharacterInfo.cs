@@ -19,7 +19,6 @@ namespace Radial.Data.Entities
         [NotMapped]
         public double ActionBonus { get; set; }
 
-        public virtual Location Location { get; set; }
 
         [NotMapped]
         public long ChargeCurrent { get; set; }
@@ -76,6 +75,9 @@ namespace Radial.Data.Entities
 
         [NotMapped]
         public DateTimeOffset LastMoveTime { get; set; }
+
+        public virtual Location Location { get; set; }
+        public Guid LocationId { get; set; }
 
         public string Name { get; init; }
 

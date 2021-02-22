@@ -104,13 +104,13 @@
         var currentIndex = location.Characters.FindIndex(x => x.Id == character.Target?.Id);
         if (currentIndex == -1)
         {
-            character.Target = location.Characters.Find(x => x.Type == CharacterType.Npc);
+            character.Target = location.Characters.Find(x => x.Type == CharacterType.NPC);
         }
         else
         {
             character.Target = location.Characters
                 .Skip(currentIndex + 1)
-                .FirstOrDefault(x => x.Type == CharacterType.Npc);
+                .FirstOrDefault(x => x.Type == CharacterType.NPC);
         }
     }
 

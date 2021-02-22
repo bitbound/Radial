@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Extensions;
-using Radial.Models.Messaging;
+﻿using Radial.Models.Messaging;
 using Radial.Models.Enums;
 using System;
 using System.Collections.Generic;
@@ -20,6 +17,8 @@ namespace Radial.Services.Client
     {
         event EventHandler<string> Disconnected;
 
+        Location Location { get; }
+
         event EventHandler<IMessageBase> MessageReceived;
         RadialUser User { get; }
         Task Connect();
@@ -35,15 +34,15 @@ namespace Radial.Services.Client
     {
         private readonly IClientManager _clientManager;
         private readonly IDataService _dataService;
-        private readonly IHttpContextAccessor _httpContext;
+        private readonly AuthenticationStateProvider _authProvider;
         private Action _queuedInput;
-        private RadialUser _user;
-        public ClientConnection(IClientManager clientManager, 
-            IHttpContextAccessor httpContextAccessor,
+        public ClientConnection(
+            AuthenticationStateProvider authProvider,
+            IClientManager clientManager, 
             IDataService dataService)
         {
+            _authProvider = authProvider;
             _clientManager = clientManager;
-            _httpContext = httpContextAccessor;
             _dataService = dataService;
         }
 
@@ -54,23 +53,36 @@ namespace Radial.Services.Client
         {
             get
             {
-                if (_httpContext?.HttpContext?.User?.Identity?.IsAuthenticated != true)
+                var authState = _authProvider.GetAuthenticationStateAsync().GetAwaiter().GetResult();
+                if (!authState.User.Identity.IsAuthenticated)
                 {
                     return null;
                 }
                 
-                return _user ??= _dataService.LoadUser(_httpContext.HttpContext.User.Identity.Name).GetAwaiter().GetResult();
+                return _dataService.LoadUser(authState.User.Identity.Name).GetAwaiter().GetResult();
             }
         }
 
-        public Task Connect()
+        public Location Location
         {
-            if (_httpContext?.HttpContext?.User?.Identity?.IsAuthenticated == true)
+            get
             {
-                _dataService.InitializePlayer(User);
-                _clientManager.AddClient(_httpContext.HttpContext.Connection.Id, this);
+                var authState = _authProvider.GetAuthenticationStateAsync().GetAwaiter().GetResult();
+                if (!authState.User.Identity.IsAuthenticated)
+                {
+                    return null;
+                }
+                return  _dataService.LoadLocation(User.Character.LocationId).GetAwaiter().GetResult();
             }
-            return Task.CompletedTask;
+        }
+
+        public async Task Connect()
+        {
+            var authState = await _authProvider.GetAuthenticationStateAsync();
+            if (authState.User?.Identity?.IsAuthenticated == true)
+            {
+                await _clientManager.AddClient(this);
+            }
         }
 
         public void Disconnect(string reason)
@@ -80,7 +92,8 @@ namespace Radial.Services.Client
 
         public void Dispose()
         {
-            _clientManager.RemoveClient(_httpContext?.HttpContext?.Connection?.Id);
+            Disconnect("Session closed by server.");
+            _clientManager.RemoveClient(this);
 
             GC.SuppressFinalize(this);
         }
@@ -92,10 +105,6 @@ namespace Radial.Services.Client
 
         public void InvokeMessageReceived(IMessageBase message)
         {
-            if (message.MessageType == MessageType.CharacterInfoUpdated)
-            {
-                _dataService.ReloadEntity(User);
-            }
             _ = Task.Run(() => MessageReceived?.Invoke(this, message));
         }
     }

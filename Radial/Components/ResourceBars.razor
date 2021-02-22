@@ -52,7 +52,7 @@
     {
         if (firstRender)
         {
-            MessagePublisher.CharacterInfoChanged += async (sender, args) =>
+            MessagePublisher.DataStateChanged += async (sender, args) =>
             {
                 await InvokeAsync(StateHasChanged);
             };

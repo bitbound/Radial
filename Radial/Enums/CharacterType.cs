@@ -9,6 +9,6 @@ namespace Radial.Enums
     {
         Unknown,
         Player,
-        Npc
+        NPC
     }
 }

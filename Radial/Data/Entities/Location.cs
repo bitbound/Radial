@@ -17,7 +17,7 @@ namespace Radial.Data.Entities
 
         public virtual List<CharacterInfo> Characters { get; set; } = new List<CharacterInfo>();
 
-        public string Description { get; init; }
+        public string Description { get; set; }
 
         public virtual List<Interactable> Interactables { get; set; }
         public bool IsEditable { get; set; }
@@ -28,7 +28,7 @@ namespace Radial.Data.Entities
         [NotMapped]
         public List<PlayerCharacter> Players => Characters.OfType<PlayerCharacter>().ToList();
 
-        public string Title { get; init; }
+        public string Title { get; set; }
         public long XCoord { get; init; }
 
         [NotMapped]

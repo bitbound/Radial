@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.DependencyInjection;
+using Radial.Data.Entities;
 using Radial.Models.Messaging;
 using Radial.Services.Client;
 using System;
@@ -12,11 +14,11 @@ namespace Radial.Services
 {
     public interface IClientManager
     {
-        void AddClient(string connectionId, IClientConnection clientConnection);
+        Task AddClient(IClientConnection clientConnection);
         bool IsPlayerOnline(string username);
         void Broadcast(IMessageBase message);
 
-        void RemoveClient(string connectionId);
+        Task RemoveClient(IClientConnection clientConnection);
 
         bool SendToClient(IClientConnection senderConnection, string recipient, IMessageBase message, bool copyToSelf = false);
         void SendToLocal(IClientConnection senderConnection, IMessageBase message);
@@ -27,27 +29,33 @@ namespace Radial.Services
 
     public class ClientManager : IClientManager
     {
+        private readonly IServiceProvider _serviceProvider;
+        private readonly IDataService _dataService;
+
+        public ClientManager(IServiceProvider serviceProvider, IDataService dataService)
+        {
+            _serviceProvider = serviceProvider;
+            _dataService = dataService;
+        }
+
         private static ConcurrentDictionary<string, IClientConnection> ClientConnections { get; } =
             new ConcurrentDictionary<string, IClientConnection>();
 
-        public void AddClient(string connectionId, IClientConnection clientConnection)
+        public Task AddClient(IClientConnection clientConnection)
         {
-            if (string.IsNullOrWhiteSpace(connectionId))
+            if (clientConnection?.User?.Character is null)
             {
-                return;
+                return Task.CompletedTask;
             }
 
-            var existingConnection = ClientConnections.FirstOrDefault(x => x.Value?.User?.UserName == clientConnection.User.UserName);
-
-            if (existingConnection.Value != null)
+            if (ClientConnections.TryRemove(clientConnection.User.Id, out var existingConnection))
             {
-                ClientConnections.Remove(existingConnection.Key, out _);
-                existingConnection.Value.Disconnect("You've been disconnected because you signed in from another tab or browser.");
+                existingConnection.Disconnect("You've been disconnected because you signed in from another tab or browser.");
             }
 
-            ClientConnections.AddOrUpdate(connectionId, clientConnection, (k, v) => clientConnection);
+            ClientConnections.AddOrUpdate(clientConnection.User.Id, clientConnection, (k, v) => clientConnection);
 
-            foreach (var other in ClientConnections.Where(x => x.Key != connectionId))
+            foreach (var other in ClientConnections.Where(x => x.Value.User.Id != clientConnection.User.Id))
             {
                 other.Value.InvokeMessageReceived(new ChatMessage()
                 {
@@ -55,7 +63,16 @@ namespace Radial.Services
                     Sender = "System",
                     Channel = Enums.ChatChannel.System
                 });
+
+                if (other.Value.User.Character.Location == clientConnection.User.Character.Location)
+                {
+                    other.Value.InvokeMessageReceived(new GenericMessage()
+                    {
+                        MessageType = Models.Enums.MessageType.CharacterInfoUpdated
+                    });
+                }
             }
+            return Task.CompletedTask;
         }
 
         public void Broadcast(IMessageBase message)
@@ -71,16 +88,42 @@ namespace Radial.Services
             return ClientConnections.Values.Any(x => x.User.UserName.Equals(username.Trim(), StringComparison.OrdinalIgnoreCase));
         }
 
-        public void RemoveClient(string connectionId)
+        public async Task RemoveClient(IClientConnection clientConnection)
         {
-            if (string.IsNullOrWhiteSpace(connectionId))
+            var user = clientConnection.User;
+            var location = clientConnection.Location;
+
+            if (user?.Character is null)
             {
                 return;
             }
 
-            if (ClientConnections.TryRemove(connectionId, out var connection))
+            if (ClientConnections.TryRemove(user.Id, out _))
             {
-                connection.Disconnect("Session closed by server.");
+                var locationXyz = user.Character.Location.XYZ;
+                location.Characters.RemoveAll(x => x.Id == user.Character.Id);
+                user.Character.Location = null;
+                await _dataService.SaveEntity(user);
+                await _dataService.SaveEntity(location);
+
+                foreach (var other in ClientConnections.Where(x => x.Value.User.Id != user.Id))
+                {
+                    other.Value.InvokeMessageReceived(new ChatMessage()
+                    {
+                        Message = $"{user.UserName} has signed out.",
+                        Sender = "System",
+                        Channel = Enums.ChatChannel.System
+                    });
+
+                    if (other.Value.User.Character.XYZ == locationXyz)
+                    {
+                        other.Value.InvokeMessageReceived(new GenericMessage()
+                        {
+                            MessageType = Models.Enums.MessageType.CharacterInfoUpdated
+                        });
+                    }
+                }
+
             }
         }
 

@@ -33,11 +33,20 @@ namespace Radial
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<ApplicationDbContext>(options =>
+            services.AddDbContextFactory<ApplicationDbContext>(options =>
                 options.UseSqlite(
                     Configuration.GetConnectionString("Sqlite")));
+
+            services.AddScoped(p =>
+            {
+                var factory = p.GetRequiredService<IDbContextFactory<ApplicationDbContext>>();
+                var dbContext = factory.CreateDbContext();
+                return dbContext;
+            });
+
             services.AddDefaultIdentity<RadialUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
+
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<RadialUser>>();
@@ -52,7 +61,7 @@ namespace Radial
             services.AddScoped<IMessagePublisher, MessagePublisher>();
             services.AddScoped<IToastService, ToastService>();
 
-            services.AddSingleton<IClientManager, ClientManager>();
+            services.AddScoped<IClientManager, ClientManager>();
             services.AddScoped<IInputDispatcher, InputDispatcher>();
 
             services.AddHostedService<GameEngine>();

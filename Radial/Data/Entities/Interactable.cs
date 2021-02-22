@@ -15,7 +15,7 @@ namespace Radial.Data.Entities
 
         public string Content { get; init; }
 
-        public string LookSummary { get; set; }
+        public string Prompt { get; set; }
 
         public string Title { get; init; }
 

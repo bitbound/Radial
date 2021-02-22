@@ -11,7 +11,7 @@ namespace Radial.Services.Client
 {
     public interface IMessagePublisher
     {
-        event EventHandler CharacterInfoChanged;
+        event EventHandler DataStateChanged;
         event EventHandler<ChatMessage> ChatReceived;
     }
     public class MessagePublisher : IMessagePublisher
@@ -26,7 +26,7 @@ namespace Radial.Services.Client
             _logger = logger;
         }
 
-        public event EventHandler CharacterInfoChanged;
+        public event EventHandler DataStateChanged;
         public event EventHandler<ChatMessage> ChatReceived;
 
         private void MessageReceived(object sender, IMessageBase message)
@@ -39,7 +39,7 @@ namespace Radial.Services.Client
                         ChatReceived?.Invoke(this, message as ChatMessage);
                         break;
                     case MessageType.CharacterInfoUpdated:
-                        CharacterInfoChanged?.Invoke(this, null);
+                        DataStateChanged?.Invoke(this, null);
                         break;
                     default:
                         break;

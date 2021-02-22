@@ -18,15 +18,15 @@
 
             @if (Location.Interactables?.Any() == true)
             {
-                <p>
+                <p class="text-info">
                     @foreach (var interactable in Location.Interactables)
                     {
-                        <div>@interactable.LookSummary</div>
+                        <div>@interactable.Prompt</div>
                     }
                 </p>
             }
 
-            <p>
+            <p class="text-success">
                 @foreach (var character in Location.Characters.Where(x => x.Id != CharacterInfo.Id))
                 {
                     <div>@($"{character.Name} ({character.Type}) is here.")</div>
@@ -35,6 +35,20 @@
         }
         else
         {
+            <h3>@CurrentInteraction.Title</h3>
+            <p>
+                @CurrentInteraction.Content
+            </p>
+
+            @if (CurrentInteraction.Interactables?.Any() == true)
+            {
+                <p class="text-info">
+                    @foreach (var interactable in Location.Interactables)
+                    {
+                        <div>@interactable.Prompt</div>
+                    }
+                </p>
+            }
 
         }
     </div>
@@ -51,13 +65,12 @@
 </div>
 
 @code {
-    private CharacterInfo CharacterInfo { get; set; }
-    private Interactable CurrentInteraction { get; set; }
-    private Location Location { get; set; }
+    private CharacterInfo CharacterInfo => ClientConnection.User.Character;
+    private Interactable CurrentInteraction => ClientConnection.User.Character.Interaction;
+    private Location Location => ClientConnection.Location;
 
     protected override Task OnInitializedAsync()
     {
-        LoadCharacter();
         return base.OnInitializedAsync();
     }
 
@@ -65,18 +78,17 @@
     {
         if (firstRender)
         {
-            LoadCharacter();
             JsInterop.AutoHeight();
             StateHasChanged();
+            MessagePublisher.DataStateChanged += (sender, args) =>
+            {
+                InvokeAsync(() =>
+                {
+                    StateHasChanged();
+                });
+            };
         }
 
         await base.OnAfterRenderAsync(firstRender);
-    }
-
-    private void LoadCharacter()
-    {
-        CharacterInfo = ClientConnection.User.Character;
-        CurrentInteraction = ClientConnection.User.Character.Interaction;
-        Location = ClientConnection.User.Character.Location;
     }
 } 
