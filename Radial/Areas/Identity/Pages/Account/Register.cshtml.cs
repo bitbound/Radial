@@ -25,20 +25,20 @@ namespace Radial.Areas.Identity.Pages.Account
         private readonly UserManager<RadialUser> _userManager;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSenderEx _emailSender;
-        private readonly IDataService _dataService;
+        private readonly IWorld _world;
 
         public RegisterModel(
             UserManager<RadialUser> userManager,
             SignInManager<RadialUser> signInManager,
             ILogger<RegisterModel> logger,
             IEmailSenderEx emailSender,
-            IDataService dataService)
+            IWorld world)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
-            _dataService = dataService;
+            _world = world;
         }
 
         [BindProperty]
@@ -98,20 +98,13 @@ namespace Radial.Areas.Identity.Pages.Account
                     return Page();
                 }
 
-                var startLocation = await _dataService.GetXyzLocation("0,0,0");
+                var characterGuid = Guid.NewGuid();
 
                 var user = new RadialUser 
                 {
                     UserName = Input.Username, 
                     Email = Input.Email,
-                    Character = new PlayerCharacter()
-                    {
-                        CoreEnergy = 100,
-                        EnergyCurrent = 100,
-                        Name = Input.Username,
-                        Type = Enums.CharacterType.Player,
-                        Location = startLocation
-                    }
+                    CharacterId = characterGuid
                 };
 
                 var result = await _userManager.CreateAsync(user, Input.Password);
@@ -119,8 +112,19 @@ namespace Radial.Areas.Identity.Pages.Account
                 {
                     _logger.LogInformation("User created a new account with password.");
 
-                    startLocation.Players.Add(user.Character);
-                    await _dataService.SaveEntity(startLocation);
+                    var startLocation = _world.Locations.Find(x => x.XYZ == "0,0,0");
+
+                    var character = new PlayerCharacter()
+                    {
+                        Id = characterGuid,
+                        CoreEnergy = 100,
+                        EnergyCurrent = 100,
+                        Name = Input.Username,
+                        Type = Enums.CharacterType.Player
+                    };
+
+                    startLocation.Players.Add(character);
+                    await _world.Save();
 
                     var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     var code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));

@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace Radial.Models
 {
-    public class Npc : CharacterInfo
+    public class Npc : Character
     {
         public AggressionModel AggressionModel { get; init; }
-        public virtual Interactable Dialog { get; init; }
+        public Interactable Dialog { get; init; }
     }
 }

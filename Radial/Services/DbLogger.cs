@@ -2,6 +2,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Radial.Data;
+using Radial.Data.Entities;
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
@@ -57,9 +59,28 @@ namespace Radial.Services
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
-            using var scope = _serviceProvider.CreateScope();
-            var dataService = scope.ServiceProvider.GetRequiredService<IDataService>();
-            dataService.WriteLog(logLevel, _categoryName, eventId, state.ToString(), exception, ScopeStack.ToList());
+            try
+            {
+                using var scope = _serviceProvider.CreateScope();
+                var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+                // Prevent re-entrancy.
+                if (eventId.Name?.Contains("EntityFrameworkCore") == true)
+                {
+                    return;
+                }
+
+                dbContext.EventLogs.Add(new EventLogEntry()
+                {
+                    StackTrace = exception?.StackTrace,
+                    LogLevel = logLevel,
+                    Message = $"[{logLevel}] [{string.Join(" - ", ScopeStack)} - {_categoryName}] | Message: {state} | Exception: {exception?.Message}",
+                    TimeStamp = DateTimeOffset.Now
+                });
+
+                dbContext.SaveChanges();
+            }
+            catch { }
         }
 
 

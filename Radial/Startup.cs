@@ -33,16 +33,9 @@ namespace Radial
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContextFactory<ApplicationDbContext>(options =>
-                options.UseSqlite(
+            services.AddDbContext<ApplicationDbContext>(options =>
+               options.UseSqlite(
                     Configuration.GetConnectionString("Sqlite")));
-
-            services.AddScoped(p =>
-            {
-                var factory = p.GetRequiredService<IDbContextFactory<ApplicationDbContext>>();
-                var dbContext = factory.CreateDbContext();
-                return dbContext;
-            });
 
             services.AddDefaultIdentity<RadialUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
@@ -55,7 +48,7 @@ namespace Radial
             services.AddScoped<IApplicationConfig, ApplicationConfig>();
             services.AddScoped<IEmailSender, EmailSender>();
             services.AddScoped<IEmailSenderEx, EmailSender>();
-            services.AddScoped<IDataService, DataService>();
+            services.AddSingleton<IWorld, World>();
             services.AddScoped<IJsInterop, JsInterop>();
             services.AddScoped<IClientConnection, ClientConnection>();
             services.AddScoped<IMessagePublisher, MessagePublisher>();

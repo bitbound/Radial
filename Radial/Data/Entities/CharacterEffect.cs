@@ -10,10 +10,7 @@ namespace Radial.Data.Entities
 {
     public class CharacterEffect
     {
-
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public Guid Id { get; init; }
+        public Guid Id { get; init; } = Guid.NewGuid();
 
         public TimeSpan Duration { get; init; }
         public DateTimeOffset StartTime { get; init; }

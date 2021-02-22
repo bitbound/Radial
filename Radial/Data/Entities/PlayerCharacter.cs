@@ -5,9 +5,8 @@ using System.Threading.Tasks;
 
 namespace Radial.Data.Entities
 {
-    public class PlayerCharacter : CharacterInfo
+    public class PlayerCharacter : Character
     {
         public string UserId { get; set; }
-        public virtual RadialUser User { get; set; }
     }
 }

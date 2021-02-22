@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using System;
 
 namespace Radial.Data.Entities
 {
     public class RadialUser : IdentityUser
     {
-        public virtual PlayerCharacter Character { get; init; }
+        public Guid CharacterId { get; set; }
         public bool IsServerAdmin { get; set; }
     }
 }

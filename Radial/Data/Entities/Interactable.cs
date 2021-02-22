@@ -19,6 +19,6 @@ namespace Radial.Data.Entities
 
         public string Title { get; init; }
 
-        public virtual List<Interactable> Interactables { get; init; } = new List<Interactable>();
+        public List<Interactable> Interactables { get; init; } = new List<Interactable>();
     }
 }

@@ -4,40 +4,39 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Radial.Data.Entities
 {
-    public class CharacterInfo
+    public class Character
     {
         private static readonly long _lowestStatValue = 10;
 
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public Guid Id { get; set; }
+        public Guid Id { get; init; } = Guid.NewGuid();
 
-        [NotMapped]
+        [JsonIgnore]
         public double ActionBonus { get; set; }
 
 
-        [NotMapped]
+        [JsonIgnore]
         public long ChargeCurrent { get; set; }
 
-        [NotMapped]
+        [JsonIgnore]
         public long ChargeMax => Math.Max(_lowestStatValue, CoreEnergyCurrent + ChargeMaxMod);
 
-        [NotMapped]
+        [JsonIgnore]
         public long ChargeMaxMod => Effects
             .Where(x => x.TargetStat == CharacterEffectStat.ChargeMax)
             .Sum(x => x.StatChange);
 
-        [NotMapped]
+        [JsonIgnore]
         public double ChargePercent => (double)ChargeCurrent / ChargeMax;
 
-        [NotMapped]
+        [JsonIgnore]
         public long ChargeRate => Math.Max(_lowestStatValue, CoreEnergyCurrent + ChargeRateMod);
 
-        [NotMapped]
+        [JsonIgnore]
         public long ChargeRateMod => Effects
             .Where(x => x.TargetStat == CharacterEffectStat.ChargeRate)
             .Sum(x => x.StatChange);
@@ -45,61 +44,48 @@ namespace Radial.Data.Entities
 
         public long CoreEnergy { get; set; }
 
-        [NotMapped]
+        [JsonIgnore]
         public long CoreEnergyCurrent => Math.Max(_lowestStatValue, CoreEnergy + CoreEnergyMod);
 
-        [NotMapped]
+        [JsonIgnore]
         public long CoreEnergyMod => Effects
             .Where(x => x.TargetStat == CharacterEffectStat.CoreEnergy)
             .Sum(x => x.StatChange);
 
-        public virtual List<CharacterEffect> Effects { get; set; } = new List<CharacterEffect>();
+        public List<CharacterEffect> Effects { get; init; } = new List<CharacterEffect>();
 
         public long EnergyCurrent { get; set; }
 
-        [NotMapped]
+        [JsonIgnore]
         public long EnergyMax => CoreEnergyCurrent + EnergyMaxMod;
 
-        [NotMapped]
+        [JsonIgnore]
         public long EnergyMaxMod => Effects
             .Where(x => x.TargetStat == CharacterEffectStat.EnergyMax)
             .Sum(x => x.StatChange);
 
-        [NotMapped]
+        [JsonIgnore]
         public double EnergyPercent => (double)EnergyCurrent / EnergyMax;
 
         public long Experience { get; set; }
 
-        [NotMapped]
+        [JsonIgnore]
         public Interactable Interaction { get; set; }
 
-        [NotMapped]
+        [JsonIgnore]
         public DateTimeOffset LastMoveTime { get; set; }
-
-        public virtual Location Location { get; set; }
-        public Guid LocationId { get; set; }
 
         public string Name { get; init; }
 
-        [NotMapped]
+        [JsonIgnore]
         public string PartyId { get; set; }
 
-        [NotMapped]
+        [JsonIgnore]
         public CharacterState State { get; set; }
 
-        [NotMapped]
-        public CharacterInfo Target { get; set; }
+        [JsonIgnore]
+        public Character Target { get; set; }
 
         public CharacterType Type { get; set; }
-
-
-        [NotMapped]
-        public long XCoord => Location?.XCoord ?? 0;
-        [NotMapped]
-        public string XYZ => Location?.XYZ ?? "0,0,0";
-        [NotMapped]
-        public long YCoord => Location?.YCoord ?? 0;
-        [NotMapped]
-        public string ZCoord => Location?.ZCoord ?? "0";
     }
 }
