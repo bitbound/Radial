@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Radial.Models
 {
-    public class PlayerCharacter : Character
+    public class PlayerCharacter : CharacterBase
     {
         public string UserId { get; set; }
     }

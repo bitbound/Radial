@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Radial\Radial.csproj" />
+  </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="$(TargetPath)&#xD;&#xA;cd $(ProjectDir)&#xD;&#xA;copy /y &quot;$(OutDir)\Locations.json&quot; &quot;..\Radial\Resources\Locations.json&quot;" />
+  </Target>
+
+</Project>

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Radial.Models
 {
-    public class Npc : Character
+    public class Npc : CharacterBase
     {
         public AggressionModel AggressionModel { get; init; }
         public Interactable Dialog { get; init; }

@@ -3,22 +3,31 @@
 @inject IInputDispatcher InputDispatcher
 @inject IMessagePublisher MessagePublisher
 @inject IClientConnection ClientConnection
+@inject IWorld World 
 @inject IJsInterop JsInterop
 @inherits AuthComponentBase
 
 <div class="explore-container auto-height">
     <div style="align-self: baseline">
+        <div class="small location-grid mb-2">
+            <div>
+                Location: X: @(Location?.XCoord) | Y: @(Location?.YCoord) | Z: @(Location?.ZCoord)
+            </div>
+            <div>
+                Target: @(CharacterInfo?.Target?.Name)
+            </div>
+        </div>
         @if (CurrentInteraction is null)
         {
-            <h3>@Location.Title</h3>
+            <h3>@Location?.Title</h3>
             <p>
-                @Location.Description
+                @Location?.Description
             </p>
 
-            @if (Location.Interactables?.Any() == true)
+            @if (Location?.Interactables?.Any() == true)
             {
                 <p class="text-info">
-                    @foreach (var interactable in Location.Interactables)
+                    @foreach (var interactable in Location?.Interactables)
                     {
                         <div>@interactable.Prompt</div>
                     }
@@ -26,23 +35,27 @@
             }
 
             <p class="text-success">
-                @foreach (var character in Location.Characters.Where(x => x.Name != CharacterInfo.Name))
+                @foreach (var character in GetNearbyCharacters())
                 {
-                    <div>@($"{character.Name} ({character.Type}) is here.")</div>
+                    <div>
+                        <span class="nearby-character" @onclick="() => SetTarget(character)">
+                            @($"{character.Name} ({character.Type}) is here.")
+                        </span>
+                    </div>
                 }
             </p>
         }
         else
         {
-            <h3>@CurrentInteraction.Title</h3>
+            <h3>@CurrentInteraction?.Title</h3>
             <p>
-                @CurrentInteraction.Content
+                @CurrentInteraction?.Content
             </p>
 
-            @if (CurrentInteraction.Interactables?.Any() == true)
+            @if (CurrentInteraction?.Interactables?.Any() == true)
             {
                 <p class="text-info">
-                    @foreach (var interactable in Location.Interactables)
+                    @foreach (var interactable in Location?.Interactables)
                     {
                         <div>@interactable.Prompt</div>
                     }
@@ -64,30 +77,47 @@
 </div>
 
 @code {
-    private PlayerCharacter CharacterInfo => ClientConnection.Character;
-    private Interactable CurrentInteraction => ClientConnection.Character?.Interaction;
-    private Location Location => ClientConnection.Location;
+    private PlayerCharacter CharacterInfo { get; set; }
+    private Interactable CurrentInteraction { get; set; }
+    private Location Location { get; set; }
 
     protected override Task OnInitializedAsync()
     {
         return base.OnInitializedAsync();
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
+            SetState();
             JsInterop.AutoHeight();
             StateHasChanged();
             MessagePublisher.DataStateChanged += (sender, args) =>
             {
-                InvokeAsync(() =>
-                {
-                    StateHasChanged();
-                });
+                SetState();
             };
         }
 
-        await base.OnAfterRenderAsync(firstRender);
+        return base.OnAfterRenderAsync(firstRender);
+    }
+
+    private void SetState()
+    {
+        CharacterInfo = ClientConnection.Character;
+        CurrentInteraction = CharacterInfo?.Interaction;
+        Location = ClientConnection.Location;
+        InvokeAsync(StateHasChanged);
+    }
+
+    private IEnumerable<CharacterBase> GetNearbyCharacters()
+    {
+        return Location?.Characters?.Where(x => x.Name != CharacterInfo?.Name) ?? Array.Empty<CharacterBase>();
+    }
+
+    private void SetTarget(CharacterBase target)
+    {
+        CharacterInfo.Target = target;
+        InvokeAsync(StateHasChanged);
     }
 } 

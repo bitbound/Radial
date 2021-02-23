@@ -102,7 +102,7 @@ namespace Radial
                 endpoints.MapFallbackToPage("/_Host");
             });
 
-            DataInitializer.Load(world);
+            world.Load();
 
             loggerFactory.AddProvider(new DbLoggerProvider(env, app.ApplicationServices));
         }

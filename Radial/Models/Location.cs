@@ -11,7 +11,7 @@ namespace Radial.Models
 {
     public class Location
     {
-        public List<Character> Characters { get; set; } = new List<Character>();
+        public List<CharacterBase> Characters { get; set; } = new List<CharacterBase>();
 
         public string Description { get; set; }
 

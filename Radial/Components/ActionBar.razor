@@ -1,9 +1,9 @@
 ﻿@using Radial.Enums
 @using Radial.Services
 @using Radial.Services.Client
-@using Radial.Data.Entities 
 @inject IInputDispatcher InputDispatcher
 @inject IClientConnection ClientConnection
+@inject IMessagePublisher MessagePublisher
 
 <div class="action-bar-frame" tabindex="0" @onkeydown="OnKeyDown">
     @if (CharacterInfo?.EnergyCurrent < 1)
@@ -28,9 +28,9 @@
 
         <div class="button-control-frame">
             <div class="action-bonus-ring"
-                 style="opacity: @CharacterInfo.ActionBonus; 
-                        transform: translate(-50%, -50%) scale(@($"{CharacterInfo.ActionBonus},{CharacterInfo.ActionBonus}"));
-                        border-color: @(CharacterInfo.ActionBonus > .9 ? "limegreen" : "unset")">
+                 style="opacity: @CharacterInfo?.ActionBonus; 
+                        transform: translate(-50%, -50%) scale(@($"{CharacterInfo?.ActionBonus},{CharacterInfo?.ActionBonus}"));
+                        border-color: @(CharacterInfo?.ActionBonus > .9 ? "limegreen" : "unset")">
 
             </div>
             <div>
@@ -63,13 +63,14 @@
 @code {
     private PlayerCharacter CharacterInfo { get; set; }
 
-    protected override Task OnInitializedAsync()
+    protected override Task OnAfterRenderAsync(bool firstRender)
     {
-        CharacterInfo = ClientConnection.Character;
-
-        return base.OnInitializedAsync();
+        if (firstRender)
+        {
+            CharacterInfo = ClientConnection.Character;
+        }
+        return base.OnAfterRenderAsync(firstRender);
     }
-
 
     private void Attack()
     {
@@ -110,6 +111,8 @@
                 .Skip(currentIndex + 1)
                 .FirstOrDefault(x => x.Type == CharacterType.NPC);
         }
+
+        MessagePublisher.InvokeStateChanged();
     }
 
     private void CycleFriendlyTarget()
@@ -127,6 +130,8 @@
                 .Skip(currentIndex + 1)
                 .FirstOrDefault(x => x.Type == CharacterType.Player);
         }
+
+        MessagePublisher.InvokeStateChanged();
     }
 
     private void Escape()

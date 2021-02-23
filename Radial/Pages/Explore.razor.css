@@ -3,3 +3,16 @@
     grid-template-rows: 1fr 1fr auto auto;
     grid-row-gap: 10px;
 }
+
+.location-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.location-grid :last-child {
+    text-align: right;
+}
+
+.nearby-character {
+    cursor: pointer;
+}

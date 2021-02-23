@@ -1,25 +1,27 @@
-﻿using Radial.Data.Entities;
-using Radial.Models;
+﻿using Radial.Models;
 using Radial.Services;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.IO;
+using System.Text.Json;
 
-namespace Radial.Utilities
+namespace Radial.WorldBuilder
 {
-    public static class DataInitializer
+    class Program
     {
-        public static void Load(IWorld world)
+        static void Main(string[] args)
         {
+            var locationDictionary = new ConcurrentDictionary<string, Location>();
             foreach (var location in Locations)
             {
-                world.Locations.AddOrUpdate(location.XYZ, location);
+                locationDictionary.TryAdd(location.XYZ, location);
             }
+            File.WriteAllTextAsync("Locations.json", JsonSerializer.Serialize(locationDictionary));
         }
 
-        private static Location[] Locations => new [] 
-        { 
+        private static Location[] Locations => new[]
+        {
             new Location()
             {
                 XCoord = 0,
@@ -27,7 +29,7 @@ namespace Radial.Utilities
                 ZCoord = World.PurgatoryZCoord,
                 Title = "Purgatory",
                 Description = "There is only absence here.  The void is like a tangible force that you can feel, " +
-                    "so powerful that the concept of your own existence becomes a confusing blur, unraveling in your own mind.", 
+                    "so powerful that the concept of your own existence becomes a confusing blur, unraveling in your own mind.",
             },
             new Location()
             {

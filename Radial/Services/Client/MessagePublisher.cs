@@ -13,6 +13,7 @@ namespace Radial.Services.Client
     {
         event EventHandler DataStateChanged;
         event EventHandler<ChatMessage> ChatReceived;
+        void InvokeStateChanged();
     }
     public class MessagePublisher : IMessagePublisher
     {
@@ -28,6 +29,11 @@ namespace Radial.Services.Client
 
         public event EventHandler DataStateChanged;
         public event EventHandler<ChatMessage> ChatReceived;
+
+        public void InvokeStateChanged()
+        {
+            DataStateChanged?.Invoke(this, null);
+        }
 
         private void MessageReceived(object sender, IMessageBase message)
         {

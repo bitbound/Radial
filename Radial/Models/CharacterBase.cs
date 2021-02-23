@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Radial.Models
 {
-    public class Character
+    public class CharacterBase
     {
         private static readonly long _lowestStatValue = 10;
 
@@ -82,7 +82,7 @@ namespace Radial.Models
         public CharacterState State { get; set; }
 
         [JsonIgnore]
-        public Character Target { get; set; }
+        public CharacterBase Target { get; set; }
 
         public CharacterType Type { get; set; }
     }

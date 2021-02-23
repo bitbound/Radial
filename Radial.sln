@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.30907.101
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Radial", "Radial\Radial.csproj", "{CDE4604E-647A-4C53-A164-7693ACF9CE62}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Radial.WorldBuilder", "Radial.WorldBuilder\Radial.WorldBuilder.csproj", "{4F447EDE-87AE-4D5A-8967-70D3D1348DF0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{CDE4604E-647A-4C53-A164-7693ACF9CE62}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CDE4604E-647A-4C53-A164-7693ACF9CE62}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CDE4604E-647A-4C53-A164-7693ACF9CE62}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F447EDE-87AE-4D5A-8967-70D3D1348DF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F447EDE-87AE-4D5A-8967-70D3D1348DF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F447EDE-87AE-4D5A-8967-70D3D1348DF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F447EDE-87AE-4D5A-8967-70D3D1348DF0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
