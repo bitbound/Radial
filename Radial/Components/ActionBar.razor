@@ -99,7 +99,7 @@
     {
         var location = ClientConnection.Location;
 
-        var currentIndex = location.Characters.FindIndex(x => x.Id == CharacterInfo.Target?.Id);
+        var currentIndex = location.Characters.FindIndex(x => x.Name == CharacterInfo.Target?.Name);
         if (currentIndex == -1)
         {
             CharacterInfo.Target = location.Characters.Find(x => x.Type == CharacterType.NPC);
@@ -116,7 +116,7 @@
     {
         var location = ClientConnection.Location;
 
-        var currentIndex = location.Characters.FindIndex(x => x.Id == CharacterInfo.Target?.Id);
+        var currentIndex = location.Characters.FindIndex(x => x.Name == CharacterInfo.Target?.Name);
         if (currentIndex == -1)
         {
             CharacterInfo.Target = location.Characters.Find(x => x.Type == CharacterType.Player);

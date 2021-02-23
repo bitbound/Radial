@@ -30,6 +30,7 @@ namespace Radial.Data
 
             builder.Entity<IdentityUser>().ToTable("Users");
 
+
             if (Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite")
             {
                 // SQLite does not have proper support for DateTimeOffset via Entity Framework Core, see the limitations

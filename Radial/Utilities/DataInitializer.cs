@@ -14,7 +14,7 @@ namespace Radial.Utilities
         {
             foreach (var location in Locations)
             {
-                world.Locations.AddOrUpdate(location.Id, location);
+                world.Locations.AddOrUpdate(location.XYZ, location);
             }
         }
 
@@ -23,10 +23,19 @@ namespace Radial.Utilities
             new Location()
             {
                 XCoord = 0,
-               YCoord = 0,
-               ZCoord = World.PurgatoryZCoord,
-               Title = "Purgatory",
-               Description = "There is only absence here, a void so powerful that you feel the concept of your own existence unraveling.", 
+                YCoord = 0,
+                ZCoord = World.PurgatoryZCoord,
+                Title = "Purgatory",
+                Description = "There is only absence here.  The void is like a tangible force that you can feel, " +
+                    "so powerful that the concept of your own existence becomes a confusing blur, unraveling in your own mind.", 
+            },
+            new Location()
+            {
+                XCoord = 0,
+                YCoord = 0,
+                ZCoord = World.OfflineZCoord,
+                Title = "Offline",
+                Description = "You're offline!  You shouldn't be seeing this!  Email the dev immediately!",
             },
             new Location()
             {

@@ -42,7 +42,11 @@ namespace Radial.Services
 
         public Task AddClient(IClientConnection clientConnection)
         {
-            if (clientConnection?.Character is null)
+            var character = clientConnection.Character;
+            var oldLocation = clientConnection.Location;
+            var newLocation = _world.StartLocation;
+
+            if (character is null)
             {
                 return Task.CompletedTask;
             }
@@ -51,6 +55,9 @@ namespace Radial.Services
             {
                 existingConnection.Disconnect("You've been disconnected because you signed in from another tab or browser.");
             }
+
+            oldLocation.Characters.RemoveAll(x => x.Name == character.Name);
+            newLocation.Characters.Add(character);
 
             ClientConnections.AddOrUpdate(clientConnection.User.Id, clientConnection, (k, v) => clientConnection);
 
@@ -64,10 +71,9 @@ namespace Radial.Services
                 });
             }
 
-            var location = clientConnection.Location;
-            foreach (var other in location.Players.Where(x => x.Id != clientConnection.Character.Id))
+            foreach (var other in newLocation.Players.Where(x => x.Name != character.Name))
             {
-                var player = ClientConnections.Values.FirstOrDefault(x => x.Character.Id == other.Id);
+                var player = ClientConnections.Values.FirstOrDefault(x => x.Character.Name == other.Name);
                 player.InvokeMessageReceived(new GenericMessage()
                 {
                     MessageType = Models.Enums.MessageType.CharacterInfoUpdated
@@ -91,7 +97,6 @@ namespace Radial.Services
 
         public Task RemoveClient(IClientConnection clientConnection)
         {
-            var user = clientConnection.User;
             var character = clientConnection.Character;
             var location = clientConnection.Location;
 
@@ -100,28 +105,29 @@ namespace Radial.Services
                 return Task.CompletedTask;
             }
 
-            if (ClientConnections.TryRemove(user.Id, out _))
+            _world.CharacterBackups.AddOrUpdate(character.Name, character);
+
+            if (ClientConnections.TryRemove(character.UserId, out _))
             {
                 var locationXyz = location.XYZ;
-                var purgatory = _world.PurgatoryLocation;
+       
+                location.Characters.RemoveAll(x => x.Name == character.Name);
+                _world.OfflineLocation.Characters.Add(character);
 
-                location.Characters.RemoveAll(x => x.Id == character.Id);
-                purgatory.Characters.Add(character);
 
-
-                foreach (var other in ClientConnections.Where(x => x.Value.User.Id != user.Id))
+                foreach (var other in ClientConnections.Where(x => x.Value.User.Id != character.UserId))
                 {
                     other.Value.InvokeMessageReceived(new ChatMessage()
                     {
-                        Message = $"{user.UserName} has signed out.",
+                        Message = $"{character.Name} has signed out.",
                         Sender = "System",
                         Channel = Enums.ChatChannel.System
                     });
                 }
 
-                foreach (var other in location.Players.Where(x => x.Id != clientConnection.Character.Id))
+                foreach (var other in location.Players.Where(x => x.Name != clientConnection.Character.Name))
                 {
-                    var player = ClientConnections.Values.FirstOrDefault(x => x.Character.Id == other.Id);
+                    var player = ClientConnections.Values.FirstOrDefault(x => x.Character.Name == other.Name);
                     player.InvokeMessageReceived(new GenericMessage()
                     {
                         MessageType = Models.Enums.MessageType.CharacterInfoUpdated
@@ -182,8 +188,8 @@ namespace Radial.Services
         {
             var location = senderConnection.Location;
             return location.Players
-                .Where(x => x.Id != senderConnection.Character.Id)
-                .Select(x => ClientConnections.Values.FirstOrDefault(y => y.Character.Id == x.Id));
+                .Where(x => x.Name != senderConnection.Character.Name)
+                .Select(x => ClientConnections.Values.FirstOrDefault(y => y.Character.Name == x.Name));
         }
     }
 }

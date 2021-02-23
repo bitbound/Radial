@@ -98,13 +98,10 @@ namespace Radial.Areas.Identity.Pages.Account
                     return Page();
                 }
 
-                var characterGuid = Guid.NewGuid();
-
                 var user = new RadialUser 
                 {
                     UserName = Input.Username, 
                     Email = Input.Email,
-                    CharacterId = characterGuid
                 };
 
                 var result = await _userManager.CreateAsync(user, Input.Password);
@@ -112,11 +109,8 @@ namespace Radial.Areas.Identity.Pages.Account
                 {
                     _logger.LogInformation("User created a new account with password.");
 
-                    var startLocation = _world.Locations.Find(x => x.XYZ == "0,0,0");
-
                     var character = new PlayerCharacter()
                     {
-                        Id = characterGuid,
                         CoreEnergy = 100,
                         EnergyCurrent = 100,
                         Name = Input.Username,
@@ -124,7 +118,8 @@ namespace Radial.Areas.Identity.Pages.Account
                         UserId = user.Id
                     };
 
-                    startLocation.Characters.Add(character);
+                    _world.OfflineLocation.Characters.Add(character);
+                    _world.CharacterBackups.AddOrUpdate(character.Name, character);
                     await _world.Save();
 
                     var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);

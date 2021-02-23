@@ -17,7 +17,7 @@ namespace Radial.Utilities
 {
     public class ObjectStore<T>
     {
-        private readonly ConcurrentDictionary<Guid, T> _cache = new ConcurrentDictionary<Guid, T>();
+        private readonly ConcurrentDictionary<string, T> _cache = new ConcurrentDictionary<string, T>();
         private readonly SemaphoreSlim _fileLock = new SemaphoreSlim(1, 1);
 
         private readonly TimeSpan _saveInterval = TimeSpan.FromMinutes(30);
@@ -45,12 +45,16 @@ namespace Radial.Utilities
 
         public string Name { get; }
 
-        public T AddOrUpdate(Guid key, T item)
+        public T AddOrUpdate(string key, T item)
         {
             return _cache.AddOrUpdate(key, item, (k, v) => item);
         }
 
-        // TODO: Cache searchers.
+        public T Get(string key)
+        {
+            return _cache[key];
+        }
+
         public T Find(Func<T, bool> match)
         {
             return _cache.Values.FirstOrDefault(match);
@@ -71,7 +75,7 @@ namespace Radial.Utilities
                 }
 
                 var content = File.ReadAllText(storePath);
-                var savedEntries = JsonSerializer.Deserialize<ConcurrentDictionary<Guid, T>>(content);
+                var savedEntries = JsonSerializer.Deserialize<ConcurrentDictionary<string, T>>(content);
                 foreach (var entry in savedEntries)
                 {
                     _cache.TryAdd(entry.Key, entry.Value);
@@ -110,7 +114,7 @@ namespace Radial.Utilities
             }
         }
 
-        public bool TryGet(Guid key, out T result)
+        public bool TryGet(string key, out T result)
         {
             return _cache.TryGetValue(key, out result);
         }

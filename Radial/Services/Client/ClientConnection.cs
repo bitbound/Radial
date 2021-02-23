@@ -10,6 +10,7 @@ using Radial.Models;
 using Microsoft.AspNetCore.Identity;
 using Radial.Data.Entities;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.Extensions.Logging;
 
 namespace Radial.Services.Client
 {
@@ -37,25 +38,56 @@ namespace Radial.Services.Client
         private readonly IClientManager _clientManager;
         private readonly UserManager<RadialUser> _userManager;
         private readonly IWorld _world;
+        private readonly ILogger<ClientConnection> _logger;
         private Action _queuedInput;
         private RadialUser _user;
+        private PlayerCharacter _character;
 
         public ClientConnection(
             AuthenticationStateProvider authProvider,
             UserManager<RadialUser> userManager,
             IClientManager clientManager,
-            IWorld world)
+            IWorld world,
+            ILogger<ClientConnection> logger)
         {
             _authProvider = authProvider;
             _userManager = userManager;
             _clientManager = clientManager;
             _world = world;
+            _logger = logger;
         }
 
         public event EventHandler<string> Disconnected;
 
         public event EventHandler<IMessageBase> MessageReceived;
-        public PlayerCharacter Character { get; private set; }
+        public PlayerCharacter Character
+        {
+            get
+            {
+                var authState = _authProvider.GetAuthenticationStateAsync().GetAwaiter().GetResult();
+                if (!authState.User.Identity.IsAuthenticated)
+                {
+                    return null;
+                }
+
+                if (_character is not null)
+                {
+                    return _character;
+                }
+
+                _character = _world.PlayerCharacters.FirstOrDefault(x => x.Name == authState.User.Identity.Name);
+
+                if (_character is null)
+                {
+                    if (!_world.CharacterBackups.TryGet(authState.User.Identity.Name, out _character))
+                    {
+                        _logger.LogError("Failed to load character.  Username: {username}", authState.User.Identity.Name);
+                    }
+                    _world.PurgatoryLocation.Characters.Add(_character);
+                }
+                return _character;
+            }
+        }
 
         public Location Location
         {
@@ -66,7 +98,14 @@ namespace Radial.Services.Client
                 {
                     return null;
                 }
-                return _world.Locations.Find(x => x.Characters.Contains(Character));
+                var location = _world.Locations.Find(x => x.Characters.Contains(Character));
+                if (location is null)
+                {
+                    _world.PurgatoryLocation.Characters.Add(Character);
+                    location = _world.PurgatoryLocation;
+                }
+
+                return location;
             }
         }
 
@@ -83,7 +122,6 @@ namespace Radial.Services.Client
                 if (_user is null)
                 {
                     _user = _userManager.GetUserAsync(authState.User).GetAwaiter().GetResult();
-                    Character = _world.PlayerCharacters.FirstOrDefault(x => x.Id == _user.CharacterId);
                 }
                 return _user;
             }

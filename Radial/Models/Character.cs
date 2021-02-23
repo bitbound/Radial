@@ -13,8 +13,6 @@ namespace Radial.Models
     {
         private static readonly long _lowestStatValue = 10;
 
-        public Guid Id { get; init; } = Guid.NewGuid();
-
         [JsonIgnore]
         public double ActionBonus { get; set; }
 

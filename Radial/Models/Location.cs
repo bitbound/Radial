@@ -11,8 +11,6 @@ namespace Radial.Models
 {
     public class Location
     {
-        public Guid Id { get; init; } = Guid.NewGuid();
-
         public List<Character> Characters { get; set; } = new List<Character>();
 
         public string Description { get; set; }
