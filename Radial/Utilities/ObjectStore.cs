@@ -47,11 +47,13 @@ namespace Radial.Utilities
 
         public T AddOrUpdate(string key, T item)
         {
+            key = key.Replace(" ", string.Empty);
             return _cache.AddOrUpdate(key, item, (k, v) => item);
         }
 
         public T Get(string key)
         {
+            key = key.Replace(" ", string.Empty);
             return _cache[key];
         }
 

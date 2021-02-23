@@ -56,6 +56,7 @@ namespace Radial
 
             services.AddScoped<IClientManager, ClientManager>();
             services.AddScoped<IInputDispatcher, InputDispatcher>();
+            services.AddScoped<ILocationService, LocationService>();
 
             services.AddHostedService<GameEngine>();
         }

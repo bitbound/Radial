@@ -60,7 +60,7 @@ namespace Radial.Services
 
         public Location LocateCharacter(string characterName)
         {
-            return Locations.Find(x => x.Characters.Exists(character => character.Name == characterName));
+            return Locations.Find(x => x.Characters.Any(character => character.Name == characterName));
         }
 
         public async Task Load()

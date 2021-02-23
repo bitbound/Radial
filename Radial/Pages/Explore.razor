@@ -1,5 +1,6 @@
 ﻿@page "/explore"
 @attribute [Authorize]
+@using System.Collections.Concurrent 
 @inject IInputDispatcher InputDispatcher
 @inject IMessagePublisher MessagePublisher
 @inject IClientConnection ClientConnection
@@ -65,7 +66,10 @@
         }
     </div>
     <div style="align-self: baseline">
-
+        @foreach (var eventMessage in Events)
+        {
+            <div>[@eventMessage.Timestamp.ToString("g")] - @eventMessage.Message</div>
+        }
     </div>
     <div class="p-2">
         <ActionBar />
@@ -77,6 +81,8 @@
 </div>
 
 @code {
+    public ConcurrentQueue<LocalEventMessage> Events { get; } = new ConcurrentQueue<LocalEventMessage>();
+
     private PlayerCharacter CharacterInfo { get; set; }
     private Interactable CurrentInteraction { get; set; }
     private Location Location { get; set; }
@@ -93,10 +99,7 @@
             SetState();
             JsInterop.AutoHeight();
             StateHasChanged();
-            MessagePublisher.DataStateChanged += (sender, args) =>
-            {
-                SetState();
-            };
+            RegisterMessageHandlers();
         }
 
         return base.OnAfterRenderAsync(firstRender);
@@ -113,6 +116,25 @@
     private IEnumerable<CharacterBase> GetNearbyCharacters()
     {
         return Location?.Characters?.Where(x => x.Name != CharacterInfo?.Name) ?? Array.Empty<CharacterBase>();
+    }
+
+    private void RegisterMessageHandlers()
+    {
+        MessagePublisher.DataStateChanged += (sender, args) =>
+        {
+            SetState();
+        };
+        MessagePublisher.LocalEventReceived += (sender, args) =>
+        {
+            Events.Enqueue(args);
+            InvokeAsync(StateHasChanged);
+        };
+        MessagePublisher.LocationChanged += (sender, args) =>
+        {
+            Events.Clear();
+            CharacterInfo.Target = null;
+            SetState();
+        };
     }
 
     private void SetTarget(CharacterBase target)

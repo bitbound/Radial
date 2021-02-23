@@ -1,5 +1,7 @@
-﻿using Radial.Models;
+﻿using Radial.Enums;
+using Radial.Models;
 using Radial.Services;
+using Radial.Utilities;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -46,6 +48,13 @@ namespace Radial.WorldBuilder
                ZCoord = "0",
                Title = "The Center",
                Description = "This is the center of the infinite nothingness.",
+               Exits = new ConcurrentList<MovementDirection>()
+               {
+                   MovementDirection.North, 
+                   MovementDirection.East,
+                   MovementDirection.South,
+                   MovementDirection.West
+               }
             }
         };
     }

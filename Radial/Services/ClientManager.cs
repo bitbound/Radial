@@ -25,7 +25,7 @@ namespace Radial.Services
         void SendToLocal(IClientConnection senderConnection, IMessageBase message);
 
         bool SendToParty(IClientConnection senderConnection, IMessageBase message);
-
+        IEnumerable<IClientConnection> GetPartyMembers(IClientConnection clientConnection);
     }
 
     public class ClientManager : IClientManager
@@ -56,7 +56,7 @@ namespace Radial.Services
                 existingConnection.Disconnect("You've been disconnected because you signed in from another tab or browser.");
             }
 
-            oldLocation.Characters.RemoveAll(x => x.Name == character.Name);
+            oldLocation.Characters.Remove(character);
             newLocation.Characters.Add(character);
 
             ClientConnections.AddOrUpdate(clientConnection.User.Id, clientConnection, (k, v) => clientConnection);
@@ -74,9 +74,9 @@ namespace Radial.Services
             foreach (var other in newLocation.Players.Where(x => x.Name != character.Name))
             {
                 var player = ClientConnections.Values.FirstOrDefault(x => x.Character.Name == other.Name);
-                player.InvokeMessageReceived(new GenericMessage()
+                player.InvokeMessageReceived(new LocalEventMessage()
                 {
-                    MessageType = Models.Enums.MessageType.CharacterInfoUpdated
+                    Message = $"{character.Name} has appeared."
                 });
             }
             return Task.CompletedTask;
@@ -88,6 +88,16 @@ namespace Radial.Services
             {
                 clientConnection.InvokeMessageReceived(message);
             };
+        }
+
+        public IEnumerable<IClientConnection> GetPartyMembers(IClientConnection clientConnection)
+        {
+            if (string.IsNullOrWhiteSpace(clientConnection?.Character?.PartyId))
+            {
+                return new IClientConnection[] { clientConnection };
+            }
+
+            return ClientConnections.Values.Where(x => x.Character.PartyId == clientConnection.Character.PartyId);
         }
 
         public bool IsPlayerOnline(string username)
@@ -111,7 +121,7 @@ namespace Radial.Services
             {
                 var locationXyz = location.XYZ;
        
-                location.Characters.RemoveAll(x => x.Name == character.Name);
+                location.Characters.Remove(character);
                 _world.OfflineLocation.Characters.Add(character);
 
 
@@ -128,9 +138,9 @@ namespace Radial.Services
                 foreach (var other in location.Players.Where(x => x.Name != clientConnection.Character.Name))
                 {
                     var player = ClientConnections.Values.FirstOrDefault(x => x.Character.Name == other.Name);
-                    player.InvokeMessageReceived(new GenericMessage()
+                    player.InvokeMessageReceived(new LocalEventMessage()
                     {
-                        MessageType = Models.Enums.MessageType.CharacterInfoUpdated
+                        Message = $"{character.Name} has disappeared."
                     });
                 }
             }

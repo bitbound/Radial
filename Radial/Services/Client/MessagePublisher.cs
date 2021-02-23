@@ -11,8 +11,10 @@ namespace Radial.Services.Client
 {
     public interface IMessagePublisher
     {
-        event EventHandler DataStateChanged;
         event EventHandler<ChatMessage> ChatReceived;
+        event EventHandler DataStateChanged;
+        event EventHandler<LocalEventMessage> LocalEventReceived;
+        event EventHandler LocationChanged;
         void InvokeStateChanged();
     }
     public class MessagePublisher : IMessagePublisher
@@ -27,8 +29,10 @@ namespace Radial.Services.Client
             _logger = logger;
         }
 
-        public event EventHandler DataStateChanged;
         public event EventHandler<ChatMessage> ChatReceived;
+        public event EventHandler DataStateChanged;
+        public event EventHandler LocationChanged;
+        public event EventHandler<LocalEventMessage> LocalEventReceived;
 
         public void InvokeStateChanged()
         {
@@ -44,8 +48,13 @@ namespace Radial.Services.Client
                     case MessageType.ChatMessage:
                         ChatReceived?.Invoke(this, message as ChatMessage);
                         break;
-                    case MessageType.CharacterInfoUpdated:
+                    case MessageType.DataStateChanged:
                         DataStateChanged?.Invoke(this, null);
+                        break;
+                    case MessageType.LocalEvent:
+                        LocalEventReceived?.Invoke(this, message as LocalEventMessage);
+                        break;
+                    case MessageType.LocationChanged:
                         break;
                     default:
                         break;

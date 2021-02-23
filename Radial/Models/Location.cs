@@ -1,4 +1,6 @@
-﻿using Radial.Models;
+﻿using Radial.Enums;
+using Radial.Models;
+using Radial.Utilities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -11,12 +13,18 @@ namespace Radial.Models
 {
     public class Location
     {
-        public List<CharacterBase> Characters { get; set; } = new List<CharacterBase>();
+        public ConcurrentList<CharacterBase> Characters { get; set; } = new ConcurrentList<CharacterBase>();
 
         public string Description { get; set; }
 
-        public List<Interactable> Interactables { get; set; }
+        public ConcurrentList<MovementDirection> Exits { get; set; } = new ConcurrentList<MovementDirection>();
+
+        public ConcurrentList<Interactable> Interactables { get; set; } = new ConcurrentList<Interactable>();
         public bool IsEditable { get; set; }
+
+        public bool IsTemporary { get; set; }
+
+        public DateTimeOffset LastAccessed { get; set; }
 
         [JsonIgnore]
         public IEnumerable<Npc> Npcs => Characters.OfType<Npc>();

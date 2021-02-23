@@ -100,10 +100,10 @@
     {
         var location = ClientConnection.Location;
 
-        var currentIndex = location.Characters.FindIndex(x => x.Name == CharacterInfo.Target?.Name);
+        var currentIndex = location.Characters.IndexOf(CharacterInfo.Target);
         if (currentIndex == -1)
         {
-            CharacterInfo.Target = location.Characters.Find(x => x.Type == CharacterType.NPC);
+            CharacterInfo.Target = location.Characters.FirstOrDefault(x => x.Type == CharacterType.NPC);
         }
         else
         {
@@ -119,10 +119,10 @@
     {
         var location = ClientConnection.Location;
 
-        var currentIndex = location.Characters.FindIndex(x => x.Name == CharacterInfo.Target?.Name);
+        var currentIndex = location.Characters.IndexOf(CharacterInfo.Target);
         if (currentIndex == -1)
         {
-            CharacterInfo.Target = location.Characters.Find(x => x.Type == CharacterType.Player);
+            CharacterInfo.Target = location.Characters.FirstOrDefault(x => x.Type == CharacterType.Player);
         }
         else
         {

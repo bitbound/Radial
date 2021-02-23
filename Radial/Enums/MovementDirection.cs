@@ -11,10 +11,6 @@ namespace Radial.Enums
         North,
         East,
         South,
-        West,
-        Northeast,
-        Northwest,
-        Southeast,
-        Southwest
+        West
     }
 }
