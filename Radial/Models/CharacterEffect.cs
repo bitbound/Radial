@@ -6,7 +6,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
-namespace Radial.Data.Entities
+namespace Radial.Models
 {
     public class CharacterEffect
     {

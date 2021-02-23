@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Radial.Data.Entities
+namespace Radial.Models
 {
     public class Interactable
     {

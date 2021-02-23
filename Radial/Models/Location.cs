@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace Radial.Data.Entities
+namespace Radial.Models
 {
     public class Location
     {
@@ -21,10 +21,10 @@ namespace Radial.Data.Entities
         public bool IsEditable { get; set; }
 
         [JsonIgnore]
-        public List<Npc> Npcs => Characters.OfType<Npc>().ToList();
+        public IEnumerable<Npc> Npcs => Characters.OfType<Npc>();
 
         [JsonIgnore]
-        public List<PlayerCharacter> Players => Characters.OfType<PlayerCharacter>().ToList();
+        public IEnumerable<PlayerCharacter> Players => Characters.OfType<PlayerCharacter>();
 
         public string Title { get; set; }
         public long XCoord { get; init; }

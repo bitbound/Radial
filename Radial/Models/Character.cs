@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace Radial.Data.Entities
+namespace Radial.Models
 {
     public class Character
     {

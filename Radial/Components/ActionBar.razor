@@ -4,16 +4,15 @@
 @using Radial.Data.Entities 
 @inject IInputDispatcher InputDispatcher
 @inject IClientConnection ClientConnection
-@inject IDataService DataService
 
 <div class="action-bar-frame" tabindex="0" @onkeydown="OnKeyDown">
-    @if (ClientConnection.User?.Character?.EnergyCurrent < 1)
+    @if (CharacterInfo?.EnergyCurrent < 1)
     {
         <button id="respawnButton" class="btn btn-danger" @onkeydown="Respawn">Respawn</button>
     }
     else
     {
-        @if (ClientConnection.User?.Character?.State == CharacterState.InCombat)
+        @if (CharacterInfo?.State == CharacterState.InCombat)
         {
             <button id="respawnButton" class="btn btn-danger" @onkeydown="Escape">Escape</button>
         }
@@ -62,11 +61,11 @@
 </div>
 
 @code {
-    private CharacterInfo CharacterInfo { get; set; }
+    private PlayerCharacter CharacterInfo { get; set; }
 
     protected override Task OnInitializedAsync()
     {
-        CharacterInfo = ClientConnection.User?.Character;
+        CharacterInfo = ClientConnection.Character;
 
         return base.OnInitializedAsync();
     }
@@ -98,17 +97,16 @@
 
     private void CycleEnemyTarget()
     {
-        var character = ClientConnection.User.Character;
-        var location = ClientConnection.User.Character.Location;
+        var location = ClientConnection.Location;
 
-        var currentIndex = location.Characters.FindIndex(x => x.Id == character.Target?.Id);
+        var currentIndex = location.Characters.FindIndex(x => x.Id == CharacterInfo.Target?.Id);
         if (currentIndex == -1)
         {
-            character.Target = location.Characters.Find(x => x.Type == CharacterType.NPC);
+            CharacterInfo.Target = location.Characters.Find(x => x.Type == CharacterType.NPC);
         }
         else
         {
-            character.Target = location.Characters
+            CharacterInfo.Target = location.Characters
                 .Skip(currentIndex + 1)
                 .FirstOrDefault(x => x.Type == CharacterType.NPC);
         }
@@ -116,17 +114,16 @@
 
     private void CycleFriendlyTarget()
     {
-        var character = ClientConnection.User.Character;
-        var location = ClientConnection.User.Character.Location;
+        var location = ClientConnection.Location;
 
-        var currentIndex = location.Characters.FindIndex(x => x.Id == character.Target?.Id);
+        var currentIndex = location.Characters.FindIndex(x => x.Id == CharacterInfo.Target?.Id);
         if (currentIndex == -1)
         {
-            character.Target = location.Characters.Find(x => x.Type == CharacterType.Player);
+            CharacterInfo.Target = location.Characters.Find(x => x.Type == CharacterType.Player);
         }
         else
         {
-            character.Target = location.Characters
+            CharacterInfo.Target = location.Characters
                 .Skip(currentIndex + 1)
                 .FirstOrDefault(x => x.Type == CharacterType.Player);
         }
@@ -150,12 +147,12 @@
 
     private void Move(MovementDirection direction)
     {
-        if (DateTimeOffset.Now - ClientConnection.User.Character.LastMoveTime < TimeSpan.FromSeconds(1))
+        if (DateTimeOffset.Now - CharacterInfo.LastMoveTime < TimeSpan.FromSeconds(1))
         {
             return;
         }
 
-        ClientConnection.User.Character.LastMoveTime = DateTimeOffset.Now;
+        CharacterInfo.LastMoveTime = DateTimeOffset.Now;
 
         ClientConnection.ExchangeInput(() =>
         {

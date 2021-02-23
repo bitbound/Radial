@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using Radial.Data.Entities;
+using Radial.Models;
 using Radial.Services;
 
 namespace Radial.Areas.Identity.Pages.Account
@@ -120,10 +120,11 @@ namespace Radial.Areas.Identity.Pages.Account
                         CoreEnergy = 100,
                         EnergyCurrent = 100,
                         Name = Input.Username,
-                        Type = Enums.CharacterType.Player
+                        Type = Enums.CharacterType.Player,
+                        UserId = user.Id
                     };
 
-                    startLocation.Players.Add(character);
+                    startLocation.Characters.Add(character);
                     await _world.Save();
 
                     var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);

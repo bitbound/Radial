@@ -64,7 +64,8 @@ namespace Radial
         public void Configure(IApplicationBuilder app,
             IWebHostEnvironment env,
             ApplicationDbContext dbContext,
-            ILoggerFactory loggerFactory)
+            ILoggerFactory loggerFactory,
+            IWorld world)
         {
             app.UseForwardedHeaders();
 
@@ -101,7 +102,7 @@ namespace Radial
                 endpoints.MapFallbackToPage("/_Host");
             });
 
-            DataInitializer.LoadRecords(dbContext);
+            DataInitializer.Load(world);
 
             loggerFactory.AddProvider(new DbLoggerProvider(env, app.ApplicationServices));
         }

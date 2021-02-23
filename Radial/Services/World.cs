@@ -14,11 +14,15 @@ namespace Radial.Services
         ObjectStore<Location> Locations { get; }
         IEnumerable<Npc> Npcs { get; }
         IEnumerable<PlayerCharacter> PlayerCharacters { get; }
+        Location PurgatoryLocation { get; }
+
         Task Save();
     }
 
     public class World : IWorld
     {
+        public static readonly string PurgatoryZCoord = "purgatory";
+
         private readonly IServiceProvider _serviceProvider;
 
         public World(IServiceProvider serviceProvider)
@@ -27,13 +31,13 @@ namespace Radial.Services
 
             Locations = new ObjectStore<Location>(nameof(Locations), _serviceProvider);
         }
-        public ObjectStore<Location> Locations { get; }
-
         public IEnumerable<Character> Characters => Locations.All.SelectMany(x => x.Characters);
-
+        public ObjectStore<Location> Locations { get; }
         public IEnumerable<Npc> Npcs => Characters.OfType<Npc>();
 
         public IEnumerable<PlayerCharacter> PlayerCharacters => Characters.OfType<PlayerCharacter>();
+
+        public Location PurgatoryLocation => Locations.Find(x => x.ZCoord == PurgatoryZCoord);
 
         public Location LocateCharacter(Guid characterId)
         {

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Radial.Data.Entities;
+using Radial.Models;
 using Radial.Models.Messaging;
 using Radial.Services.Client;
 using System;
@@ -29,13 +30,11 @@ namespace Radial.Services
 
     public class ClientManager : IClientManager
     {
-        private readonly IServiceProvider _serviceProvider;
-        private readonly IDataService _dataService;
+        private readonly IWorld _world;
 
-        public ClientManager(IServiceProvider serviceProvider, IDataService dataService)
+        public ClientManager(IWorld world)
         {
-            _serviceProvider = serviceProvider;
-            _dataService = dataService;
+            _world = world;
         }
 
         private static ConcurrentDictionary<string, IClientConnection> ClientConnections { get; } =
@@ -43,7 +42,7 @@ namespace Radial.Services
 
         public Task AddClient(IClientConnection clientConnection)
         {
-            if (clientConnection?.User?.Character is null)
+            if (clientConnection?.Character is null)
             {
                 return Task.CompletedTask;
             }
@@ -63,14 +62,16 @@ namespace Radial.Services
                     Sender = "System",
                     Channel = Enums.ChatChannel.System
                 });
+            }
 
-                if (other.Value.User.Character.Location == clientConnection.User.Character.Location)
+            var location = clientConnection.Location;
+            foreach (var other in location.Players.Where(x => x.Id != clientConnection.Character.Id))
+            {
+                var player = ClientConnections.Values.FirstOrDefault(x => x.Character.Id == other.Id);
+                player.InvokeMessageReceived(new GenericMessage()
                 {
-                    other.Value.InvokeMessageReceived(new GenericMessage()
-                    {
-                        MessageType = Models.Enums.MessageType.CharacterInfoUpdated
-                    });
-                }
+                    MessageType = Models.Enums.MessageType.CharacterInfoUpdated
+                });
             }
             return Task.CompletedTask;
         }
@@ -88,23 +89,25 @@ namespace Radial.Services
             return ClientConnections.Values.Any(x => x.User.UserName.Equals(username.Trim(), StringComparison.OrdinalIgnoreCase));
         }
 
-        public async Task RemoveClient(IClientConnection clientConnection)
+        public Task RemoveClient(IClientConnection clientConnection)
         {
             var user = clientConnection.User;
+            var character = clientConnection.Character;
             var location = clientConnection.Location;
 
-            if (user?.Character is null)
+            if (character is null)
             {
-                return;
+                return Task.CompletedTask;
             }
 
             if (ClientConnections.TryRemove(user.Id, out _))
             {
-                var locationXyz = user.Character.Location.XYZ;
-                location.Characters.RemoveAll(x => x.Id == user.Character.Id);
-                user.Character.Location = null;
-                await _dataService.SaveEntity(user);
-                await _dataService.SaveEntity(location);
+                var locationXyz = location.XYZ;
+                var purgatory = _world.PurgatoryLocation;
+
+                location.Characters.RemoveAll(x => x.Id == character.Id);
+                purgatory.Characters.Add(character);
+
 
                 foreach (var other in ClientConnections.Where(x => x.Value.User.Id != user.Id))
                 {
@@ -114,17 +117,19 @@ namespace Radial.Services
                         Sender = "System",
                         Channel = Enums.ChatChannel.System
                     });
-
-                    if (other.Value.User.Character.XYZ == locationXyz)
-                    {
-                        other.Value.InvokeMessageReceived(new GenericMessage()
-                        {
-                            MessageType = Models.Enums.MessageType.CharacterInfoUpdated
-                        });
-                    }
                 }
 
+                foreach (var other in location.Players.Where(x => x.Id != clientConnection.Character.Id))
+                {
+                    var player = ClientConnections.Values.FirstOrDefault(x => x.Character.Id == other.Id);
+                    player.InvokeMessageReceived(new GenericMessage()
+                    {
+                        MessageType = Models.Enums.MessageType.CharacterInfoUpdated
+                    });
+                }
             }
+
+            return Task.CompletedTask;
         }
 
         public bool SendToClient(IClientConnection senderConnection, string recipient, IMessageBase dto, bool copyToSelf = false)
@@ -153,7 +158,7 @@ namespace Radial.Services
 
         public void SendToLocal(IClientConnection senderConnection, IMessageBase message)
         {
-            foreach (var connection in ClientConnections.Values.Where(x => x.User.Character.XYZ == senderConnection.User.Character.XYZ))
+            foreach (var connection in GetLocalConnections(senderConnection))
             {
                 connection.InvokeMessageReceived(message);
             }
@@ -161,16 +166,24 @@ namespace Radial.Services
 
         public bool SendToParty(IClientConnection senderConnection, IMessageBase message)
         {
-            if (string.IsNullOrWhiteSpace(senderConnection.User.Character.PartyId))
+            if (string.IsNullOrWhiteSpace(senderConnection.Character.PartyId))
             {
                 return false;
             }
 
-            foreach (var connection in ClientConnections.Values.Where(x=>x.User.Character.PartyId == senderConnection.User.Character.PartyId))
+            foreach (var connection in ClientConnections.Values.Where(x=>x.Character.PartyId == senderConnection.Character.PartyId))
             {
                 connection.InvokeMessageReceived(message);
             }
             return true;
+        }
+
+        private IEnumerable<IClientConnection> GetLocalConnections(IClientConnection senderConnection)
+        {
+            var location = senderConnection.Location;
+            return location.Players
+                .Where(x => x.Id != senderConnection.Character.Id)
+                .Select(x => ClientConnections.Values.FirstOrDefault(y => y.Character.Id == x.Id));
         }
     }
 }

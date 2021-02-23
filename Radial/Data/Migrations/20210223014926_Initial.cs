@@ -38,28 +38,12 @@ namespace Radial.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Locations",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Description = table.Column<string>(type: "TEXT", nullable: true),
-                    IsEditable = table.Column<bool>(type: "INTEGER", nullable: false),
-                    Title = table.Column<string>(type: "TEXT", nullable: true),
-                    XCoord = table.Column<long>(type: "INTEGER", nullable: false),
-                    YCoord = table.Column<long>(type: "INTEGER", nullable: false),
-                    ZCoord = table.Column<string>(type: "TEXT", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Locations", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "TEXT", nullable: false),
                     Discriminator = table.Column<string>(type: "TEXT", nullable: false),
+                    CharacterId = table.Column<Guid>(type: "TEXT", nullable: true),
                     IsServerAdmin = table.Column<bool>(type: "INTEGER", nullable: true),
                     UserName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
@@ -100,34 +84,6 @@ namespace Radial.Data.Migrations
                         principalTable: "AspNetRoles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Interactable",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Content = table.Column<string>(type: "TEXT", nullable: true),
-                    LookSummary = table.Column<string>(type: "TEXT", nullable: true),
-                    Title = table.Column<string>(type: "TEXT", nullable: true),
-                    InteractableId = table.Column<Guid>(type: "TEXT", nullable: true),
-                    LocationId = table.Column<Guid>(type: "TEXT", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Interactable", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Interactable_Interactable_InteractableId",
-                        column: x => x.InteractableId,
-                        principalTable: "Interactable",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Interactable_Locations_LocationId",
-                        column: x => x.LocationId,
-                        principalTable: "Locations",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -215,68 +171,6 @@ namespace Radial.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "Characters",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    LocationId = table.Column<Guid>(type: "TEXT", nullable: true),
-                    CoreEnergy = table.Column<long>(type: "INTEGER", nullable: false),
-                    EnergyCurrent = table.Column<long>(type: "INTEGER", nullable: false),
-                    Experience = table.Column<long>(type: "INTEGER", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: true),
-                    Type = table.Column<int>(type: "INTEGER", nullable: false),
-                    Discriminator = table.Column<string>(type: "TEXT", nullable: false),
-                    UserId = table.Column<string>(type: "TEXT", nullable: true),
-                    AggressionModel = table.Column<int>(type: "INTEGER", nullable: true),
-                    DialogId = table.Column<Guid>(type: "TEXT", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Characters", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Characters_Interactable_DialogId",
-                        column: x => x.DialogId,
-                        principalTable: "Interactable",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Characters_Locations_LocationId",
-                        column: x => x.LocationId,
-                        principalTable: "Locations",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Characters_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "CharacterEffects",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Duration = table.Column<TimeSpan>(type: "TEXT", nullable: false),
-                    StartTime = table.Column<string>(type: "TEXT", nullable: false),
-                    StatChange = table.Column<long>(type: "INTEGER", nullable: false),
-                    TargetStat = table.Column<int>(type: "INTEGER", nullable: false),
-                    Type = table.Column<int>(type: "INTEGER", nullable: false),
-                    CharacterInfoId = table.Column<Guid>(type: "TEXT", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_CharacterEffects", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_CharacterEffects_Characters_CharacterInfoId",
-                        column: x => x.CharacterInfoId,
-                        principalTable: "Characters",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -302,37 +196,6 @@ namespace Radial.Data.Migrations
                 name: "IX_AspNetUserRoles_RoleId",
                 table: "AspNetUserRoles",
                 column: "RoleId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_CharacterEffects_CharacterInfoId",
-                table: "CharacterEffects",
-                column: "CharacterInfoId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Characters_DialogId",
-                table: "Characters",
-                column: "DialogId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Characters_LocationId",
-                table: "Characters",
-                column: "LocationId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Characters_UserId",
-                table: "Characters",
-                column: "UserId",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Interactable_InteractableId",
-                table: "Interactable",
-                column: "InteractableId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Interactable_LocationId",
-                table: "Interactable",
-                column: "LocationId");
 
             migrationBuilder.CreateIndex(
                 name: "EmailIndex",
@@ -364,25 +227,13 @@ namespace Radial.Data.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "CharacterEffects");
-
-            migrationBuilder.DropTable(
                 name: "EventLogs");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "Characters");
-
-            migrationBuilder.DropTable(
-                name: "Interactable");
-
-            migrationBuilder.DropTable(
                 name: "Users");
-
-            migrationBuilder.DropTable(
-                name: "Locations");
         }
     }
 }

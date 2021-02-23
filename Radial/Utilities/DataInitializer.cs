@@ -1,4 +1,6 @@
 ﻿using Radial.Data.Entities;
+using Radial.Models;
+using Radial.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,19 +10,24 @@ namespace Radial.Utilities
 {
     public static class DataInitializer
     {
-        public static void LoadRecords(Data.ApplicationDbContext dbContext)
+        public static void Load(IWorld world)
         {
-            if (dbContext.Locations.Any())
+            foreach (var location in Locations)
             {
-                return;
+                world.Locations.AddOrUpdate(location.Id, location);
             }
-
-            dbContext.Locations.AddRange(Locations);
-            dbContext.SaveChanges();
         }
 
         private static Location[] Locations => new [] 
         { 
+            new Location()
+            {
+                XCoord = 0,
+               YCoord = 0,
+               ZCoord = World.PurgatoryZCoord,
+               Title = "Purgatory",
+               Description = "There is only absence here, a void so powerful that you feel the concept of your own existence unraveling.", 
+            },
             new Location()
             {
                XCoord = 0,

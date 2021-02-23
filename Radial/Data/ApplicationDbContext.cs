@@ -21,13 +21,14 @@ namespace Radial.Data
         {
         }
 
+        public DbSet<EventLogEntry> EventLogs { get; set; }
+        public new DbSet<RadialUser> Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
             builder.Entity<IdentityUser>().ToTable("Users");
-
 
             if (Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite")
             {

@@ -4,7 +4,6 @@
 @inject IMessagePublisher MessagePublisher
 @inject IClientConnection ClientConnection
 @inject IJsInterop JsInterop
-@inject IDataService DataService
 @inherits AuthComponentBase
 
 <div class="explore-container auto-height">
@@ -65,8 +64,8 @@
 </div>
 
 @code {
-    private CharacterInfo CharacterInfo => ClientConnection.User.Character;
-    private Interactable CurrentInteraction => ClientConnection.User.Character.Interaction;
+    private PlayerCharacter CharacterInfo => ClientConnection.Character;
+    private Interactable CurrentInteraction => ClientConnection.Character.Interaction;
     private Location Location => ClientConnection.Location;
 
     protected override Task OnInitializedAsync()

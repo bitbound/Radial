@@ -4,7 +4,6 @@
 @using Radial.Services
 @using Radial.Services.Client
 @inject IMessagePublisher MessagePublisher
-@inject IDataService DataService
 @inject IClientConnection ClientConnection
 
 <div class="resource-bars-container mx-4">
@@ -30,7 +29,7 @@
 
 @code {
 
-    private CharacterInfo CharacterInfo { get; set; }
+    private Character CharacterInfo { get; set; }
 
     private string GetFormattedPercent(double? percent)
     {
@@ -44,7 +43,7 @@
 
     protected override Task OnInitializedAsync()
     {
-        CharacterInfo = ClientConnection.User?.Character;
+        CharacterInfo = ClientConnection?.Character;
         return base.OnInitializedAsync();
     }
 

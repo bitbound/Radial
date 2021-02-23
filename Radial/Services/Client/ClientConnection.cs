@@ -17,9 +17,10 @@ namespace Radial.Services.Client
     {
         event EventHandler<string> Disconnected;
 
-        Location Location { get; }
-
         event EventHandler<IMessageBase> MessageReceived;
+
+        PlayerCharacter Character { get; }
+        Location Location { get; }
         RadialUser User { get; }
         Task Connect();
 
@@ -32,36 +33,29 @@ namespace Radial.Services.Client
 
     public class ClientConnection : IClientConnection
     {
-        private readonly IClientManager _clientManager;
-        private readonly IDataService _dataService;
         private readonly AuthenticationStateProvider _authProvider;
+        private readonly IClientManager _clientManager;
+        private readonly UserManager<RadialUser> _userManager;
+        private readonly IWorld _world;
         private Action _queuedInput;
+        private RadialUser _user;
+
         public ClientConnection(
             AuthenticationStateProvider authProvider,
-            IClientManager clientManager, 
-            IDataService dataService)
+            UserManager<RadialUser> userManager,
+            IClientManager clientManager,
+            IWorld world)
         {
             _authProvider = authProvider;
+            _userManager = userManager;
             _clientManager = clientManager;
-            _dataService = dataService;
+            _world = world;
         }
 
         public event EventHandler<string> Disconnected;
 
         public event EventHandler<IMessageBase> MessageReceived;
-        public RadialUser User
-        {
-            get
-            {
-                var authState = _authProvider.GetAuthenticationStateAsync().GetAwaiter().GetResult();
-                if (!authState.User.Identity.IsAuthenticated)
-                {
-                    return null;
-                }
-                
-                return _dataService.LoadUser(authState.User.Identity.Name).GetAwaiter().GetResult();
-            }
-        }
+        public PlayerCharacter Character { get; private set; }
 
         public Location Location
         {
@@ -72,10 +66,28 @@ namespace Radial.Services.Client
                 {
                     return null;
                 }
-                return  _dataService.LoadLocation(User.Character.LocationId).GetAwaiter().GetResult();
+                return _world.Locations.Find(x => x.Characters.Contains(Character));
             }
         }
 
+        public RadialUser User
+        {
+            get
+            {
+                var authState = _authProvider.GetAuthenticationStateAsync().GetAwaiter().GetResult();
+                if (!authState.User.Identity.IsAuthenticated)
+                {
+                    return null;
+                }
+
+                if (_user is null)
+                {
+                    _user = _userManager.GetUserAsync(authState.User).GetAwaiter().GetResult();
+                    Character = _world.PlayerCharacters.FirstOrDefault(x => x.Id == _user.CharacterId);
+                }
+                return _user;
+            }
+        }
         public async Task Connect()
         {
             var authState = await _authProvider.GetAuthenticationStateAsync();

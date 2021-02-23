@@ -154,7 +154,7 @@
                     ClientManager.Broadcast(message);
                     break;
                 case ChatChannel.Party:
-                    if (string.IsNullOrWhiteSpace(ClientConnection.User.Character.PartyId))
+                    if (string.IsNullOrWhiteSpace(ClientConnection.Character.PartyId))
                     {
                         ToastService.ShowToast("You are not in a party.", classString: "bg-warning");
                         return;
