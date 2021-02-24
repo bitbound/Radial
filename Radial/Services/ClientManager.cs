@@ -22,7 +22,8 @@ namespace Radial.Services
         Task RemoveClient(IClientConnection clientConnection);
 
         bool SendToClient(IClientConnection senderConnection, string recipient, IMessageBase message, bool copyToSelf = false);
-        void SendToLocal(IClientConnection senderConnection, IMessageBase message);
+        void SendToLocals(IClientConnection senderConnection, IMessageBase message);
+        void SendToLocals(IClientConnection senderConnection, Location location, IMessageBase message);
 
         bool SendToParty(IClientConnection senderConnection, IMessageBase message);
         IEnumerable<IClientConnection> GetPartyMembers(IClientConnection clientConnection);
@@ -172,9 +173,21 @@ namespace Radial.Services
             return true;
         }
 
-        public void SendToLocal(IClientConnection senderConnection, IMessageBase message)
+        public void SendToLocals(IClientConnection senderConnection, IMessageBase message)
         {
             foreach (var connection in GetLocalConnections(senderConnection))
+            {
+                connection.InvokeMessageReceived(message);
+            }
+        }
+
+        public void SendToLocals(IClientConnection senderConnection, Location location, IMessageBase message)
+        {
+            var connections = location.Players
+                .Where(x => x.Name != senderConnection.Character.Name)
+                .Select(x => ClientConnections.Values.FirstOrDefault(y => y.Character.Name == x.Name));
+
+            foreach (var connection in connections)
             {
                 connection.InvokeMessageReceived(message);
             }

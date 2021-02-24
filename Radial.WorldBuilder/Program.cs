@@ -6,6 +6,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 
 namespace Radial.WorldBuilder
@@ -19,7 +20,8 @@ namespace Radial.WorldBuilder
             {
                 locationDictionary.TryAdd(location.XYZ, location);
             }
-            File.WriteAllTextAsync("Locations.json", JsonSerializer.Serialize(locationDictionary));
+
+            File.WriteAllText("Locations.json", JsonSerializer.Serialize(locationDictionary));
         }
 
         private static Location[] Locations => new[]

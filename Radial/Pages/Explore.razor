@@ -9,7 +9,7 @@
 @inherits AuthComponentBase
 
 <div class="explore-container auto-height">
-    <div style="align-self: baseline">
+    <div style="overflow-y: auto">
         <div class="small location-grid mb-2">
             <div>
                 Location: X: @(Location?.XCoord) | Y: @(Location?.YCoord) | Z: @(Location?.ZCoord)
@@ -23,6 +23,14 @@
             <h3>@Location?.Title</h3>
             <p>
                 @Location?.Description
+            </p>
+
+            <p>
+                <span class="text-info">Exits: </span>
+                @if (Location?.Exits?.Any() == true)
+                {
+                    <span>@string.Join(", ", Location?.Exits?.Select(x => x.ToString()))</span>
+                }
             </p>
 
             @if (Location?.Interactables?.Any() == true)
@@ -65,7 +73,7 @@
 
         }
     </div>
-    <div style="align-self: baseline">
+    <div @ref="EventMessageDiv" style="overflow-y: auto">
         @foreach (var eventMessage in Events)
         {
             <div>[@eventMessage.Timestamp.ToString("g")] - @eventMessage.Message</div>
@@ -86,6 +94,8 @@
     private PlayerCharacter CharacterInfo { get; set; }
     private Interactable CurrentInteraction { get; set; }
     private Location Location { get; set; }
+
+    private ElementReference EventMessageDiv { get; set; }
 
     protected override Task OnInitializedAsync()
     {
@@ -124,10 +134,11 @@
         {
             SetState();
         };
-        MessagePublisher.LocalEventReceived += (sender, args) =>
+        MessagePublisher.LocalEventReceived += async (sender, args) =>
         {
             Events.Enqueue(args);
-            InvokeAsync(StateHasChanged);
+            await InvokeAsync(StateHasChanged);
+            JsInterop.ScrollToEnd(EventMessageDiv);
         };
         MessagePublisher.LocationChanged += (sender, args) =>
         {

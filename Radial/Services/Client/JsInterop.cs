@@ -1,4 +1,5 @@
-﻿using Microsoft.JSInterop;
+﻿using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +19,7 @@ namespace Radial.Services.Client
 
         void StartDraggingY(string elementId, double clientY);
 
-        void ScrollToEnd(string elementId);
+        void ScrollToEnd(ElementReference element);
 
     }
     public class JsInterop : IJsInterop
@@ -49,9 +50,9 @@ namespace Radial.Services.Client
         {
             return _jsRuntime.InvokeAsync<string>("invokePrompt", message);
         }
-        public void ScrollToEnd(string elementId)
+        public void ScrollToEnd(ElementReference element)
         {
-            _jsRuntime.InvokeVoidAsync("scrollToEnd", elementId);
+            _jsRuntime.InvokeVoidAsync("scrollToEnd", element);
         }
         public void StartDraggingY(string elementId, double clientY)
         {

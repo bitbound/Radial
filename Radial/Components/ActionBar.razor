@@ -74,26 +74,17 @@
 
     private void Attack()
     {
-        ClientConnection.ExchangeInput(() =>
-        {
-            InputDispatcher.Attack(ClientConnection);
-        });
+        InputDispatcher.Attack(ClientConnection);
     }
 
     private void Blast()
     {
-        ClientConnection.ExchangeInput(() =>
-        {
-            InputDispatcher.Blast(ClientConnection);
-        });
+        InputDispatcher.Blast(ClientConnection);
     }
 
     private void Block()
     {
-        ClientConnection.ExchangeInput(() =>
-        {
-            InputDispatcher.Block(ClientConnection);
-        });
+        InputDispatcher.Block(ClientConnection);
     }
 
     private void CycleEnemyTarget()
@@ -112,7 +103,7 @@
                 .FirstOrDefault(x => x.Type == CharacterType.NPC);
         }
 
-        MessagePublisher.InvokeStateChanged();
+        ClientConnection.InvokeMessageReceived(GenericMessage.StateChanged);
     }
 
     private void CycleFriendlyTarget()
@@ -131,23 +122,17 @@
                 .FirstOrDefault(x => x.Type == CharacterType.Player);
         }
 
-        MessagePublisher.InvokeStateChanged();
+        ClientConnection.InvokeMessageReceived(GenericMessage.StateChanged);
     }
 
     private void Escape()
     {
-        ClientConnection.ExchangeInput(() =>
-        {
-            InputDispatcher.EscapeCombat(ClientConnection);
-        });
+        InputDispatcher.EscapeCombat(ClientConnection);
     }
 
     private void Heal()
     {
-        ClientConnection.ExchangeInput(() =>
-        {
-            InputDispatcher.Heal(ClientConnection);
-        });
+        InputDispatcher.Heal(ClientConnection);
     }
 
     private void Move(MovementDirection direction)
@@ -159,10 +144,7 @@
 
         CharacterInfo.LastMoveTime = DateTimeOffset.Now;
 
-        ClientConnection.ExchangeInput(() =>
-        {
-            InputDispatcher.MoveCharacter(ClientConnection, direction);
-        });
+        InputDispatcher.MoveCharacter(ClientConnection, direction);
     }
 
     private void OnKeyDown(KeyboardEventArgs args)
@@ -190,9 +172,6 @@
 
     private void Respawn()
     {
-        ClientConnection.ExchangeInput(() =>
-        {
-            InputDispatcher.Respawn(ClientConnection);
-        });
+        InputDispatcher.Respawn(ClientConnection);
     }
 }

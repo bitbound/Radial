@@ -39,7 +39,10 @@ namespace Radial.Services
                 try
                 {
                     using var scope = _serviceProvider.CreateScope();
-                    await CheckLoopSpeed();
+                    var world = scope.ServiceProvider.GetRequiredService<IWorld>();
+                    var inputDispatcher = scope.ServiceProvider.GetRequiredService<IInputDispatcher>();
+                    var loopSpeed = await GetSpeedMultiplier();
+                    await inputDispatcher.DispatchInputs();
                 }
                 catch (Exception ex)
                 {
@@ -48,7 +51,7 @@ namespace Radial.Services
             }
         }
 
-        private async Task<double> CheckLoopSpeed()
+        private async Task<double> GetSpeedMultiplier()
         {
             var elapsed = DateTimeOffset.Now - _lastLoop;
             if (elapsed < _desiredLoopTime)

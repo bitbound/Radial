@@ -10,9 +10,7 @@ window.invokePrompt = async (message) => {
     return prompt(message);
 }
 
-window.scrollToEnd = (elementId) => {
-    var element = document.getElementById(elementId);
-
+window.scrollToEnd = (element) => {
     if (!element) {
         return;
     }

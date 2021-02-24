@@ -27,7 +27,7 @@
         <h4 class="text-center mt-2 mb-1">Chat</h4>
     </div>
 
-    <div id="chat-message-window" class="chat-message-window">
+    <div @ref="_chatMessageWindow" class="chat-message-window">
         @foreach (var chatMessage in _chatMessages)
         {
             <div class="chat-bubble-frame  @(IsMessageFromSelf(chatMessage) ? "self" : chatMessage.Channel.ToString().ToLower())">
@@ -68,6 +68,7 @@
 @code {
     private readonly ConcurrentQueue<ChatMessage> _chatMessages = new ConcurrentQueue<ChatMessage>();
     private string _chatFrameOpenClass;
+    private ElementReference _chatMessageWindow;
     private string _currentInputText;
     private ChatChannel _chatChannel = ChatChannel.Global;
     private bool _isRendered;
@@ -103,7 +104,7 @@
 
         if (_scrollChatWindowOnRender)
         {
-            JsInterop.ScrollToEnd("chat-message-window");
+            JsInterop.ScrollToEnd(_chatMessageWindow);
             _scrollChatWindowOnRender = false;
         }
 
@@ -162,7 +163,7 @@
                     ClientManager.SendToParty(ClientConnection, message);
                     break;
                 case ChatChannel.Local:
-                    ClientManager.SendToLocal(ClientConnection, message);
+                    ClientManager.SendToLocals(ClientConnection, message);
                     break;
                 case ChatChannel.Private:
                     if (!ClientManager.SendToClient(ClientConnection, _privateChatRecipient, message, true))

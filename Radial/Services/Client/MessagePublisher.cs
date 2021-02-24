@@ -15,7 +15,6 @@ namespace Radial.Services.Client
         event EventHandler DataStateChanged;
         event EventHandler<LocalEventMessage> LocalEventReceived;
         event EventHandler LocationChanged;
-        void InvokeStateChanged();
     }
     public class MessagePublisher : IMessagePublisher
     {
@@ -34,10 +33,6 @@ namespace Radial.Services.Client
         public event EventHandler LocationChanged;
         public event EventHandler<LocalEventMessage> LocalEventReceived;
 
-        public void InvokeStateChanged()
-        {
-            DataStateChanged?.Invoke(this, null);
-        }
 
         private void MessageReceived(object sender, IMessageBase message)
         {
@@ -55,6 +50,7 @@ namespace Radial.Services.Client
                         LocalEventReceived?.Invoke(this, message as LocalEventMessage);
                         break;
                     case MessageType.LocationChanged:
+                        LocationChanged?.Invoke(this, null);
                         break;
                     default:
                         break;

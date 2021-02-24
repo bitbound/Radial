@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="$(TargetPath)&#xD;&#xA;cd $(ProjectDir)&#xD;&#xA;copy /y &quot;$(OutDir)\Locations.json&quot; &quot;..\Radial\Resources\Locations.json&quot;" />
+    <Exec Command="cd $(OutDir)&#xD;&#xA;dotnet &quot;$(TargetPath)&quot;&#xD;&#xA;cd $(ProjectDir)&#xD;&#xA;copy /y &quot;$(OutDir)\Locations.json&quot; &quot;..\Radial\Resources\Locations.json&quot;" />
   </Target>
 
 </Project>

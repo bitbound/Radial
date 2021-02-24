@@ -24,11 +24,7 @@ namespace Radial.Services.Client
         Location Location { get; }
         RadialUser User { get; }
         Task Connect();
-
         void Disconnect(string reason);
-
-        Action ExchangeInput(Action inputAction);
-
         void InvokeMessageReceived(IMessageBase message);
     }
 
@@ -39,7 +35,6 @@ namespace Radial.Services.Client
         private readonly UserManager<RadialUser> _userManager;
         private readonly IWorld _world;
         private readonly ILogger<ClientConnection> _logger;
-        private Action _queuedInput;
         private RadialUser _user;
         private PlayerCharacter _character;
 
@@ -146,11 +141,6 @@ namespace Radial.Services.Client
             _clientManager.RemoveClient(this);
 
             GC.SuppressFinalize(this);
-        }
-
-        public Action ExchangeInput(Action inputAction)
-        {
-            return Interlocked.Exchange(ref _queuedInput, inputAction);
         }
 
         public void InvokeMessageReceived(IMessageBase message)
