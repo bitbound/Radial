@@ -137,7 +137,7 @@
 
     private void Move(MovementDirection direction)
     {
-        if (DateTimeOffset.Now - CharacterInfo.LastMoveTime < TimeSpan.FromSeconds(1))
+        if (DateTimeOffset.Now - CharacterInfo.LastMoveTime < TimeSpan.FromMilliseconds(100))
         {
             return;
         }
