@@ -51,10 +51,9 @@ namespace Radial.Utilities
             return _cache.AddOrUpdate(key, item, (k, v) => item);
         }
 
-        public T Get(string key)
+        public bool Exists(string xyz)
         {
-            key = key.Replace(" ", string.Empty);
-            return _cache[key];
+            return _cache.ContainsKey(xyz);
         }
 
         public T Find(Func<T, bool> match)
@@ -62,6 +61,11 @@ namespace Radial.Utilities
             return _cache.Values.FirstOrDefault(match);
         }
 
+        public T Get(string key)
+        {
+            key = key.Replace(" ", string.Empty);
+            return _cache[key];
+        }
         public void Load()
         {
             var scope = _serviceProvider.CreateScope();

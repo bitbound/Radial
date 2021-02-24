@@ -59,6 +59,7 @@ namespace Radial.Services
 
             oldLocation.Characters.Remove(character);
             newLocation.Characters.Add(character);
+            clientConnection.Location = newLocation;
 
             ClientConnections.AddOrUpdate(clientConnection.User.Id, clientConnection, (k, v) => clientConnection);
 
@@ -124,6 +125,7 @@ namespace Radial.Services
        
                 location.Characters.Remove(character);
                 _world.OfflineLocation.Characters.Add(character);
+                clientConnection.Location = _world.OfflineLocation;
 
 
                 foreach (var other in ClientConnections.Where(x => x.Value.User.Id != character.UserId))

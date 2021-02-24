@@ -21,7 +21,7 @@ namespace Radial.Services.Client
         event EventHandler<IMessageBase> MessageReceived;
 
         PlayerCharacter Character { get; }
-        Location Location { get; }
+        Location Location { get; set; }
         RadialUser User { get; }
         Task Connect();
         void Disconnect(string reason);
@@ -37,6 +37,7 @@ namespace Radial.Services.Client
         private readonly ILogger<ClientConnection> _logger;
         private RadialUser _user;
         private PlayerCharacter _character;
+        private Location _location;
 
         public ClientConnection(
             AuthenticationStateProvider authProvider,
@@ -93,6 +94,12 @@ namespace Radial.Services.Client
                 {
                     return null;
                 }
+
+                if (_location?.Players?.Contains(Character) == true)
+                {
+                    return _location;
+                }
+
                 var location = _world.Locations.Find(x => x.Characters.Contains(Character));
                 if (location is null)
                 {
@@ -101,6 +108,10 @@ namespace Radial.Services.Client
                 }
 
                 return location;
+            }
+            set
+            {
+                _location = value;
             }
         }
 

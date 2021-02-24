@@ -3,6 +3,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -56,7 +57,14 @@ namespace Radial.Services
             var elapsed = DateTimeOffset.Now - _lastLoop;
             if (elapsed < _desiredLoopTime)
             {
-                await Task.Delay(_desiredLoopTime - elapsed);
+                var waitTime = _desiredLoopTime - elapsed;
+                Debug.WriteLine($"Waiting {waitTime} in main loop.");
+                Debug.WriteLine($"Loop time is {elapsed}.");
+                await Task.Delay(waitTime);
+            }
+            else
+            {
+                Debug.WriteLine($"Loop time is slow.  Elapsed: {elapsed}");
             }
 
             var speedMultiplier = (DateTimeOffset.Now - _lastLoop).TotalMilliseconds / _desiredLoopTime.TotalMilliseconds;
