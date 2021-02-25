@@ -1,4 +1,8 @@
-﻿window.invokeConfirm = async (message) => {
+﻿window.addClassName = (element, className) => {
+    element.classList.add(className);
+}
+
+window.invokeConfirm = async (message) => {
     return confirm(message);
 }
 
@@ -16,6 +20,10 @@ window.scrollToEnd = (element) => {
     }
 
     element.scrollTop = element.scrollHeight;
+}
+
+window.setStyleProperty = (element, propertyName, value) => {
+    element.style[propertyName] = value;
 }
 
 window.startDraggingY = (elementId, clientY) => {
@@ -41,6 +49,8 @@ window.startDraggingY = (elementId, clientY) => {
         window.removeEventListener("pointermove", pointerMove);
         window.removeEventListener("pointerup", pointerUpOrLeave);
         window.removeEventListener("pointerleave", pointerUpOrLeave);
+        ev.preventDefault();
+        ev.stopPropagation();
     }
 
     pointerUpOrLeave();

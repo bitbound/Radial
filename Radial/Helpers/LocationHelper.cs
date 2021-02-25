@@ -103,7 +103,13 @@ namespace Radial.Helpers
                 {
                     continue;
                 }
-                var addExit = Convert.ToBoolean(random.Next(0, 2));
+
+                // Increase the odds of generating an exit in the direction you're already traveling.
+                var odds = enterDirection == direction ?
+                    4 :
+                    2;
+
+                var addExit = Convert.ToBoolean(random.Next(0, odds));
                 if (addExit)
                 {
                     exits.Add(direction);

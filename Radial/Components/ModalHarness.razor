@@ -1,0 +1,69 @@
+﻿@inject IModalService ModalService
+@inject IJsInterop JsInterop
+  
+<div @ref="_mainModal" 
+     class="modal fade @_showClass" style="display: @_displayStyle">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@ModalService.Title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="CloseModal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>@ModalService.Message</p>
+                @if (ModalService.ShowInput)
+                {
+                    <input type="text" @bind-value="ModalService.TextInput" />
+                }
+            </div>
+            <div class="modal-footer">
+                @foreach (var button in ModalService.Buttons)
+                {
+                    <button type="button" class="@button.Class" @onclick="() => ExecuteButtonAction(button.OnClick)">@button.Text</button>
+                }
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="CloseModal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private ElementReference _mainModal;
+
+    private string _showClass;
+    private string _displayStyle;
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            ModalService.ModalShown += async (sender, args) =>
+            {
+                _displayStyle = "block";
+                await InvokeAsync(StateHasChanged);
+                // The fade animation won't work without a delay here.
+                await Task.Delay(100);
+                _showClass = "show";
+                await InvokeAsync(StateHasChanged);
+            };
+        }
+        return base.OnAfterRenderAsync(firstRender);
+    }
+
+    private async Task CloseModal()
+    {
+        _showClass = null;
+        await InvokeAsync(StateHasChanged);
+        await Task.Delay(100);
+        _displayStyle = null;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task ExecuteButtonAction(Action onclick)
+    {
+        onclick.Invoke();
+        await CloseModal();
+    }
+}

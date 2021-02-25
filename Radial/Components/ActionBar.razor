@@ -4,6 +4,7 @@
 @inject IInputDispatcher InputDispatcher
 @inject IClientConnection ClientConnection
 @inject IMessagePublisher MessagePublisher
+@inject IModalService ModalService 
 
 <div class="action-bar-frame" tabindex="0" @onkeydown="OnKeyDown">
     @if (CharacterInfo?.EnergyCurrent < 1)

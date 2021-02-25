@@ -63,6 +63,10 @@ namespace Radial.Services
                 newLocation = LocationHelper.GetRandomLocation(newXyz, clientConnection, direction, _clientManager, _world);
                 _world.Locations.AddOrUpdate(newLocation.XYZ, newLocation);
             }
+            else
+            {
+                LocationHelper.AddLogicalExits(newLocation.Exits, _world, newXyz);
+            }
         
             oldLocation.Characters.Remove(clientConnection.Character);
             newLocation.Characters.Add(clientConnection.Character);

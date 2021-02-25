@@ -65,13 +65,13 @@ namespace Radial.Services
 
         public async Task Load()
         {
-            if (!Locations.All.Any())
+            var scope = _serviceProvider.CreateScope();
+            var env = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
+            var locationsPath = Path.Combine(env.ContentRootPath, "Resources", "Locations.json");
+            var locations = JsonSerializer.Deserialize<Dictionary<string, Location>>(await File.ReadAllTextAsync(locationsPath));
+            foreach (var location in locations.Values)
             {
-                var scope = _serviceProvider.CreateScope();
-                var env = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
-                var locationsPath = Path.Combine(env.ContentRootPath, "Resources", "Locations.json");
-                var locations = JsonSerializer.Deserialize<Dictionary<string, Location>>(await File.ReadAllTextAsync(locationsPath));
-                foreach (var location in locations.Values)
+                if (!Locations.Exists(location.XYZ))
                 {
                     Locations.AddOrUpdate(location.XYZ, location);
                 }

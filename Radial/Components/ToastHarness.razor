@@ -2,7 +2,7 @@
 @inject IToastService ToastService
 
 <div class="toast-harness">
-    @foreach (var toast in Toasts)
+    @foreach (var toast in ToastService?.Toasts)
     {
         <div class="toast-message @toast.ClassString" style="animation-delay: @(toast.Expiration.TotalMilliseconds.ToString() + "ms"); @toast.StyleOverrides">
             @toast.Message
@@ -12,15 +12,16 @@
 
 @code {
 
-    private List<Radial.Models.Toast> Toasts { get; set; } = new List<Radial.Models.Toast>();
-
-    protected override Task OnInitializedAsync()
+    protected override Task OnAfterRenderAsync(bool firstRender)
     {
-        ToastService.OnToastsChanged += (s, e) =>
+        if (firstRender)
         {
-            Toasts = ToastService.Toasts;
-            InvokeAsync(StateHasChanged);
-        };
+            ToastService.OnToastsChanged += (s, e) =>
+            {
+                InvokeAsync(StateHasChanged);
+            };
+        }
         return base.OnInitializedAsync();
+
     }
 }

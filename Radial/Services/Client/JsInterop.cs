@@ -9,6 +9,7 @@ namespace Radial.Services.Client
 {
    public interface IJsInterop
     {
+        void AddClassName(ElementReference element, string className);
         ValueTask Alert(string message);
 
         void AutoHeight();
@@ -16,7 +17,7 @@ namespace Radial.Services.Client
         ValueTask<bool> Confirm(string message);
 
         ValueTask<string> Prompt(string message);
-
+        void SetStyleProperty(ElementReference element, string propertyName, string value);
         void StartDraggingY(string elementId, double clientY);
 
         void ScrollToEnd(ElementReference element);
@@ -29,6 +30,11 @@ namespace Radial.Services.Client
         public JsInterop(IJSRuntime jSRuntime)
         {
             _jsRuntime = jSRuntime;
+        }
+
+        public void AddClassName(ElementReference element, string className)
+        {
+            _jsRuntime.InvokeVoidAsync("addClassName", element, className);
         }
 
         public ValueTask Alert(string message)
@@ -53,6 +59,10 @@ namespace Radial.Services.Client
         public void ScrollToEnd(ElementReference element)
         {
             _jsRuntime.InvokeVoidAsync("scrollToEnd", element);
+        }
+        public void SetStyleProperty(ElementReference element, string propertyName, string value)
+        {
+            _jsRuntime.InvokeVoidAsync("setStyleProperty", element, propertyName, value);
         }
         public void StartDraggingY(string elementId, double clientY)
         {

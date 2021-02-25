@@ -53,6 +53,7 @@ namespace Radial
             services.AddScoped<IClientConnection, ClientConnection>();
             services.AddScoped<IMessagePublisher, MessagePublisher>();
             services.AddScoped<IToastService, ToastService>();
+            services.AddScoped<IModalService, ModalService>();
 
             services.AddScoped<IClientManager, ClientManager>();
             services.AddScoped<IInputDispatcher, InputDispatcher>();
