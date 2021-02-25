@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 using Radial.Enums;
+using Radial.Models.Messaging;
 using Radial.Services.Client;
 using System;
 using System.Collections.Concurrent;
@@ -43,17 +44,50 @@ namespace Radial.Services
 
         public void Attack(IClientConnection clientConnection)
         {
-
+            QueueInput(clientConnection, () =>
+            {
+                if (clientConnection.Character.ChargeCurrent < 1)
+                {
+                    clientConnection.InvokeMessageReceived(new LocalEventMessage()
+                    {
+                        Message = "No charge available to perform action."
+                    });
+                    return Task.CompletedTask;
+                }
+                return Task.CompletedTask;
+            });
         }
 
         public void Blast(IClientConnection clientConnection)
         {
-
+            QueueInput(clientConnection, () =>
+            {
+                if (clientConnection.Character.ChargeCurrent < 1)
+                {
+                    clientConnection.InvokeMessageReceived(new LocalEventMessage()
+                    {
+                        Message = "No charge available to perform action."
+                    });
+                    return Task.CompletedTask;
+                }
+                return Task.CompletedTask;
+            });
         }
 
         public void Block(IClientConnection clientConnection)
         {
-
+            QueueInput(clientConnection, () =>
+            {
+                if (clientConnection.Character.ChargeCurrent < 1)
+                {
+                    clientConnection.InvokeMessageReceived(new LocalEventMessage()
+                    {
+                        Message = "No charge available to perform action."
+                    });
+                    return Task.CompletedTask;
+                }
+                return Task.CompletedTask;
+            });
         }
 
         public async Task DispatchInputs()
@@ -81,7 +115,18 @@ namespace Radial.Services
 
         public void Heal(IClientConnection clientConnection)
         {
-
+            QueueInput(clientConnection, () =>
+            {
+                if (clientConnection.Character.ChargeCurrent < 1)
+                {
+                    clientConnection.InvokeMessageReceived(new LocalEventMessage()
+                    {
+                        Message = "No charge available to perform action."
+                    });
+                    return Task.CompletedTask;
+                }
+                return Task.CompletedTask;
+            });
         }
 
         public void MoveCharacter(IClientConnection clientConnection, MovementDirection direction)

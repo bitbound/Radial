@@ -31,6 +31,11 @@ namespace Radial.Services
        
         public void MoveCharacter(IClientConnection clientConnection, MovementDirection direction)
         {
+            if (clientConnection.Character.State != CharacterState.Normal)
+            {
+                return;
+            }
+
             var oldLocation = clientConnection.Location;
 
             string newXyz;
@@ -67,7 +72,9 @@ namespace Radial.Services
             {
                 LocationHelper.AddLogicalExits(newLocation.Exits, _world, newXyz);
             }
-        
+
+            oldLocation.LastAccessed = DateTimeOffset.Now;
+            newLocation.LastAccessed = DateTimeOffset.Now;
             oldLocation.Characters.Remove(clientConnection.Character);
             newLocation.Characters.Add(clientConnection.Character);
             clientConnection.Location = newLocation;

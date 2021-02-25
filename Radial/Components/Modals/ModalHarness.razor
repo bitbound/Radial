@@ -12,11 +12,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <p>@ModalService.Message</p>
-                @if (ModalService.ShowInput)
-                {
-                    <input type="text" @bind-value="ModalService.TextInput" />
-                }
+                @ModalService.Body
             </div>
             <div class="modal-footer">
                 @foreach (var button in ModalService.Buttons)

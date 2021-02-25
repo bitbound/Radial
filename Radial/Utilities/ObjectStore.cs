@@ -37,6 +37,7 @@ namespace Radial.Utilities
                 Interval = _saveInterval.TotalMilliseconds
             };
             _saveTimer.Elapsed += SaveTimer_Elapsed;
+            _saveTimer.Start();
 
             Load();
         }

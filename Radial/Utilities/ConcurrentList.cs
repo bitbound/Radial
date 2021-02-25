@@ -77,7 +77,7 @@ namespace Radial.Utilities
         {
             lock (_lock)
             {
-                return _list.GetEnumerator();
+                return _list.ToList().GetEnumerator();
             }
         }
 

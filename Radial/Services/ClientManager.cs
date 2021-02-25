@@ -15,10 +15,14 @@ namespace Radial.Services
 {
     public interface IClientManager
     {
+        ICollection<IClientConnection> Clients { get; }
+
         Task AddClient(IClientConnection clientConnection);
-        bool IsPlayerOnline(string username);
         void Broadcast(IMessageBase message);
 
+        IEnumerable<IClientConnection> GetPartyMembers(IClientConnection clientConnection);
+
+        bool IsPlayerOnline(string username);
         Task RemoveClient(IClientConnection clientConnection);
 
         bool SendToClient(IClientConnection senderConnection, string recipient, IMessageBase message, bool copyToSelf = false);
@@ -26,11 +30,13 @@ namespace Radial.Services
         void SendToLocals(IClientConnection senderConnection, Location location, IMessageBase message);
 
         bool SendToParty(IClientConnection senderConnection, IMessageBase message);
-        IEnumerable<IClientConnection> GetPartyMembers(IClientConnection clientConnection);
     }
 
     public class ClientManager : IClientManager
     {
+        private static ConcurrentDictionary<string, IClientConnection> _clientConnections =
+                    new ConcurrentDictionary<string, IClientConnection>();
+
         private readonly IWorld _world;
 
         public ClientManager(IWorld world)
@@ -38,8 +44,7 @@ namespace Radial.Services
             _world = world;
         }
 
-        private static ConcurrentDictionary<string, IClientConnection> ClientConnections { get; } =
-            new ConcurrentDictionary<string, IClientConnection>();
+        public ICollection<IClientConnection> Clients => _clientConnections.Values;
 
         public Task AddClient(IClientConnection clientConnection)
         {
@@ -52,7 +57,7 @@ namespace Radial.Services
                 return Task.CompletedTask;
             }
 
-            if (ClientConnections.TryRemove(clientConnection.User.Id, out var existingConnection))
+            if (_clientConnections.TryRemove(clientConnection.User.Id, out var existingConnection))
             {
                 existingConnection.Disconnect("You've been disconnected because you signed in from another tab or browser.");
             }
@@ -61,9 +66,9 @@ namespace Radial.Services
             newLocation.Characters.Add(character);
             clientConnection.Location = newLocation;
 
-            ClientConnections.AddOrUpdate(clientConnection.User.Id, clientConnection, (k, v) => clientConnection);
+            _clientConnections.AddOrUpdate(clientConnection.User.Id, clientConnection, (k, v) => clientConnection);
 
-            foreach (var other in ClientConnections.Where(x => x.Value.User.Id != clientConnection.User.Id))
+            foreach (var other in _clientConnections.Where(x => x.Value.User.Id != clientConnection.User.Id))
             {
                 other.Value.InvokeMessageReceived(new ChatMessage()
                 {
@@ -75,7 +80,7 @@ namespace Radial.Services
 
             foreach (var other in newLocation.Players.Where(x => x.Name != character.Name))
             {
-                var player = ClientConnections.Values.FirstOrDefault(x => x.Character.Name == other.Name);
+                var player = _clientConnections.Values.FirstOrDefault(x => x.Character.Name == other.Name);
                 player.InvokeMessageReceived(new LocalEventMessage()
                 {
                     Message = $"{character.Name} has appeared."
@@ -86,7 +91,7 @@ namespace Radial.Services
 
         public void Broadcast(IMessageBase message)
         {
-            foreach (var clientConnection in ClientConnections.Values)
+            foreach (var clientConnection in _clientConnections.Values)
             {
                 clientConnection.InvokeMessageReceived(message);
             };
@@ -99,12 +104,12 @@ namespace Radial.Services
                 return new IClientConnection[] { clientConnection };
             }
 
-            return ClientConnections.Values.Where(x => x.Character.PartyId == clientConnection.Character.PartyId);
+            return _clientConnections.Values.Where(x => x.Character.PartyId == clientConnection.Character.PartyId);
         }
 
         public bool IsPlayerOnline(string username)
         {
-            return ClientConnections.Values.Any(x => x.User.UserName.Equals(username.Trim(), StringComparison.OrdinalIgnoreCase));
+            return _clientConnections.Values.Any(x => x.User.UserName.Equals(username.Trim(), StringComparison.OrdinalIgnoreCase));
         }
 
         public Task RemoveClient(IClientConnection clientConnection)
@@ -119,7 +124,7 @@ namespace Radial.Services
 
             _world.CharacterBackups.AddOrUpdate(character.Name, character);
 
-            if (ClientConnections.TryRemove(character.UserId, out _))
+            if (_clientConnections.TryRemove(character.UserId, out _))
             {
                 var locationXyz = location.XYZ;
        
@@ -128,7 +133,7 @@ namespace Radial.Services
                 clientConnection.Location = _world.OfflineLocation;
 
 
-                foreach (var other in ClientConnections.Where(x => x.Value.User.Id != character.UserId))
+                foreach (var other in _clientConnections.Where(x => x.Value.User.Id != character.UserId))
                 {
                     other.Value.InvokeMessageReceived(new ChatMessage()
                     {
@@ -140,7 +145,7 @@ namespace Radial.Services
 
                 foreach (var other in location.Players.Where(x => x.Name != clientConnection.Character.Name))
                 {
-                    var player = ClientConnections.Values.FirstOrDefault(x => x.Character.Name == other.Name);
+                    var player = _clientConnections.Values.FirstOrDefault(x => x.Character.Name == other.Name);
                     player.InvokeMessageReceived(new LocalEventMessage()
                     {
                         Message = $"{character.Name} has disappeared."
@@ -158,7 +163,7 @@ namespace Radial.Services
                 return false;
             }
 
-            var clientConnection = ClientConnections.Values.FirstOrDefault(x => 
+            var clientConnection = _clientConnections.Values.FirstOrDefault(x => 
                 x.User.UserName.Equals(recipient?.Trim(), StringComparison.OrdinalIgnoreCase));
 
             if (clientConnection is null)
@@ -187,7 +192,7 @@ namespace Radial.Services
         {
             var connections = location.Players
                 .Where(x => x.Name != senderConnection.Character.Name)
-                .Select(x => ClientConnections.Values.FirstOrDefault(y => y.Character.Name == x.Name));
+                .Select(x => _clientConnections.Values.FirstOrDefault(y => y.Character.Name == x.Name));
 
             foreach (var connection in connections)
             {
@@ -202,7 +207,7 @@ namespace Radial.Services
                 return false;
             }
 
-            foreach (var connection in ClientConnections.Values.Where(x=>x.Character.PartyId == senderConnection.Character.PartyId))
+            foreach (var connection in _clientConnections.Values.Where(x=>x.Character.PartyId == senderConnection.Character.PartyId))
             {
                 connection.InvokeMessageReceived(message);
             }
@@ -214,7 +219,7 @@ namespace Radial.Services
             var location = senderConnection.Location;
             return location.Players
                 .Where(x => x.Name != senderConnection.Character.Name)
-                .Select(x => ClientConnections.Values.FirstOrDefault(y => y.Character.Name == x.Name));
+                .Select(x => _clientConnections.Values.FirstOrDefault(y => y.Character.Name == x.Name));
         }
     }
 }

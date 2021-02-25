@@ -67,6 +67,8 @@ namespace Radial.Models
 
         public long Experience { get; set; }
 
+        public long Glints { get; set; }
+
         [JsonIgnore]
         public Interactable Interaction { get; set; }
 

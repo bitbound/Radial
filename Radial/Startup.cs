@@ -55,7 +55,7 @@ namespace Radial
             services.AddScoped<IToastService, ToastService>();
             services.AddScoped<IModalService, ModalService>();
 
-            services.AddScoped<IClientManager, ClientManager>();
+            services.AddSingleton<IClientManager, ClientManager>();
             services.AddScoped<IInputDispatcher, InputDispatcher>();
             services.AddScoped<ILocationService, LocationService>();
 

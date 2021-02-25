@@ -1,0 +1,19 @@
+﻿<div>
+    @foreach (var line in ContentLines)
+    {
+        <p>
+            @line
+        </p>
+    }
+</div>
+
+@code {
+
+    public TextModalContent(string[] contentLines)
+    {
+        ContentLines = contentLines;
+    }
+
+    [Parameter]
+    public string[] ContentLines { get; set; }
+}
