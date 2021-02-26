@@ -1,4 +1,5 @@
-﻿using Radial.Services.Client;
+﻿using Radial.Models;
+using Radial.Services.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,20 +9,24 @@ namespace Radial.Services
 {
     public interface ICharacterEffectsService
     {
-        void ApplyChargeRecovery(IClientConnection client, double timeMultiplier);
+        void ApplyChargeRecovery(Location location, double timeMultiplier);
     }
     public class CharacterEffectsService : ICharacterEffectsService
     {
-        public void ApplyChargeRecovery(IClientConnection client, double timeMultiplier)
+        public void ApplyChargeRecovery(Location location, double timeMultiplier)
         {
-            if (client.Character.ChargeCurrent != client.Character.ChargeMax)
+            foreach (var character in location.Characters)
             {
-                client.Character.ChargeCurrent = (long)Math.Max(0,
-                    Math.Min(
-                        client.Character.ChargeMax,
-                        client.Character.ChargeCurrent + client.Character.ChargeRate * .1 * timeMultiplier)
-                );
+                if (character.ChargeCurrent != character.ChargeMax)
+                {
+                    character.ChargeCurrent = (long)Math.Max(0,
+                        Math.Min(
+                            character.ChargeMax,
+                            character.ChargeCurrent + character.ChargeRate * .1 * timeMultiplier)
+                    );
+                }
             }
+
         }
     }
 }

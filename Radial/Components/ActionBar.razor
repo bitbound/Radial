@@ -15,7 +15,9 @@
     {
         @if (CharacterInfo?.State == CharacterState.InCombat)
         {
-            <button id="respawnButton" class="btn btn-danger" @onkeydown="Escape">Escape</button>
+            <div class="text-center">
+                <button id="respawnButton" class="btn btn-danger" style="transform: translate(-50%, 50%)" @onkeydown="Escape">Escape</button>
+            </div>
         }
         else
         {
@@ -80,6 +82,10 @@
         if (firstRender)
         {
             CharacterInfo = ClientConnection.Character;
+            MessagePublisher.DataStateChanged += (sender, args) =>
+            {
+                InvokeAsync(StateHasChanged);
+            };
         }
         return base.OnAfterRenderAsync(firstRender);
     }

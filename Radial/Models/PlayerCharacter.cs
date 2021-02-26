@@ -9,10 +9,7 @@ namespace Radial.Models
 {
     public class PlayerCharacter : CharacterBase
     {
-        public string UserId { get; set; }
-
-        [JsonIgnore]
-        public DateTimeOffset LastCombatEncounter { get; set; }
+        public long FarthestDistanceTravelled { get; set; }
 
         /// <summary>
         /// A lookup for which interactable to start at when interacting with an NPC or object.
@@ -20,5 +17,10 @@ namespace Radial.Models
         /// This is so state can be saved, like for NPC dialogs.
         /// </summary>
         public ConcurrentDictionary<Guid, Guid> InteractableStartLookup { get; init; } = new ConcurrentDictionary<Guid, Guid>();
+
+        [JsonIgnore]
+        public DateTimeOffset LastCombatEncounter { get; set; }
+
+        public string UserId { get; set; }
     }
 }

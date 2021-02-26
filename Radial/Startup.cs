@@ -61,6 +61,7 @@ namespace Radial
             services.AddScoped<ICombatService, CombatService>();
             services.AddScoped<ICharacterEffectsService, CharacterEffectsService>();
             services.AddScoped<IEncounterService, EncounterService>();
+            services.AddScoped<INpcService, NpcService>();
 
             services.AddHostedService<GameEngine>();
         }

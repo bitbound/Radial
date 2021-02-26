@@ -23,6 +23,7 @@ namespace Radial.Services
         private DateTimeOffset _lastLoop = DateTimeOffset.Now;
         private TimeSpan _elapsed;
         private double _timeMultiplier;
+        private DateTimeOffset _lastThreeSecondTick;
         private readonly TimeSpan _desiredLoopTime = TimeSpan.FromMilliseconds(100);
 
         public GameEngine(IWorld world, IClientManager clientManager, IServiceProvider serviceProvider, ILogger<GameEngine> logger)
@@ -54,6 +55,7 @@ namespace Radial.Services
                  
                     await RunImmediateActions(scope);
                     await RunOneSecondActions(scope);
+                    await RunThreeSecondActions(scope);
                     SendStateUpdates();
                 }
                 catch (Exception ex)
@@ -61,6 +63,27 @@ namespace Radial.Services
                     _logger.LogError(ex, "Error in main loop.");
                 }
             }
+        }
+
+        private Task RunThreeSecondActions(IServiceScope scope)
+        {
+            if (DateTimeOffset.Now - _lastThreeSecondTick < TimeSpan.FromSeconds(3))
+            {
+                return Task.CompletedTask;
+            }
+
+            var combatService = scope.ServiceProvider.GetRequiredService<ICombatService>();
+
+            var locations =_clientManager.Clients.Select(x => x.Location).Distinct();
+
+            foreach (var location in locations)
+            {
+                combatService.ExecuteNpcActions(location);
+            }
+
+            _lastThreeSecondTick = DateTimeOffset.Now;
+
+            return Task.CompletedTask;
         }
 
         private void SendStateUpdates()
@@ -79,10 +102,17 @@ namespace Radial.Services
             }
 
             var effectsService = scope.ServiceProvider.GetRequiredService<ICharacterEffectsService>();
+            var encounterService = scope.ServiceProvider.GetRequiredService<IEncounterService>();
+            var locations = _clientManager.Clients.Select(x => x.Location).Distinct();
 
             foreach (var client in _clientManager.Clients)
             {
-                effectsService.ApplyChargeRecovery(client, _timeMultiplier);
+                encounterService.SpawnNpcCombatEncounters(client);
+            }
+
+            foreach (var location in locations)
+            {
+                effectsService.ApplyChargeRecovery(location, _timeMultiplier);
             }
 
             _lastOneSecondTick = DateTimeOffset.Now;

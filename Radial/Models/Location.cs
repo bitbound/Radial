@@ -22,7 +22,7 @@ namespace Radial.Models
 
         public ConcurrentList<Interactable> Interactables { get; set; } = new ConcurrentList<Interactable>();
         public bool IsEditable { get; set; }
-
+        public bool IsSafeArea { get; set; }
         public bool IsTemporary { get; set; }
 
         public DateTimeOffset LastAccessed { get; set; }

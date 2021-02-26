@@ -9,7 +9,6 @@ namespace Radial.Enums
     {
         None,
         OnAttacked,
-        PlayerOnSight,
-        CharacterOnSight
+        PlayerOnSight
     }
 }
