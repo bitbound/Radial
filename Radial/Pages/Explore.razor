@@ -36,7 +36,7 @@
             @if (Location?.Interactables?.Any() == true)
             {
                 <p class="text-info">
-                    @foreach (var interactable in Location?.Interactables)
+                    @foreach (var interactable in Location.Interactables)
                     {
                         <div>@interactable.Prompt</div>
                     }

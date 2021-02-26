@@ -4,7 +4,7 @@
 @inject IInputDispatcher InputDispatcher
 @inject IClientConnection ClientConnection
 @inject IMessagePublisher MessagePublisher
-@inject IModalService ModalService 
+@inject IModalService ModalService
 
 <div class="action-bar-frame" tabindex="0" @onkeydown="OnKeyDown">
     @if (CharacterInfo?.EnergyCurrent < 1)
@@ -28,12 +28,20 @@
         }
 
         <div class="button-control-frame">
-            <div class="action-bonus-ring"
-                 style="opacity: @CharacterInfo?.ActionBonus; 
+            @if (CharacterInfo?.State == CharacterState.InCombat)
+            {
+                <div class="action-bonus-ring"
+                     style="opacity: @CharacterInfo?.ActionBonus;
                         transform: translate(-50%, -50%) scale(@($"{CharacterInfo?.ActionBonus},{CharacterInfo?.ActionBonus}"));
                         border-color: @(CharacterInfo?.ActionBonus > .9 ? "limegreen" : "unset")">
 
-            </div>
+                </div>
+            }
+            else
+            {
+                <div></div>
+            }
+
             <div>
                 <button class="btn btn-primary dpad-button top-button" title="Attack" @onclick="Attack">
                     <img src="/media/svg/sword.svg" />
@@ -56,6 +64,9 @@
             </button>
             <button class="btn btn-sm btn-danger target-button" title="Cycle Enemy Target" @onclick="CycleEnemyTarget">
                 <span class="oi oi-target"></span>
+            </button>
+            <button class="btn btn-sm btn-warning target-button" title="Powers">
+                <span class="oi oi-bolt"></span>
             </button>
         </div>
     }

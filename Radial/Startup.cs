@@ -58,6 +58,9 @@ namespace Radial
             services.AddSingleton<IClientManager, ClientManager>();
             services.AddScoped<IInputDispatcher, InputDispatcher>();
             services.AddScoped<ILocationService, LocationService>();
+            services.AddScoped<ICombatService, CombatService>();
+            services.AddScoped<ICharacterEffectsService, CharacterEffectsService>();
+            services.AddScoped<IEncounterService, EncounterService>();
 
             services.AddHostedService<GameEngine>();
         }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -9,9 +10,7 @@ namespace Radial.Models
 {
     public class Interactable
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public Guid Id { get; init; }
+        public Guid Id { get; init; } = Guid.NewGuid();
 
         public string Content { get; init; }
 
@@ -19,6 +18,6 @@ namespace Radial.Models
 
         public string Title { get; init; }
 
-        public List<Interactable> Interactables { get; init; } = new List<Interactable>();
+        public ConcurrentDictionary<Guid, Interactable> Interactables { get; init; } = new ConcurrentDictionary<Guid, Interactable>();
     }
 }

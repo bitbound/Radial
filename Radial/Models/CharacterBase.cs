@@ -16,6 +16,9 @@ namespace Radial.Models
         [JsonIgnore]
         public double ActionBonus { get; set; }
 
+        [JsonIgnore]
+        public bool ActionBonusIncreasing { get; set; }
+
 
         [JsonIgnore]
         public long ChargeCurrent { get; set; }

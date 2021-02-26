@@ -1,6 +1,7 @@
 ﻿using Radial.Data.Entities;
 using Radial.Enums;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -11,7 +12,8 @@ namespace Radial.Models
 {
     public class Npc : CharacterBase
     {
+        public Guid Id { get; init; } = Guid.NewGuid();
         public AggressionModel AggressionModel { get; init; }
-        public Interactable Dialog { get; init; }
+        public ConcurrentDictionary<Guid, Interactable> Dialog { get; init; } = new ConcurrentDictionary<Guid, Interactable>();
     }
 }
