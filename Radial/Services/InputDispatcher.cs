@@ -125,6 +125,7 @@ namespace Radial.Services
             clientConnection.Location.Characters.Remove(clientConnection.Character);
             _world.StartLocation.Characters.Add(clientConnection.Character);
             clientConnection.Location = _world.StartLocation;
+            clientConnection.Character.ChargeCurrent = 0;
         }
 
         public void Heal(IClientConnection clientConnection)
@@ -149,6 +150,11 @@ namespace Radial.Services
                     clientConnection.Location,
                     clientConnection.Character.ActionBonus,
                     clientConnection.Location.PlayersAlive.Except(new[] { clientConnection.Character }));
+
+                if (clientConnection.Location.PlayersAlive.Any(x=>x.State == CharacterState.InCombat))
+                {
+                    clientConnection.Character.State = CharacterState.InCombat;
+                }
 
                 return Task.CompletedTask;
             });

@@ -58,6 +58,11 @@ namespace Radial.Services
 
         public void AttackTarget(CharacterBase attacker, Location location, double actionBonus)
         {
+            if (!location.Characters.Contains(attacker.Target))
+            {
+                attacker.Target = null;
+            }
+
             if (attacker.Target is null || attacker.Target?.Type == attacker.Type)
             {
                 attacker.Target = Calculator.GetRandom(location.CharactersAlive.Where(x => x.Type != attacker.Type));
@@ -148,7 +153,8 @@ namespace Radial.Services
             double actionBonus,
             IEnumerable<CharacterBase> otherRecipients)
         {
-            if (healer.Target is null)
+
+            if (healer.Target is null || !location.Characters.Contains(primaryRecipient))
             {
                 healer.Target = Calculator.GetRandom(location.CharactersAlive.Where(x => x.Type == healer.Type && x != healer));
             }

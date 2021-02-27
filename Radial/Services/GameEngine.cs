@@ -110,6 +110,7 @@ namespace Radial.Services
 
             var effectsService = scope.ServiceProvider.GetRequiredService<ICharacterEffectsService>();
             var encounterService = scope.ServiceProvider.GetRequiredService<IEncounterService>();
+            var combatService = scope.ServiceProvider.GetRequiredService<ICombatService>();
             var locations = _clientManager.Clients.Select(x => x.Location).Distinct();
 
             foreach (var client in _clientManager.Clients)
