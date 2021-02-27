@@ -1,12 +1,12 @@
 ﻿@using Radial.Enums
 @using Radial.Services
 @using Radial.Services.Client
-@using Radial.Utilities
+@using Radial.Utilities; 
 @inject IInputDispatcher InputDispatcher
 @inject IClientConnection ClientConnection
 @inject IMessagePublisher MessagePublisher
 @inject IModalService ModalService
-@inject IUiNoticiations UiNotifications 
+@inject IAppState AppState 
 
 <div class="action-bar-frame" tabindex="0" @onkeydown="OnKeyDown">
     <div class="action-bar-top-row">
@@ -232,7 +232,7 @@
     }
     private void OpenPowersMenu()
     {
-        UiNotifications.InvokePowersMenuOpenedEvent();
+        AppState.IsPowersMenuOpen = !AppState.IsPowersMenuOpen;
     }
     private void Respawn()
     {

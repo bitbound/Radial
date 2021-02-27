@@ -117,9 +117,11 @@ namespace Radial.Services
                 attackPower *= .9;
             }
 
+            attackPower = Math.Round(attackPower);
+
             foreach (var target in targets)
             {
-                target.EnergyCurrent = (long)Math.Round(target.EnergyCurrent - attackPower);
+                target.EnergyCurrent = Math.Max(0, (long)(target.EnergyCurrent - attackPower));
 
                 _clientManager.SendToAllAtLocation(location,
                     new LocalEventMessage($"{target.Name} is blasted for {attackPower} damage! {target.EnergyPercentFormatted} remaining.", "text-danger"));
@@ -343,6 +345,8 @@ namespace Radial.Services
             {
                 location.RemoveCharacter(npcTarget);
             }
+
+            // TODO: Add experience and glint.
         }
     }
 }

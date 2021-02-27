@@ -158,8 +158,6 @@ namespace Radial.Services
                     }
             };
 
-            npcService.SpawnNpcsForParty(clientConnection, newLocation);
-
             return newLocation;
         }
 
@@ -211,6 +209,11 @@ namespace Radial.Services
             else
             {
                 AddLogicalExits(newLocation.Exits, _world, newXyz);
+            }
+
+            if (!newLocation.NpcsAlive.Any(x=>x.AggressionModel > AggressionModel.OnAttacked))
+            {
+                _npcService.SpawnNpcsForParty(clientConnection, newLocation);
             }
 
             oldLocation.LastAccessed = DateTimeOffset.Now;

@@ -7,10 +7,10 @@
 @inject IClientConnection ClientConnection
 @inject IClientManager ClientManager
 @inject IToastService ToastService
-@inject IUiNoticiations UiNotifications 
+@inject IAppState AppState 
 @inherits AuthComponentBase
 
-<div class="powers-menu @_powersMenuOpenClass">
+<div class="powers-menu @(AppState.IsPowersMenuOpen ? "open" : "")">
     <div>
         <button type="button" class="close float-left ml-2 mt-2" style="font-size:2em" aria-label="Close" @onclick="ClosePowersMenu">
             <span aria-hidden="true">&times;</span>
@@ -23,16 +23,16 @@
 </div>
 
 @code {
-    public string _powersMenuOpenClass;
-
     protected override Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            UiNotifications.PowersWindowOpened += (sender, args) =>
+            AppState.PropertyChanged += (sender, args) =>
             {
-                _powersMenuOpenClass = "open";
-                InvokeAsync(StateHasChanged);
+                if (args.PropertyName == nameof(IAppState.IsPowersMenuOpen))
+                {
+                    InvokeAsync(StateHasChanged);
+                }
             };
         }
         return base.OnAfterRenderAsync(firstRender);
@@ -40,7 +40,7 @@
 
     private void ClosePowersMenu(MouseEventArgs args)
     {
-        _powersMenuOpenClass = string.Empty;
+        AppState.IsPowersMenuOpen = false;
         StateHasChanged();
     }
 }

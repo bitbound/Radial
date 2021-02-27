@@ -51,7 +51,7 @@ namespace Radial
             services.AddSingleton<IWorld, World>();
             services.AddScoped<IJsInterop, JsInterop>();
             services.AddScoped<IClientConnection, ClientConnection>();
-            services.AddScoped<IUiNoticiations, UiNotifications>();
+            services.AddScoped<IAppState, AppState>();
             services.AddScoped<IMessagePublisher, MessagePublisher>();
             services.AddScoped<IToastService, ToastService>();
             services.AddScoped<IModalService, ModalService>();
