@@ -66,7 +66,6 @@ namespace Radial.Services
         public static ConcurrentList<MovementDirection> GetOpenWorldExits(IWorld world, string newXyz, MovementDirection enterDirection)
         {
             var exits = new ConcurrentList<MovementDirection>();
-            var random = new Random();
 
             switch (enterDirection)
             {
@@ -201,10 +200,7 @@ namespace Radial.Services
                     newXyz = $"{oldLocation.XCoord - 1},{oldLocation.YCoord},{oldLocation.ZCoord}";
                     break;
                 default:
-                    clientConnection.InvokeMessageReceived(new LocalEventMessage()
-                    {
-                        Message = "There is no exit in that direction."
-                    });
+                    clientConnection.InvokeMessageReceived(new LocalEventMessage("There is no exit in that direction."));
                     return;
             }
 
@@ -226,14 +222,11 @@ namespace Radial.Services
             clientConnection.Location = newLocation;
             clientConnection.Character.FarthestDistanceTravelled = (long)Calculator.GetDistanceBetween(0, 0, newLocation.XCoord, newLocation.YCoord);
 
-            _clientManager.SendToLocals(clientConnection, oldLocation, new LocalEventMessage()
-            {
-                Message = $"{clientConnection.Character.Name} left to the {direction}."
-            });
-            _clientManager.SendToLocals(clientConnection, newLocation, new LocalEventMessage()
-            {
-                Message = $"{clientConnection.Character.Name} entered from the {GetOppositeDirection(direction)}."
-            });
+            _clientManager.SendToOtherLocals(clientConnection, oldLocation, 
+                new LocalEventMessage($"{clientConnection.Character.Name} left to the {direction}."));
+
+            _clientManager.SendToOtherLocals(clientConnection, newLocation,
+                new LocalEventMessage($"{clientConnection.Character.Name} entered from the {GetOppositeDirection(direction)}."));
             clientConnection.InvokeMessageReceived(GenericMessage.LocationChanged);
 
             _combatService.InitiateNpcAttackOnSight(clientConnection);

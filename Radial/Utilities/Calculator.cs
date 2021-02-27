@@ -9,6 +9,9 @@ namespace Radial.Utilities
 {
     public static class Calculator
     {
+        public static Random RandInstance { get; } = new Random();
+
+
         public static double GetDistanceBetween(long fromX, long fromY, long toX, long toY)
         {
             return Math.Sqrt(Math.Pow(fromX - toX, 2) +
@@ -22,21 +25,26 @@ namespace Radial.Utilities
                 throw new ArgumentException("Odds must be between 0 and 1.", nameof(odds));
             }
 
-            return new Random().NextDouble() <= odds;
+            return RandInstance.NextDouble() <= odds;
         }
 
         public static T GetRandomEnum<T>() 
             where T : Enum
         {
             var values = Enum.GetValues(typeof(T)).Cast<T>().ToArray();
-            var randomIndex = new Random().Next(0, values.Length);
+            var randomIndex = RandInstance.Next(0, values.Length);
             return values[randomIndex];
         }
 
         public static T GetRandom<T>(IEnumerable<T> collection)
         {
+            if (collection?.Any() != true)
+            {
+                return default;
+            }
+
             var count = collection.Count();
-            var index = new Random().Next(0, count);
+            var index = RandInstance.Next(0, count);
             return collection.ElementAt(index);
         }
     }

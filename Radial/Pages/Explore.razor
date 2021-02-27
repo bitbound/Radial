@@ -15,7 +15,7 @@
                 Location: X: @(Location?.XCoord) | Y: @(Location?.YCoord) | Z: @(Location?.ZCoord)
             </div>
             <div>
-                Target: @(CharacterInfo?.Target?.Name)
+                Target: @(CharacterInfo?.Target?.Name) [@(CharacterInfo?.Target?.EnergyPercentFormatted)]
             </div>
         </div>
         @if (CurrentInteraction is null)
@@ -48,7 +48,18 @@
                 {
                     <div>
                         <span class="nearby-character" @onclick="() => SetTarget(character)">
-                            @($"{character.Name} ({character.Type}) is here.")
+                            @if (character.State == CharacterState.InCombat)
+                            {
+                            <span class="text-danger">
+                                @($"{character.Name} ({character.Type}) is attacking! " +
+                                    $"(Target: {character.Target?.Name}) " +
+                                    $"[Energy: {character.EnergyPercentFormatted}]")
+                            </span>
+                            }
+                            else
+                            {
+                                @($"{character.Name} ({character.Type}) is here. [Energy: {character.EnergyPercentFormatted}]")
+                            }
                         </span>
                     </div>
                 }
@@ -76,7 +87,7 @@
     <div @ref="EventMessageDiv" style="overflow-y: auto">
         @foreach (var eventMessage in Events)
         {
-            <div>[@eventMessage.Timestamp.ToString("g")] - @eventMessage.Message</div>
+            <div class="@eventMessage.ClassName">[@eventMessage.Timestamp.ToString("g")] - @eventMessage.Message</div>
         }
     </div>
     <div class="p-2">

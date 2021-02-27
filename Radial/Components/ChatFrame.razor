@@ -163,7 +163,7 @@
                     ClientManager.SendToParty(ClientConnection, message);
                     break;
                 case ChatChannel.Local:
-                    ClientManager.SendToLocals(ClientConnection, message);
+                    ClientManager.SendToOtherLocals(ClientConnection, message);
                     break;
                 case ChatChannel.Private:
                     if (!ClientManager.SendToClient(ClientConnection, _privateChatRecipient, message, true))

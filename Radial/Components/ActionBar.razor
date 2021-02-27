@@ -9,14 +9,14 @@
 <div class="action-bar-frame" tabindex="0" @onkeydown="OnKeyDown">
     @if (CharacterInfo?.EnergyCurrent < 1)
     {
-        <button id="respawnButton" class="btn btn-danger" @onkeydown="Respawn">Respawn</button>
+        <button id="respawnButton" class="btn btn-danger" @onclick="Respawn">Respawn</button>
     }
     else
     {
         @if (CharacterInfo?.State == CharacterState.InCombat)
         {
             <div class="text-center">
-                <button id="respawnButton" class="btn btn-danger" style="transform: translate(-50%, 50%)" @onkeydown="Escape">Escape</button>
+                <button id="escapeButton" class="btn btn-danger" style="transform: translate(-50%, 50%)" @onclick="Escape">Escape</button>
             </div>
         }
         else
@@ -48,7 +48,7 @@
                 <button class="btn btn-primary dpad-button top-button" title="Attack" @onclick="Attack">
                     <img src="/media/svg/sword.svg" />
                 </button>
-                <button class="btn btn-primary dpad-button right-button" title="Block" @onclick="Block">
+                <button class="btn btn-primary dpad-button right-button" title="Block" @onclick="Guard">
                     <img src="/media/svg/shield.svg" />
                 </button>
                 <button class="btn btn-primary dpad-button bottom-button" title="Heal" @onclick="Heal">
@@ -100,9 +100,9 @@
         InputDispatcher.Blast(ClientConnection);
     }
 
-    private void Block()
+    private void Guard()
     {
-        InputDispatcher.Block(ClientConnection);
+        InputDispatcher.Guard(ClientConnection);
     }
 
     private void CycleEnemyTarget()
@@ -160,6 +160,11 @@
             return;
         }
 
+        if (CharacterInfo.State != CharacterState.Normal)
+        {
+            return;
+        }
+
         CharacterInfo.LastMoveTime = DateTimeOffset.Now;
 
         InputDispatcher.MoveCharacter(ClientConnection, direction);
@@ -169,21 +174,37 @@
     {
         switch (args.Key)
         {
+            case "A":
+            case "a":
+                Move(MovementDirection.West);
+                break;
+            case "W":
+            case "w":
+                Move(MovementDirection.North);
+                break;
+            case "D":
+            case "d":
+                Move(MovementDirection.East);
+                break;
+            case "S":
+            case "s":
+                Move(MovementDirection.South);
+                break;
             case "ArrowLeft":
             case "Left":
-                Move(MovementDirection.West);
+                Blast();
                 break;
             case "ArrowUp":
             case "Up":
-                Move(MovementDirection.North);
+                Attack();
                 break;
             case "ArrowRight":
             case "Right":
-                Move(MovementDirection.East);
+                Guard();
                 break;
             case "ArrowDown":
             case "Down":
-                Move(MovementDirection.South);
+                Heal();
                 break;
         }
     }

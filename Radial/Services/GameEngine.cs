@@ -13,19 +13,18 @@ namespace Radial.Services
 {
     public class GameEngine : BackgroundService
     {
-        private readonly IWorld _world;
         private readonly IClientManager _clientManager;
-        private readonly IServiceProvider _serviceProvider;
+        private readonly TimeSpan _desiredLoopTime = TimeSpan.FromMilliseconds(100);
         private readonly ILogger<GameEngine> _logger;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly IWorld _world;
         private CancellationToken _cancelToken;
 
-        private DateTimeOffset _lastOneSecondTick = DateTimeOffset.Now;
-        private DateTimeOffset _lastLoop = DateTimeOffset.Now;
         private TimeSpan _elapsed;
-        private double _timeMultiplier;
+        private DateTimeOffset _lastLoop = DateTimeOffset.Now;
+        private DateTimeOffset _lastOneSecondTick = DateTimeOffset.Now;
         private DateTimeOffset _lastThreeSecondTick;
-        private readonly TimeSpan _desiredLoopTime = TimeSpan.FromMilliseconds(100);
-
+        private double _timeMultiplier;
         public GameEngine(IWorld world, IClientManager clientManager, IServiceProvider serviceProvider, ILogger<GameEngine> logger)
         {
             _world = world;
@@ -38,6 +37,27 @@ namespace Radial.Services
         {
             _cancelToken = stoppingToken;
             return Task.Run(MainLoop, stoppingToken);
+        }
+
+        private async Task CalculateElapsedTime()
+        {
+            _elapsed = DateTimeOffset.Now - _lastLoop;
+            if (_elapsed < _desiredLoopTime)
+            {
+                var waitTime = _desiredLoopTime - _elapsed;
+                Debug.WriteLine($"Waiting {waitTime} in main loop.");
+                Debug.WriteLine($"Loop time is {_elapsed}.");
+                await Task.Delay(waitTime);
+            }
+            else
+            {
+                Debug.WriteLine($"Loop time is slow.  Elapsed: {_elapsed}");
+            }
+
+
+            _elapsed = DateTimeOffset.Now - _lastLoop;
+            _timeMultiplier = _elapsed.TotalMilliseconds / _desiredLoopTime.TotalMilliseconds;
+            _lastLoop = DateTimeOffset.Now;
         }
 
         private async Task MainLoop()
@@ -65,32 +85,19 @@ namespace Radial.Services
             }
         }
 
-        private Task RunThreeSecondActions(IServiceScope scope)
+        private async Task RunImmediateActions(IServiceScope scope)
         {
-            if (DateTimeOffset.Now - _lastThreeSecondTick < TimeSpan.FromSeconds(3))
-            {
-                return Task.CompletedTask;
-            }
-
             var combatService = scope.ServiceProvider.GetRequiredService<ICombatService>();
+            var inputDispatcher = scope.ServiceProvider.GetRequiredService<IInputDispatcher>();
 
-            var locations =_clientManager.Clients.Select(x => x.Location).Distinct();
+            await inputDispatcher.DispatchInputs();
 
-            foreach (var location in locations)
-            {
-                combatService.ExecuteNpcActions(location);
-            }
-
-            _lastThreeSecondTick = DateTimeOffset.Now;
-
-            return Task.CompletedTask;
-        }
-
-        private void SendStateUpdates()
-        {
             foreach (var client in _clientManager.Clients)
             {
-                client.InvokeMessageReceived(GenericMessage.StateChanged);
+                if (client.Character.State == Enums.CharacterState.InCombat)
+                {
+                    combatService.ApplyActionBonus(client, _elapsed);
+                }
             }
         }
 
@@ -113,6 +120,7 @@ namespace Radial.Services
             foreach (var location in locations)
             {
                 effectsService.ApplyChargeRecovery(location, _timeMultiplier);
+                combatService.EvaluateCombatStates(location);
             }
 
             _lastOneSecondTick = DateTimeOffset.Now;
@@ -120,41 +128,33 @@ namespace Radial.Services
             return Task.CompletedTask;
         }
 
-        private async Task RunImmediateActions(IServiceScope scope)
+        private Task RunThreeSecondActions(IServiceScope scope)
         {
+            if (DateTimeOffset.Now - _lastThreeSecondTick < TimeSpan.FromSeconds(3))
+            {
+                return Task.CompletedTask;
+            }
+
             var combatService = scope.ServiceProvider.GetRequiredService<ICombatService>();
-            var inputDispatcher = scope.ServiceProvider.GetRequiredService<IInputDispatcher>();
 
-            await inputDispatcher.DispatchInputs();
+            var locations =_clientManager.Clients.Select(x => x.Location).Distinct();
 
+            foreach (var location in locations)
+            {
+                combatService.InitiateNpcAttackOnSight(location);
+                combatService.ExecuteNpcActions(location);
+            }
+
+            _lastThreeSecondTick = DateTimeOffset.Now;
+
+            return Task.CompletedTask;
+        }
+        private void SendStateUpdates()
+        {
             foreach (var client in _clientManager.Clients)
             {
-                if (client.Character.State == Enums.CharacterState.InCombat)
-                {
-                    combatService.ApplyActionBonus(client, _elapsed);
-                }
+                client.InvokeMessageReceived(GenericMessage.StateChanged);
             }
-        }
-
-        private async Task CalculateElapsedTime()
-        {
-            _elapsed = DateTimeOffset.Now - _lastLoop;
-            if (_elapsed < _desiredLoopTime)
-            {
-                var waitTime = _desiredLoopTime - _elapsed;
-                Debug.WriteLine($"Waiting {waitTime} in main loop.");
-                Debug.WriteLine($"Loop time is {_elapsed}.");
-                await Task.Delay(waitTime);
-            }
-            else
-            {
-                Debug.WriteLine($"Loop time is slow.  Elapsed: {_elapsed}");
-            }
-
-
-            _elapsed = DateTimeOffset.Now - _lastLoop;
-            _timeMultiplier = _elapsed.TotalMilliseconds / _desiredLoopTime.TotalMilliseconds;
-            _lastLoop = DateTimeOffset.Now;
         }
     }
 }

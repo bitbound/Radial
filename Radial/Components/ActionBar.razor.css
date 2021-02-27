@@ -35,6 +35,13 @@
     transform: translate(-140%, -50%);
 }
 
+#escapeButton {
+    justify-self: center;
+    align-self: center;
+    height: 60px;
+    border-radius: 10px;
+}
+
 #respawnButton {
     grid-column: span 2;
     justify-self: center;

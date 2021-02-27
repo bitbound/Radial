@@ -24,10 +24,10 @@ namespace Radial.Services
 
         bool IsPlayerOnline(string username);
         Task RemoveClient(IClientConnection clientConnection);
-
+        void SendToAllAtLocation(Location location, IMessageBase message);
         bool SendToClient(IClientConnection senderConnection, string recipient, IMessageBase message, bool copyToSelf = false);
-        void SendToLocals(IClientConnection senderConnection, IMessageBase message);
-        void SendToLocals(IClientConnection senderConnection, Location location, IMessageBase message);
+        void SendToOtherLocals(IClientConnection senderConnection, IMessageBase message);
+        void SendToOtherLocals(IClientConnection senderConnection, Location location, IMessageBase message);
 
         bool SendToParty(IClientConnection senderConnection, IMessageBase message);
     }
@@ -81,10 +81,7 @@ namespace Radial.Services
             foreach (var other in newLocation.Players.Where(x => x.Name != character.Name))
             {
                 var player = _clientConnections.Values.FirstOrDefault(x => x.Character.Name == other.Name);
-                player.InvokeMessageReceived(new LocalEventMessage()
-                {
-                    Message = $"{character.Name} has appeared."
-                });
+                player.InvokeMessageReceived(new LocalEventMessage($"{character.Name} has appeared."));
             }
             return Task.CompletedTask;
         }
@@ -146,10 +143,7 @@ namespace Radial.Services
                 foreach (var other in location.Players.Where(x => x.Name != clientConnection.Character.Name))
                 {
                     var player = _clientConnections.Values.FirstOrDefault(x => x.Character.Name == other.Name);
-                    player.InvokeMessageReceived(new LocalEventMessage()
-                    {
-                        Message = $"{character.Name} has disappeared."
-                    });
+                    player.InvokeMessageReceived(new LocalEventMessage($"{character.Name} has disappeared."));
                 }
             }
 
@@ -180,7 +174,7 @@ namespace Radial.Services
             return true;
         }
 
-        public void SendToLocals(IClientConnection senderConnection, IMessageBase message)
+        public void SendToOtherLocals(IClientConnection senderConnection, IMessageBase message)
         {
             foreach (var connection in GetLocalConnections(senderConnection))
             {
@@ -188,10 +182,21 @@ namespace Radial.Services
             }
         }
 
-        public void SendToLocals(IClientConnection senderConnection, Location location, IMessageBase message)
+        public void SendToOtherLocals(IClientConnection senderConnection, Location location, IMessageBase message)
         {
             var connections = location.Players
                 .Where(x => x.Name != senderConnection.Character.Name)
+                .Select(x => _clientConnections.Values.FirstOrDefault(y => y.Character.Name == x.Name));
+
+            foreach (var connection in connections)
+            {
+                connection.InvokeMessageReceived(message);
+            }
+        }
+
+        public void SendToAllAtLocation(Location location, IMessageBase message)
+        {
+            var connections = location.Players
                 .Select(x => _clientConnections.Values.FirstOrDefault(y => y.Character.Name == x.Name));
 
             foreach (var connection in connections)

@@ -12,7 +12,8 @@ namespace Radial.Models
     public class CharacterBase
     {
         private static readonly long _lowestStatValue = 10;
-
+        private bool _isGuarding;
+        private CharacterState _state;
         [JsonIgnore]
         public double ActionBonus { get; set; }
 
@@ -33,6 +34,9 @@ namespace Radial.Models
 
         [JsonIgnore]
         public double ChargePercent => (double)ChargeCurrent / ChargeMax;
+
+        [JsonIgnore]
+        public string ChargePercentFormatted => $"{Math.Round(ChargePercent * 100)}%";
 
         [JsonIgnore]
         public long ChargeRate => Math.Max(_lowestStatValue, CoreEnergyCurrent + ChargeRateMod);
@@ -68,12 +72,35 @@ namespace Radial.Models
         [JsonIgnore]
         public double EnergyPercent => (double)EnergyCurrent / EnergyMax;
 
+        [JsonIgnore]
+        public string EnergyPercentFormatted => $"{Math.Round(EnergyPercent * 100)}%";
+
         public long Experience { get; set; }
 
         public long Glint { get; set; }
 
         [JsonIgnore]
+        public long GuardAmount { get; set; }
+
+        [JsonIgnore]
         public Interactable Interaction { get; set; }
+
+        [JsonIgnore]
+        public bool IsGuarding
+        {
+            get
+            {
+                if (GuardAmount < 1)
+                {
+                    return false;
+                }
+                return _isGuarding;
+            }
+            set
+            {
+                _isGuarding = value;
+            }
+        }
 
         [JsonIgnore]
         public DateTimeOffset LastMoveTime { get; set; }
@@ -84,7 +111,21 @@ namespace Radial.Models
         public string PartyId { get; set; }
 
         [JsonIgnore]
-        public CharacterState State { get; set; }
+        public CharacterState State
+        {
+            get
+            {
+                if (EnergyCurrent < 1)
+                {
+                    return CharacterState.Dead;
+                }
+                return _state;
+            }
+            set
+            {
+                _state = value;
+            }
+        }
 
         [JsonIgnore]
         public CharacterBase Target { get; set; }

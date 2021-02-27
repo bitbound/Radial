@@ -16,6 +16,9 @@ namespace Radial.Models
     {
         public ConcurrentList<CharacterBase> Characters { get; set; } = new ConcurrentList<CharacterBase>();
 
+        [JsonIgnore]
+        public IEnumerable<CharacterBase> CharactersAlive => Characters.Where(x => x.State != CharacterState.Dead);
+
         public string Description { get; set; }
 
         public ConcurrentList<MovementDirection> Exits { get; set; } = new ConcurrentList<MovementDirection>();
@@ -31,7 +34,13 @@ namespace Radial.Models
         public IEnumerable<Npc> Npcs => Characters.OfType<Npc>();
 
         [JsonIgnore]
+        public IEnumerable<Npc> NpcsAlive => Npcs.Where(x => x.State != CharacterState.Dead);
+
+        [JsonIgnore]
         public IEnumerable<PlayerCharacter> Players => Characters.OfType<PlayerCharacter>();
+
+        [JsonIgnore]
+        public IEnumerable<PlayerCharacter> PlayersAlive => Players.Where(x => x.State != CharacterState.Dead);
 
         public string Title { get; set; }
         public long XCoord { get; init; }

@@ -27,7 +27,7 @@ namespace Radial.Services
         public void SpawnNpcsForParty(IClientConnection clientConnection, Location location, AggressionModel? aggressionModel = null)
         {
             var partyMembers = _clientManager.GetPartyMembers(clientConnection);
-            var npcsToSpawn = new Random().Next(0, partyMembers.Count() + 1);
+            var npcsToSpawn = Calculator.RandInstance.Next(0, partyMembers.Count() + 1);
 
             for (var i = 0; i < npcsToSpawn; i++)
             {
@@ -45,10 +45,13 @@ namespace Radial.Services
                 AggressionModel = aggressionModel.HasValue ?
                         aggressionModel.Value :
                         Calculator.RollForBool(.5) ? AggressionModel.PlayerOnSight : AggressionModel.OnAttacked,
-                CoreEnergy = new Random().Next((int)(distanceFromCenter * .75), (int)distanceFromCenter),
+                CoreEnergy = Calculator.RandInstance.Next((int)(distanceFromCenter * .75), (int)distanceFromCenter),
                 Type = CharacterType.NPC,
-                Glint = new Random().Next((int)(distanceFromCenter * .5), (int)(distanceFromCenter * 1.5)),
+                Glint = Calculator.RandInstance.Next((int)(distanceFromCenter * .5), (int)(distanceFromCenter * 1.5)),
             };
+
+            npc.EnergyCurrent = npc.EnergyMax;
+            npc.ChargeCurrent = (long)(Calculator.RandInstance.NextDouble() * npc.ChargeMax);
 
             ApplyRandomAttributes(npc);
             return npc;
