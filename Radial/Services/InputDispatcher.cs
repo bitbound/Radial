@@ -76,6 +76,7 @@ namespace Radial.Services
                     clientConnection.InvokeMessageReceived(new LocalEventMessage("No charge available to perform action."));
                     return Task.CompletedTask;
                 }
+                _combatService.Blast(clientConnection.Character, clientConnection.Location, clientConnection.Character.ActionBonus);
                 return Task.CompletedTask;
             });
         }
@@ -84,11 +85,8 @@ namespace Radial.Services
         {
             QueueInput(clientConnection, () =>
             {
-                if (clientConnection.Character.ChargeCurrent < 1)
-                {
-                    clientConnection.InvokeMessageReceived(new LocalEventMessage("No charge available to perform action."));
-                    return Task.CompletedTask;
-                }
+                _combatService.ToggleGuard(clientConnection.Character, clientConnection.Location);
+                clientConnection.InvokeMessageReceived(GenericMessage.StateChanged);
                 return Task.CompletedTask;
             });
         }
@@ -122,8 +120,8 @@ namespace Radial.Services
             _clientManager.SendToAllAtLocation(clientConnection.Location, 
                 new LocalEventMessage($"{clientConnection.Character.Name} has teleported away!", "text-success"));
 
-            clientConnection.Location.Characters.Remove(clientConnection.Character);
-            _world.StartLocation.Characters.Add(clientConnection.Character);
+            clientConnection.Location.RemoveCharacter(clientConnection.Character);
+            _world.StartLocation.AddCharacter(clientConnection.Character);
             clientConnection.Location = _world.StartLocation;
             clientConnection.Character.ChargeCurrent = 0;
         }
@@ -174,11 +172,12 @@ namespace Radial.Services
             _clientManager.SendToAllAtLocation(clientConnection.Location,
                 new LocalEventMessage($"{clientConnection.Character.Name} respawned and teleported away!", "text-info"));
 
-            clientConnection.Location.Characters.Remove(clientConnection.Character);
-            _world.StartLocation.Characters.Add(clientConnection.Character);
+            clientConnection.Location.RemoveCharacter(clientConnection.Character);
+            _world.StartLocation.AddCharacter(clientConnection.Character);
             clientConnection.Location = _world.StartLocation;
             clientConnection.Character.State = CharacterState.Normal;
             clientConnection.Character.EnergyCurrent = (long)(clientConnection.Character.EnergyMax * .1);
+            clientConnection.Character.ChargeCurrent = 0;
         }
 
         private void QueueInput(IClientConnection clientConnection, Func<Task> inputAction)

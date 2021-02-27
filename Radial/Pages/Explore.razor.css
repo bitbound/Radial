@@ -4,7 +4,7 @@
     grid-row-gap: 10px;
 }
 
-.location-grid {
+.explore-top-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
 }

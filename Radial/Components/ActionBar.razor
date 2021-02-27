@@ -1,12 +1,25 @@
 ﻿@using Radial.Enums
 @using Radial.Services
 @using Radial.Services.Client
+@using Radial.Utilities
 @inject IInputDispatcher InputDispatcher
 @inject IClientConnection ClientConnection
 @inject IMessagePublisher MessagePublisher
 @inject IModalService ModalService
+@inject IUiNoticiations UiNotifications 
 
 <div class="action-bar-frame" tabindex="0" @onkeydown="OnKeyDown">
+    <div class="action-bar-top-row">
+        <div></div>
+        <div>
+            <span class="text-info">Target:</span>
+            <span>@(CharacterInfo?.Target?.Name) [@(CharacterInfo?.Target?.EnergyPercentFormatted)]</span>
+        </div>
+        <div>
+            <span class="text-info">Guard:</span>
+            <span>@(CharacterInfo?.GuardAmount)</span>
+        </div>
+    </div>
     @if (CharacterInfo?.EnergyCurrent < 1)
     {
         <button id="respawnButton" class="btn btn-danger" @onclick="Respawn">Respawn</button>
@@ -48,7 +61,7 @@
                 <button class="btn btn-primary dpad-button top-button" title="Attack" @onclick="Attack">
                     <img src="/media/svg/sword.svg" />
                 </button>
-                <button class="btn btn-primary dpad-button right-button" title="Block" @onclick="Guard">
+                <button class="btn @GetGuardStyle() dpad-button right-button" title="Guard" @onclick="Guard">
                     <img src="/media/svg/shield.svg" />
                 </button>
                 <button class="btn btn-primary dpad-button bottom-button" title="Heal" @onclick="Heal">
@@ -67,7 +80,7 @@
             <button class="btn btn-sm btn-danger target-button" title="Cycle Enemy Target" @onclick="CycleEnemyTarget">
                 <span class="oi oi-target"></span>
             </button>
-            <button class="btn btn-sm btn-warning target-button" title="Powers">
+            <button class="btn btn-sm btn-warning target-button" title="Powers" @onclick="OpenPowersMenu">
                 <span class="oi oi-bolt"></span>
             </button>
         </div>
@@ -148,6 +161,15 @@
         InputDispatcher.EscapeCombat(ClientConnection);
     }
 
+    private string GetGuardStyle()
+    {
+        if (CharacterInfo?.IsGuarding == true)
+        {
+            return "btn-success";
+        }
+        return "btn-primary";
+    }
+
     private void Heal()
     {
         InputDispatcher.Heal(ClientConnection);
@@ -208,7 +230,10 @@
                 break;
         }
     }
-
+    private void OpenPowersMenu()
+    {
+        UiNotifications.InvokePowersMenuOpenedEvent();
+    }
     private void Respawn()
     {
         InputDispatcher.Respawn(ClientConnection);

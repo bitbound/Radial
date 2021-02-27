@@ -26,12 +26,12 @@ namespace Radial.Services
 
         public void SpawnNpcsForParty(IClientConnection clientConnection, Location location, AggressionModel? aggressionModel = null)
         {
-            var partyMembers = _clientManager.GetPartyMembers(clientConnection);
-            var npcsToSpawn = Calculator.RandInstance.Next(0, partyMembers.Count() + 1);
+            var locationPlayerCount = location.PlayersAlive.Where(x => x.State != CharacterState.InCombat);
+            var npcsToSpawn = Calculator.RandInstance.Next(0, locationPlayerCount.Count() + 1);
 
             for (var i = 0; i < npcsToSpawn; i++)
             {
-                location.Characters.Add(GenerateRandomNpc(aggressionModel, location));
+                location.AddCharacter(GenerateRandomNpc(aggressionModel, location));
             }
         }
 
@@ -53,12 +53,7 @@ namespace Radial.Services
             npc.EnergyCurrent = npc.EnergyMax;
             npc.ChargeCurrent = (long)(Calculator.RandInstance.NextDouble() * npc.ChargeMax);
 
-            ApplyRandomAttributes(npc);
             return npc;
-        }
-
-        private void ApplyRandomAttributes(Npc npc)
-        {
         }
     }
 }

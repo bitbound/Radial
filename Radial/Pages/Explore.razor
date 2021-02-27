@@ -10,12 +10,9 @@
 
 <div class="explore-container auto-height">
     <div style="overflow-y: auto">
-        <div class="small location-grid mb-2">
+        <div class="small explore-top-grid mb-2">
             <div>
                 Location: X: @(Location?.XCoord) | Y: @(Location?.YCoord) | Z: @(Location?.ZCoord)
-            </div>
-            <div>
-                Target: @(CharacterInfo?.Target?.Name) [@(CharacterInfo?.Target?.EnergyPercentFormatted)]
             </div>
         </div>
         @if (CurrentInteraction is null)
@@ -50,11 +47,11 @@
                         <span class="nearby-character" @onclick="() => SetTarget(character)">
                             @if (character.State == CharacterState.InCombat)
                             {
-                            <span class="text-danger">
-                                @($"{character.Name} ({character.Type}) is attacking! " +
-                                    $"(Target: {character.Target?.Name}) " +
-                                    $"[Energy: {character.EnergyPercentFormatted}]")
-                            </span>
+                                <span class="@(character.Type == CharacterType.NPC ? "text-danger" : "text-success")">
+                                    @($"{character.Name} ({character.Type}) is attacking! " +
+                                        $"(Target: {character.Target?.Name}) " +
+                                        $"[Energy: {character.EnergyPercentFormatted}]")
+                                </span>
                             }
                             else
                             {
@@ -87,7 +84,14 @@
     <div @ref="EventMessageDiv" style="overflow-y: auto">
         @foreach (var eventMessage in Events)
         {
-            <div class="@eventMessage.ClassName">[@eventMessage.Timestamp.ToString("g")] - @eventMessage.Message</div>
+            <div>
+                <span class="mr-1">
+                    [@eventMessage.Timestamp.ToString("g")]
+                </span>
+                <span class="@eventMessage.ClassName">
+                     @eventMessage.Message
+                </span>
+            </div>
         }
     </div>
     <div class="p-2">
@@ -136,7 +140,7 @@
 
     private IEnumerable<CharacterBase> GetNearbyCharacters()
     {
-        return Location?.Characters?.Where(x => x.Name != CharacterInfo?.Name) ?? Array.Empty<CharacterBase>();
+        return Location?.Characters?.Where(x => x != CharacterInfo) ?? Array.Empty<CharacterBase>();
     }
 
     private void RegisterMessageHandlers()
@@ -147,13 +151,16 @@
         };
         MessagePublisher.LocalEventReceived += async (sender, args) =>
         {
+            while (Events.Count > 100)
+            {
+                Events.TryDequeue(out _);
+            }
             Events.Enqueue(args);
             await InvokeAsync(StateHasChanged);
             JsInterop.ScrollToEnd(EventMessageDiv);
         };
         MessagePublisher.LocationChanged += (sender, args) =>
         {
-            Events.Clear();
             CharacterInfo.Target = null;
             SetState();
         };

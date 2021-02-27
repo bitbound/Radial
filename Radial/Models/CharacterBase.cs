@@ -12,10 +12,25 @@ namespace Radial.Models
     public class CharacterBase
     {
         private static readonly long _lowestStatValue = 10;
-        private bool _isGuarding;
         private CharacterState _state;
+        private double _actionBonus;
+
         [JsonIgnore]
-        public double ActionBonus { get; set; }
+        public double ActionBonus
+        {
+            get
+            {
+                if (State != CharacterState.InCombat)
+                {
+                    return 0;
+                }
+                return _actionBonus;
+            }
+            set
+            {
+                _actionBonus = value;
+            }
+        }
 
         [JsonIgnore]
         public bool ActionBonusIncreasing { get; set; }
@@ -86,22 +101,7 @@ namespace Radial.Models
         public Interactable Interaction { get; set; }
 
         [JsonIgnore]
-        public bool IsGuarding
-        {
-            get
-            {
-                if (GuardAmount < 1)
-                {
-                    return false;
-                }
-                return _isGuarding;
-            }
-            set
-            {
-                _isGuarding = value;
-            }
-        }
-
+        public bool IsGuarding { get; set; }
         [JsonIgnore]
         public DateTimeOffset LastMoveTime { get; set; }
 

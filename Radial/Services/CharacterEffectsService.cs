@@ -17,7 +17,12 @@ namespace Radial.Services
         {
             foreach (var character in location.Characters)
             {
-                if (character.ChargeCurrent != character.ChargeMax)
+                if (character.IsGuarding)
+                {
+                    // TODO: Add guard bonus.
+                    character.GuardAmount += (long)Math.Round(character.ChargeRate * .1 * timeMultiplier * 1.5);
+                }
+                else if (character.ChargeCurrent != character.ChargeMax)
                 {
                     character.ChargeCurrent = (long)Math.Max(0,
                         Math.Min(

@@ -62,8 +62,8 @@ namespace Radial.Services
                 existingConnection.Disconnect("You've been disconnected because you signed in from another tab or browser.");
             }
 
-            oldLocation.Characters.Remove(character);
-            newLocation.Characters.Add(character);
+            oldLocation.RemoveCharacter(character);
+            newLocation.AddCharacter(character);
             clientConnection.Location = newLocation;
 
             _clientConnections.AddOrUpdate(clientConnection.User.Id, clientConnection, (k, v) => clientConnection);
@@ -125,8 +125,8 @@ namespace Radial.Services
             {
                 var locationXyz = location.XYZ;
        
-                location.Characters.Remove(character);
-                _world.OfflineLocation.Characters.Add(character);
+                location.RemoveCharacter(character);
+                _world.OfflineLocation.AddCharacter(character);
                 clientConnection.Location = _world.OfflineLocation;
 
 

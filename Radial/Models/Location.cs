@@ -4,6 +4,7 @@ using Radial.Utilities;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -14,7 +15,8 @@ namespace Radial.Models
 {
     public class Location
     {
-        public ConcurrentList<CharacterBase> Characters { get; set; } = new ConcurrentList<CharacterBase>();
+        [JsonIgnore]
+        public IEnumerable<CharacterBase> Characters => Npcs.Cast<CharacterBase>().Concat(Players.Cast<CharacterBase>());
 
         [JsonIgnore]
         public IEnumerable<CharacterBase> CharactersAlive => Characters.Where(x => x.State != CharacterState.Dead);
@@ -30,14 +32,12 @@ namespace Radial.Models
 
         public DateTimeOffset LastAccessed { get; set; }
 
-        [JsonIgnore]
-        public IEnumerable<Npc> Npcs => Characters.OfType<Npc>();
+        public ConcurrentList<Npc> Npcs { get; init; } = new ConcurrentList<Npc>();
 
         [JsonIgnore]
         public IEnumerable<Npc> NpcsAlive => Npcs.Where(x => x.State != CharacterState.Dead);
 
-        [JsonIgnore]
-        public IEnumerable<PlayerCharacter> Players => Characters.OfType<PlayerCharacter>();
+        public ConcurrentList<PlayerCharacter> Players { get; init; } = new ConcurrentList<PlayerCharacter>();
 
         [JsonIgnore]
         public IEnumerable<PlayerCharacter> PlayersAlive => Players.Where(x => x.State != CharacterState.Dead);
@@ -49,5 +49,29 @@ namespace Radial.Models
         public string XYZ => $"{XCoord},{YCoord},{ZCoord}";
         public long YCoord { get; init; }
         public string ZCoord { get; init; } = "0";
+
+        public void AddCharacter(CharacterBase character)
+        {
+            if (character.Type == CharacterType.NPC)
+            {
+                Npcs.Add((Npc)character);
+            }
+            else if (character.Type == CharacterType.Player)
+            {
+                Players.Add((PlayerCharacter)character);
+            }
+        }
+
+        public void RemoveCharacter(CharacterBase character)
+        {
+            if (character.Type == CharacterType.NPC)
+            {
+                Npcs.Remove((Npc)character);
+            }
+            else if (character.Type == CharacterType.Player)
+            {
+                Players.Remove((PlayerCharacter)character);
+            }
+        }
     }
 }

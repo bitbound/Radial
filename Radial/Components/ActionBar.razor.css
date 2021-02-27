@@ -1,9 +1,19 @@
 ﻿.action-bar-frame {
     overflow-x: auto;
     padding: 20px;
-    height: 150px;
+    /*height: 150px;*/
     display: grid;
     grid-template-columns: 1fr 1fr auto;
+    grid-template-rows: auto 150px
+}
+
+.action-bar-top-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    grid-column-start: 1;
+    grid-column-end: 4;
+    margin-bottom: 5px;
+    grid-column-gap: 10px;
 }
 
 .button-control-frame {
@@ -52,7 +62,7 @@
 
 .action-bonus-ring {
     border: 5px solid magenta;
-    transition: .15s linear transform, .15s linear opacity;
+    transition: .1s linear transform, .1s linear opacity;
     width: 150px;
     height: 150px;
     border-radius: 100%;

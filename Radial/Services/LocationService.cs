@@ -1,5 +1,4 @@
 ﻿using Radial.Enums;
-using Radial.Helpers;
 using Radial.Models;
 using Radial.Models.Messaging;
 using Radial.Services.Client;
@@ -150,7 +149,6 @@ namespace Radial.Services
                 Description = "This empty room will be replaced with some randomly-generated fun later on.",
                 IsTemporary = true,
                 LastAccessed = DateTimeOffset.Now,
-                Characters = new ConcurrentList<CharacterBase>(),
                 Exits = new ConcurrentList<MovementDirection>()
                     {
                         MovementDirection.North,
@@ -217,10 +215,11 @@ namespace Radial.Services
 
             oldLocation.LastAccessed = DateTimeOffset.Now;
             newLocation.LastAccessed = DateTimeOffset.Now;
-            oldLocation.Characters.Remove(clientConnection.Character);
-            newLocation.Characters.Add(clientConnection.Character);
+            oldLocation.RemoveCharacter(clientConnection.Character);
+            newLocation.AddCharacter(clientConnection.Character);
             clientConnection.Location = newLocation;
             clientConnection.Character.FarthestDistanceTravelled = (long)Calculator.GetDistanceBetween(0, 0, newLocation.XCoord, newLocation.YCoord);
+            clientConnection.Character.GuardAmount = 0;
 
             _clientManager.SendToOtherLocals(clientConnection, oldLocation, 
                 new LocalEventMessage($"{clientConnection.Character.Name} left to the {direction}."));

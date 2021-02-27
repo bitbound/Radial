@@ -1,0 +1,46 @@
+﻿@using Radial.Models.Messaging
+@using Radial.Enums
+@using System.Collections.Concurrent
+@using System.Linq
+@inject IMessagePublisher MessagePublisher
+@inject IJsInterop JsInterop
+@inject IClientConnection ClientConnection
+@inject IClientManager ClientManager
+@inject IToastService ToastService
+@inject IUiNoticiations UiNotifications 
+@inherits AuthComponentBase
+
+<div class="powers-menu @_powersMenuOpenClass">
+    <div>
+        <button type="button" class="close float-left ml-2 mt-2" style="font-size:2em" aria-label="Close" @onclick="ClosePowersMenu">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="text-center mt-2 mb-1">Powers</h4>
+    </div>
+
+
+
+</div>
+
+@code {
+    public string _powersMenuOpenClass;
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            UiNotifications.PowersWindowOpened += (sender, args) =>
+            {
+                _powersMenuOpenClass = "open";
+                InvokeAsync(StateHasChanged);
+            };
+        }
+        return base.OnAfterRenderAsync(firstRender);
+    }
+
+    private void ClosePowersMenu(MouseEventArgs args)
+    {
+        _powersMenuOpenClass = string.Empty;
+        StateHasChanged();
+    }
+}

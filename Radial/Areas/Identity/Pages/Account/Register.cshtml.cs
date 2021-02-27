@@ -118,7 +118,7 @@ namespace Radial.Areas.Identity.Pages.Account
                         UserId = user.Id
                     };
 
-                    _world.OfflineLocation.Characters.Add(character);
+                    _world.OfflineLocation.AddCharacter(character);
                     _world.CharacterBackups.AddOrUpdate(character.Name, character);
                     await _world.Save();
 

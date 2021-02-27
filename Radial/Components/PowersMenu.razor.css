@@ -1,0 +1,26 @@
+﻿.powers-menu {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0;
+    transform: translateX(100%);
+    width: 400px;
+    max-width: 80%;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    grid-row-gap: 10px;
+    z-index: 3;
+    border: 1px solid gray;
+    box-shadow: rgba(150, 150, 150, 0.35) 0px 5px 15px;
+    background-color: rgb(40,40,40);
+    transition: .25s linear all;
+    pointer-events: none;
+}
+
+    .powers-menu.open {
+        opacity: 1;
+        transition: .25s linear all;
+        pointer-events: unset;
+        transform: translateX(0);
+    }

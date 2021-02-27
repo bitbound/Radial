@@ -14,6 +14,10 @@ namespace Radial.Services
     {
         void ApplyActionBonus(IClientConnection client, TimeSpan elapsed);
         void AttackTarget(CharacterBase npc, Location location, double actionBonus);
+        void Blast(CharacterBase attacker, Location location, double actionBonus);
+
+        void EvaluateCombatStates(Location location);
+
         void ExecuteNpcActions(Location location);
         void HealCharacter(CharacterBase healer,
             CharacterBase primaryRecipient,
@@ -23,7 +27,7 @@ namespace Radial.Services
 
         void InitiateNpcAttackOnSight(IClientConnection clientConnection);
         void InitiateNpcAttackOnSight(Location location);
-        void EvaluateCombatStates(Location location);
+        void ToggleGuard(CharacterBase character, Location location);
     }
 
     public class CombatService : ICombatService
@@ -58,6 +62,15 @@ namespace Radial.Services
 
         public void AttackTarget(CharacterBase attacker, Location location, double actionBonus)
         {
+            if (attacker.Target?.State == CharacterState.Dead)
+            {
+                if (attacker.Target is Npc npcTarget && !npcTarget.IsRespawnable)
+                {
+                    location.RemoveCharacter(attacker.Target);
+                }
+                attacker.Target = null;
+            }
+
             if (!location.Characters.Contains(attacker.Target))
             {
                 attacker.Target = null;
@@ -81,41 +94,65 @@ namespace Radial.Services
 
             var target = attacker.Target;
 
-            var guardingCharacters = location.CharactersAlive.Where(x =>
-                x.Type == attacker.Type &&
-                x != attacker.Target &&
-                x.IsGuarding);
+            target.State = CharacterState.InCombat;
 
-            if (guardingCharacters.Any())
+            FindBlockersAndReceiveAttack(attacker, target, location, attackPower);
+
+        }
+
+        public void Blast(CharacterBase attacker, Location location, double actionBonus)
+        {
+            var targets = location.CharactersAlive.Where(x =>
+                x.Type != attacker.Type && x.State == CharacterState.InCombat);
+
+            if (!targets.Any())
             {
-                target = Calculator.GetRandom(guardingCharacters);
-                _clientManager.SendToAllAtLocation(location, new LocalEventMessage($"{target.Name} guards {attacker.Target.Name} from the attack.", "text-info"));
+                return;
             }
 
-            var wasGuarded = target.GuardAmount > 0;
+            var attackPower = attacker.ChargeCurrent * (1 + actionBonus);
 
-            var remainingAttack = attackPower - target.GuardAmount;
-            target.GuardAmount = (long)Math.Max(0, target.GuardAmount - attackPower);
-
-            if (wasGuarded && target.GuardAmount < 1)
+            for (var i = 0; i < targets.Count(); i++)
             {
-                target.IsGuarding = false;
-                _clientManager.SendToAllAtLocation(location, new LocalEventMessage($"{target.Name}'s guard is shattered!", "text-danger"));
+                attackPower *= .9;
             }
 
-            target.EnergyCurrent = (long)Math.Max(0, target.EnergyCurrent - remainingAttack);
-
-            _clientManager.SendToAllAtLocation(location,
-                    new LocalEventMessage($"{target.Name} takes {remainingAttack} damage! {target.EnergyPercentFormatted} remaining.", "text-danger"));
-
-            if (target.EnergyCurrent < 1)
+            foreach (var target in targets)
             {
-                target.State = CharacterState.Dead;
-                _clientManager.SendToAllAtLocation(location, new LocalEventMessage($"{target.Name} has DIED!", "text-danger"));
-                attacker.Target = null;
-                if (target is Npc npcTarget && !npcTarget.IsRespawnable)
+                target.EnergyCurrent = (long)Math.Round(target.EnergyCurrent - attackPower);
+
+                _clientManager.SendToAllAtLocation(location,
+                    new LocalEventMessage($"{target.Name} is blasted for {attackPower} damage! {target.EnergyPercentFormatted} remaining.", "text-danger"));
+
+                if (target.EnergyCurrent < 1)
                 {
-                    location.Characters.Remove(npcTarget);
+                    attacker.Target = null;
+                    KillCharacter(target, attackPower, location);
+                }
+            }
+        }
+
+        public void EvaluateCombatStates(Location location)
+        {
+            if (!location.PlayersAlive.Any())
+            {
+                foreach (var npc in location.NpcsAlive)
+                {
+                    if (npc.State == CharacterState.InCombat)
+                    {
+                        npc.State = CharacterState.Normal;
+                    }
+                }
+            }
+            if (!location.NpcsAlive.Any(x => x.State == CharacterState.InCombat))
+            {
+                foreach (var player in location.PlayersAlive)
+                {
+                    if (player.State == CharacterState.InCombat)
+                    {
+                        player.State = CharacterState.Normal;
+                        player.LastCombatEncounter = DateTimeOffset.Now;
+                    }
                 }
             }
         }
@@ -183,6 +220,7 @@ namespace Radial.Services
                 _clientManager.SendToAllAtLocation(location, new LocalEventMessage($"{healer.Name} heals {primaryRecipient.Name} for {healPower}.", "text-success"));
             }
         }
+
         public void InitiateNpcAttackOnSight(IClientConnection client)
         {
             var location = client.Location;
@@ -219,28 +257,91 @@ namespace Radial.Services
             combatNpc.Target = player;
         }
 
-        public void EvaluateCombatStates(Location location)
+        public void ToggleGuard(CharacterBase character, Location location)
         {
-            if (!location.PlayersAlive.Any())
+            character.IsGuarding = !character.IsGuarding;
+
+            var verb = character.IsGuarding ? "starts" : "stops";
+
+            _clientManager.SendToAllAtLocation(location, new LocalEventMessage($"{character.Name} {verb} guarding.", "text-info"));
+        }
+
+        private void FindBlockersAndReceiveAttack(CharacterBase attacker, CharacterBase target, Location location, double attackPower)
+        {
+            var remainingAttack = attackPower;
+
+            var guardingCharacters = location.CharactersAlive.Where(x =>
+                x.Type != attacker.Type &&
+                x != attacker.Target &&
+                x.IsGuarding);
+
+            if (guardingCharacters.Any())
             {
-                foreach (var npc in location.NpcsAlive)
+                target = Calculator.GetRandom(guardingCharacters);
+                target.State = CharacterState.InCombat;
+                _clientManager.SendToAllAtLocation(location, new LocalEventMessage($"{target.Name} guards {attacker.Target.Name} from the attack.", "text-info"));
+            }
+
+            if (target.IsGuarding && target.GuardAmount > 0)
+            {
+                var startGuard = target.GuardAmount;
+
+                remainingAttack = Math.Max(0, attackPower - target.GuardAmount);
+                target.GuardAmount = (long)Math.Max(0, target.GuardAmount - attackPower);
+
+                var guardedAmount = startGuard - target.GuardAmount;
+                _clientManager.SendToAllAtLocation(location, new LocalEventMessage($"{target.Name} blocks {guardedAmount} damage!", "text-info"));
+
+                if (target.GuardAmount < 1)
                 {
-                    if (npc.State == CharacterState.InCombat)
-                    {
-                        npc.State = CharacterState.Normal;
-                    }
+                    target.IsGuarding = false;
+                    _clientManager.SendToAllAtLocation(location, new LocalEventMessage($"{target.Name}'s guard is shattered!", "text-danger"));
                 }
             }
-            if (!location.NpcsAlive.Any(x=>x.State == CharacterState.InCombat))
+
+
+            target.EnergyCurrent = (long)Math.Max(0, target.EnergyCurrent - remainingAttack);
+
+            _clientManager.SendToAllAtLocation(location,
+                    new LocalEventMessage($"{target.Name} takes {remainingAttack} damage! {target.EnergyPercentFormatted} remaining.", "text-danger"));
+
+            if (target.EnergyCurrent < 1)
             {
-                foreach (var player in location.PlayersAlive)
-                {
-                    if (player.State == CharacterState.InCombat)
-                    {
-                        player.State = CharacterState.Normal;
-                        player.LastCombatEncounter = DateTimeOffset.Now;
-                    }
-                }
+                attacker.Target = null;
+                KillCharacter(target, remainingAttack, location);
+            }
+        }
+
+        private void KillCharacter(CharacterBase target, double attackDamage, Location location)
+        {
+            target.State = CharacterState.Dead;
+
+            var attackPercentOfTotalHealth = attackDamage / target.EnergyMax;
+
+            if (attackPercentOfTotalHealth < .5)
+            {
+                _clientManager.SendToAllAtLocation(location, new LocalEventMessage($"{target.Name} has DIED!", "text-danger"));
+            }
+            else if (attackPercentOfTotalHealth < .7)
+            {
+                _clientManager.SendToAllAtLocation(location, new LocalEventMessage($"{target.Name} FORCEFULLY EXPLODES from the death blow!", "text-danger"));
+            }
+            else if (attackPercentOfTotalHealth < .8)
+            {
+                _clientManager.SendToAllAtLocation(location, new LocalEventMessage($"{target.Name} is COMPLETELY BLOWN ASUNDER by the force of the attack!", "text-danger"));
+            }
+            else if (attackPercentOfTotalHealth < .9)
+            {
+                _clientManager.SendToAllAtLocation(location, new LocalEventMessage($"{target.Name} is UTTERLY DESTROYED by the powerful attack!", "text-danger"));
+            }
+            else
+            {
+                _clientManager.SendToAllAtLocation(location, new LocalEventMessage($"{target.Name} is IRREVOCABLY WIPED FROM EXISTENCE!", "text-danger"));
+            }
+
+            if (target is Npc npcTarget && !npcTarget.IsRespawnable)
+            {
+                location.RemoveCharacter(npcTarget);
             }
         }
     }
