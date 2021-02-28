@@ -103,7 +103,12 @@ namespace Radial.Services
         public void Blast(CharacterBase attacker, Location location, double actionBonus)
         {
             var targets = location.CharactersAlive.Where(x =>
-                x.Type != attacker.Type && x.State == CharacterState.InCombat);
+                x.Type != attacker.Type);
+
+            if (attacker is PlayerCharacter)
+            {
+                targets = targets.Cast<Npc>().Where(x => x.AggressionModel == AggressionModel.PlayerOnSight);
+            }
 
             if (!targets.Any())
             {
@@ -122,6 +127,7 @@ namespace Radial.Services
 
             foreach (var target in targets)
             {
+                var overkill = attackPower - target.EnergyCurrent;
                 target.EnergyCurrent = Math.Max(0, (long)(target.EnergyCurrent - attackPower));
 
                 _clientManager.SendToAllAtLocation(location,
@@ -130,7 +136,7 @@ namespace Radial.Services
                 if (target.EnergyCurrent < 1)
                 {
                     attacker.Target = null;
-                    KillCharacter(target, attackPower, location);
+                    KillCharacter(target, overkill, location);
                 }
             }
         }
@@ -302,7 +308,7 @@ namespace Radial.Services
                 }
             }
 
-
+            var overkill = remainingAttack - target.EnergyCurrent;
             target.EnergyCurrent = (long)Math.Max(0, target.EnergyCurrent - remainingAttack);
 
             _clientManager.SendToAllAtLocation(location,
@@ -311,29 +317,29 @@ namespace Radial.Services
             if (target.EnergyCurrent < 1)
             {
                 attacker.Target = null;
-                KillCharacter(target, remainingAttack, location);
+                KillCharacter(target, overkill, location);
             }
         }
 
-        private void KillCharacter(CharacterBase target, double attackDamage, Location location)
+        private void KillCharacter(CharacterBase target, double overkillDamage, Location location)
         {
             target.State = CharacterState.Dead;
 
-            var attackPercentOfTotalHealth = attackDamage / target.EnergyMax;
+            var overkillPercentage = overkillDamage / target.EnergyMax;
 
-            if (attackPercentOfTotalHealth < .5)
+            if (overkillPercentage < .5)
             {
                 _clientManager.SendToAllAtLocation(location, new LocalEventMessage($"{target.Name} has DIED!", "text-danger"));
             }
-            else if (attackPercentOfTotalHealth < .7)
+            else if (overkillPercentage < .7)
             {
                 _clientManager.SendToAllAtLocation(location, new LocalEventMessage($"{target.Name} FORCEFULLY EXPLODES from the death blow!", "text-danger"));
             }
-            else if (attackPercentOfTotalHealth < .8)
+            else if (overkillPercentage < .8)
             {
                 _clientManager.SendToAllAtLocation(location, new LocalEventMessage($"{target.Name} is COMPLETELY BLOWN ASUNDER by the force of the attack!", "text-danger"));
             }
-            else if (attackPercentOfTotalHealth < .9)
+            else if (overkillPercentage < .9)
             {
                 _clientManager.SendToAllAtLocation(location, new LocalEventMessage($"{target.Name} is UTTERLY DESTROYED by the powerful attack!", "text-danger"));
             }

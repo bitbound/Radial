@@ -26,8 +26,13 @@ namespace Radial.Services
 
         public void SpawnNpcsForParty(IClientConnection clientConnection, Location location, AggressionModel? aggressionModel = null)
         {
+            if (location.IsSafeArea)
+            {
+                return;
+            }
+
             var locationPlayerCount = location.PlayersAlive.Where(x => x.State != CharacterState.InCombat);
-            var npcsToSpawn = Calculator.RandInstance.Next(0, locationPlayerCount.Count() + 1);
+            var npcsToSpawn = Calculator.RandInstance.Next(0, locationPlayerCount.Count() + 2);
 
             for (var i = 0; i < npcsToSpawn; i++)
             {
