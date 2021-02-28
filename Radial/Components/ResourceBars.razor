@@ -13,7 +13,8 @@
             <div id="energy-bar" class="progress-bar" style="width: @(CharacterInfo?.EnergyPercentFormatted); overflow: visible;"></div>
         </div>
         <div class="text-white resource-bar-label">
-            @(CharacterInfo?.EnergyCurrent ?? 0)
+            <span class="mr-1">@(CharacterInfo?.EnergyCurrent ?? 0)</span>
+            <span class="small text-muted">(EXP: @(CharacterInfo?.ExperiencePercentFormatted))</span>
         </div>
     </div>
     <div class="text-center">

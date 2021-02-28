@@ -30,6 +30,7 @@ namespace Radial.Services
         void SendToOtherLocals(IClientConnection senderConnection, Location location, IMessageBase message);
 
         bool SendToParty(IClientConnection senderConnection, IMessageBase message);
+        void SendToPlayer(PlayerCharacter player, IMessageBase localEventMessage);
     }
 
     public class ClientManager : IClientManager
@@ -224,6 +225,18 @@ namespace Radial.Services
             return location.Players
                 .Where(x => x.Name != senderConnection.Character.Name)
                 .Select(x => _clientConnections.Values.FirstOrDefault(y => y.Character.Name == x.Name));
+        }
+
+        public void SendToPlayer(PlayerCharacter player, IMessageBase localEventMessage)
+        {
+            var connection = _clientConnections.FirstOrDefault(x => x.Value.Character == player);
+
+            if (connection.Value is null)
+            {
+                return;
+            }
+
+            connection.Value.InvokeMessageReceived(localEventMessage);
         }
     }
 }

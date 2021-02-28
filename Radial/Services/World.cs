@@ -18,7 +18,6 @@ namespace Radial.Services
         ObjectStore<PlayerCharacter> CharacterBackups { get; }
         ObjectStore<Location> Locations { get; }
         IEnumerable<Npc> Npcs { get; }
-        Location OfflineLocation { get; }
         IEnumerable<PlayerCharacter> PlayerCharacters { get; }
         Location PurgatoryLocation { get; }
         Location StartLocation { get; }

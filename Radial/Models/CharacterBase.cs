@@ -92,6 +92,15 @@ namespace Radial.Models
 
         public long Experience { get; set; }
 
+        [JsonIgnore]
+        public long ExperienceToLevel => CoreEnergy - Experience;
+
+        [JsonIgnore]
+        public double ExperiencePercent => (double)Experience / (double)CoreEnergy;
+
+        [JsonIgnore]
+        public string ExperiencePercentFormatted => $"{Math.Round(ExperiencePercent * 100)}%";
+
         public long Glint { get; set; }
 
         [JsonIgnore]

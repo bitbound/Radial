@@ -33,10 +33,12 @@ namespace Radial.Services
     public class CombatService : ICombatService
     {
         private readonly IClientManager _clientManager;
+        private readonly ILevelUpService _levelUpService;
 
-        public CombatService(IClientManager clientManager)
+        public CombatService(IClientManager clientManager, ILevelUpService levelUpService)
         {
             _clientManager = clientManager;
+            _levelUpService = levelUpService;
         }
 
         public void ApplyActionBonus(IClientConnection client, TimeSpan elapsed)
@@ -348,12 +350,15 @@ namespace Radial.Services
                 _clientManager.SendToAllAtLocation(location, new LocalEventMessage($"{target.Name} is IRREVOCABLY WIPED FROM EXISTENCE!", "text-danger"));
             }
 
-            if (target is Npc npcTarget && !npcTarget.IsRespawnable)
+            if (target is Npc npcTarget)
             {
-                location.RemoveCharacter(npcTarget);
-            }
+                if (!npcTarget.IsRespawnable)
+                {
+                    location.RemoveCharacter(npcTarget);
+                }
 
-            // TODO: Add experience and glint.
+                _levelUpService.AddRewardsFromWin(target, location);
+            }
         }
     }
 }
