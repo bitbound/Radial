@@ -32,6 +32,7 @@ namespace Radial.Services.Client
     {
         private readonly AuthenticationStateProvider _authProvider;
         private readonly IClientManager _clientManager;
+        private readonly IJsInterop _jsInterop;
         private readonly UserManager<RadialUser> _userManager;
         private readonly IWorld _world;
         private readonly ILogger<ClientConnection> _logger;
@@ -44,11 +45,13 @@ namespace Radial.Services.Client
             UserManager<RadialUser> userManager,
             IClientManager clientManager,
             IWorld world,
+            IJsInterop jsInterop,
             ILogger<ClientConnection> logger)
         {
             _authProvider = authProvider;
             _userManager = userManager;
             _clientManager = clientManager;
+            _jsInterop = jsInterop;
             _world = world;
             _logger = logger;
         }
@@ -138,6 +141,7 @@ namespace Radial.Services.Client
             if (authState.User?.Identity?.IsAuthenticated == true)
             {
                 await _clientManager.AddClient(this);
+                _jsInterop.AddBeforeUnloadHandler();
             }
         }
 

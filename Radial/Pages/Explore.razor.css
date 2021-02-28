@@ -1,6 +1,6 @@
 ﻿.explore-container {
     display: grid;
-    grid-template-rows: 1fr 1fr auto auto;
+    grid-template-rows: 1fr auto 1fr auto auto;
     grid-row-gap: 10px;
 }
 
@@ -15,4 +15,10 @@
 
 .nearby-character {
     cursor: pointer;
+}
+
+.horizontal-bar {
+    height: 2px;
+    background-color: white;
+    border-radius: 100%;
 }

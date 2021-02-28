@@ -22,6 +22,8 @@ namespace Radial.Services.Client
 
         void ScrollToEnd(ElementReference element);
 
+        void AddBeforeUnloadHandler();
+
     }
     public class JsInterop : IJsInterop
     {
@@ -30,6 +32,11 @@ namespace Radial.Services.Client
         public JsInterop(IJSRuntime jSRuntime)
         {
             _jsRuntime = jSRuntime;
+        }
+
+        public void AddBeforeUnloadHandler()
+        {
+            _jsRuntime.InvokeVoidAsync("addBeforeUnloadHandler");
         }
 
         public void AddClassName(ElementReference element, string className)

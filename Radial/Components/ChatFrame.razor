@@ -71,7 +71,6 @@
     private ElementReference _chatMessageWindow;
     private string _currentInputText;
     private ChatChannel _chatChannel = ChatChannel.Global;
-    private bool _isRendered;
     private int _missedChatsCount;
     private string _privateChatRecipient;
     private bool _scrollChatWindowOnRender;
@@ -96,7 +95,6 @@
 
     protected override Task OnAfterRenderAsync(bool firstRender)
     {
-        _isRendered = true;
         if (firstRender)
         {
             MessagePublisher.ChatReceived += ChatReceived;

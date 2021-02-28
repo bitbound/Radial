@@ -16,7 +16,6 @@ namespace Radial.Services.Client
     {
         private bool _isPowersMenuOpen;
 
-        public event EventHandler PowersWindowOpened;
         public event PropertyChangedEventHandler PropertyChanged;
 
         public bool IsPowersMenuOpen
