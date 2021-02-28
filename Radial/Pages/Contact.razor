@@ -80,7 +80,7 @@
             return;
         }
 
-        var result = await EmailSender.TrySendEmail(AppConfig.SmtpEmail, "AutoUpdateMe Response", $"Message from {Input.Name} ({Input.Email}): <br /> <br />" +
+        var result = await EmailSender.TrySendEmail(AppConfig.SmtpEmail, "Message from Radial RPG", $"Message from {Input.Name} ({Input.Email}): <br /> <br />" +
             $"<br /> <br />" +
             $"{Input.Message}");
 
