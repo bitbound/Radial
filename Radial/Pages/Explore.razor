@@ -147,15 +147,18 @@
         {
             SetState();
         };
-        MessagePublisher.LocalEventReceived += async (sender, args) =>
+        MessagePublisher.LocalEventReceived += (sender, args) =>
         {
             while (Events.Count > 100)
             {
                 Events.TryDequeue(out _);
             }
             Events.Enqueue(args);
-            await InvokeAsync(StateHasChanged);
-            JsInterop.ScrollToEnd(EventMessageDiv);
+            InvokeAsync(StateHasChanged).ContinueWith((task) =>
+            {
+                JsInterop.ScrollToEnd(EventMessageDiv);
+            });
+
         };
         MessagePublisher.LocationChanged += (sender, args) =>
         {

@@ -73,7 +73,6 @@
     private ChatChannel _chatChannel = ChatChannel.Global;
     private int _missedChatsCount;
     private string _privateChatRecipient;
-    private bool _scrollChatWindowOnRender;
 
     private string CurrentInputText
     {
@@ -98,12 +97,6 @@
         if (firstRender)
         {
             MessagePublisher.ChatReceived += ChatReceived;
-        }
-
-        if (_scrollChatWindowOnRender)
-        {
-            JsInterop.ScrollToEnd(_chatMessageWindow);
-            _scrollChatWindowOnRender = false;
         }
 
         return base.OnAfterRenderAsync(firstRender);
@@ -179,7 +172,7 @@
         }
     }
 
-    private async void ChatReceived(object sender, ChatMessage chatMessage)
+    private void ChatReceived(object sender, ChatMessage chatMessage)
     {
         while (_chatMessages.Count > 100)
         {
@@ -193,8 +186,10 @@
             _missedChatsCount++;
         }
 
-        _scrollChatWindowOnRender = true;
-        await InvokeAsync(StateHasChanged);
+        InvokeAsync(StateHasChanged).ContinueWith(task =>
+        {
+            JsInterop.ScrollToEnd(_chatMessageWindow);
+        });
     }
 
     private void CloseChatFrame(MouseEventArgs args)
