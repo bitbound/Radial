@@ -43,7 +43,7 @@
                             @if (character.State == CharacterState.InCombat)
                             {
                                 <span class="@(character.Type == CharacterType.NPC ? "text-danger" : "text-success")">
-                                    @($"{character.Name} ({character.Type}) is attacking! " +
+                                    @($"{character.Name} ({character.Type}) is {(character.IsGuarding ? "guarding" : "attacking")}! " +
                                         $"(Target: {character.Target?.Name}) " +
                                         $"[Energy: {character.EnergyPercentFormatted}]")
                                 </span>

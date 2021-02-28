@@ -172,12 +172,12 @@ namespace Radial.Services
                         if (location.NpcsAlive.Count() > 1 &&
                             !location.NpcsAlive.Any(x => x.IsGuarding))
                         {
-                            npc.IsGuarding = true;
+                            ToggleGuard(npc, location);
                         }
                         else if (location.NpcsAlive.Count() == 1 &&
                             npc.IsGuarding)
                         {
-                            npc.IsGuarding = false;
+                            ToggleGuard(npc, location);
                         }
                         
 
