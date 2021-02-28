@@ -111,6 +111,7 @@ namespace Radial.Services
             }
 
             var attackPower = attacker.ChargeCurrent * (1 + actionBonus);
+            attacker.ChargeCurrent = 0;
 
             for (var i = 0; i < targets.Count(); i++)
             {

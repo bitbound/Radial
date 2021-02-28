@@ -10,11 +10,6 @@
 
 <div class="explore-container auto-height">
     <div style="overflow-y: auto">
-        <div class="small explore-top-grid mb-2">
-            <div>
-                Location: X: @(Location?.XCoord) | Y: @(Location?.YCoord) | Z: @(Location?.ZCoord)
-            </div>
-        </div>
         @if (CurrentInteraction is null)
         {
             <h3>@Location?.Title</h3>

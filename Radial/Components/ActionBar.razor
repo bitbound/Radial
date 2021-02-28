@@ -10,7 +10,9 @@
 
 <div class="action-bar-frame" tabindex="0" @onkeydown="OnKeyDown">
     <div class="action-bar-top-row">
-        <div></div>
+        <div>
+            Location: X: @(Location?.XCoord) | Y: @(Location?.YCoord) | Z: @(Location?.ZCoord)
+        </div>
         <div>
             <span class="text-info">Target:</span>
             <span>@(CharacterInfo?.Target?.Name) [@(CharacterInfo?.Target?.EnergyPercentFormatted)]</span>
@@ -89,6 +91,7 @@
 
 @code {
     private PlayerCharacter CharacterInfo { get; set; }
+    private Location Location => ClientConnection?.Location;
 
     protected override Task OnAfterRenderAsync(bool firstRender)
     {

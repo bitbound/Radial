@@ -211,11 +211,6 @@ namespace Radial.Services
                 AddLogicalExits(newLocation.Exits, _world, newXyz);
             }
 
-            if (!newLocation.NpcsAlive.Any(x=>x.AggressionModel > AggressionModel.OnAttacked))
-            {
-                _npcService.SpawnNpcsForParty(clientConnection, newLocation);
-            }
-
             oldLocation.LastAccessed = DateTimeOffset.Now;
             newLocation.LastAccessed = DateTimeOffset.Now;
             oldLocation.RemoveCharacter(clientConnection.Character);
@@ -230,6 +225,11 @@ namespace Radial.Services
             _clientManager.SendToOtherLocals(clientConnection, newLocation,
                 new LocalEventMessage($"{clientConnection.Character.Name} entered from the {GetOppositeDirection(direction)}."));
             clientConnection.InvokeMessageReceived(GenericMessage.LocationChanged);
+
+            if (!newLocation.NpcsAlive.Any(x => x.AggressionModel > AggressionModel.OnAttacked))
+            {
+                _npcService.SpawnNpcsForParty(clientConnection, newLocation);
+            }
 
             _combatService.InitiateNpcAttackOnSight(clientConnection);
         }

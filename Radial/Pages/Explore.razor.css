@@ -4,11 +4,6 @@
     grid-row-gap: 10px;
 }
 
-.explore-top-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-}
-
 .location-grid :last-child {
     text-align: right;
 }
