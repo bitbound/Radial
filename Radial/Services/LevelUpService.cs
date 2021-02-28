@@ -41,8 +41,9 @@ namespace Radial.Services
                     if (player.Experience == player.CoreEnergy)
                     {
                         player.CoreEnergy++;
+                        player.EnergyCurrent = player.EnergyMax;
                         player.Experience = 0;
-                        _clientManager.SendToPlayer(player, new LocalEventMessage($"Core energy increased to {player.CoreEnergy}!", "text-success"));
+                        _clientManager.SendToPlayer(player, new LocalEventMessage($"Level up! Core energy increased to {player.CoreEnergy}!", "text-success"));
                     }
 
                     expGain -= expToAdd;

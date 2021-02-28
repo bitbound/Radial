@@ -119,7 +119,7 @@ namespace Radial.Services
 
             var timeSinceMove = DateTimeOffset.Now - clientConnection.Character.LastMoveTime;
             var waitTime = TimeSpan.FromSeconds(3) - timeSinceMove;
-            if (waitTime.Ticks < 0)
+            if (waitTime.Ticks > 0)
             {
                 clientConnection.InvokeMessageReceived(new LocalEventMessage($"You must wait {waitTime.Seconds} more second(s) before escaping.", "text-warning"));
                 return;
