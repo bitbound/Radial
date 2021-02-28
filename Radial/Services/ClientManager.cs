@@ -126,8 +126,7 @@ namespace Radial.Services
                 var locationXyz = location.XYZ;
        
                 location.RemoveCharacter(character);
-                _world.OfflineLocation.AddCharacter(character);
-                clientConnection.Location = _world.OfflineLocation;
+                clientConnection.Location = null;
 
 
                 foreach (var other in _clientConnections.Where(x => x.Value.User.Id != character.UserId))

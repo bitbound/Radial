@@ -54,8 +54,6 @@ namespace Radial.Services
 
         public Location PurgatoryLocation => Locations.Get($"0,0,{PurgatoryZCoord}");
 
-        public Location OfflineLocation => Locations.Get($"0,0,{OfflineZCoord}");
-
         public Location StartLocation => Locations.Get("0,0,0");
 
         public Location LocateCharacter(string characterName)
