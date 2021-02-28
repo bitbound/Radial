@@ -87,18 +87,9 @@ namespace Radial.Services
 
         private async Task RunImmediateActions(IServiceScope scope)
         {
-            var combatService = scope.ServiceProvider.GetRequiredService<ICombatService>();
             var inputDispatcher = scope.ServiceProvider.GetRequiredService<IInputDispatcher>();
 
             await inputDispatcher.DispatchInputs();
-
-            foreach (var client in _clientManager.Clients)
-            {
-                if (client.Character.State == Enums.CharacterState.InCombat)
-                {
-                    combatService.ApplyActionBonus(client, _elapsed);
-                }
-            }
         }
 
         private Task RunOneSecondActions(IServiceScope scope)

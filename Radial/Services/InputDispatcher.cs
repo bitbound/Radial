@@ -62,7 +62,7 @@ namespace Radial.Services
                     clientConnection.InvokeMessageReceived(new LocalEventMessage("No charge available to perform action."));
                     return Task.CompletedTask;
                 }
-                _combatService.AttackTarget(clientConnection.Character, clientConnection.Location, clientConnection.Character.ActionBonus);
+                _combatService.AttackTarget(clientConnection.Character, clientConnection.Location);
                 return Task.CompletedTask;
             });
         }
@@ -76,7 +76,7 @@ namespace Radial.Services
                     clientConnection.InvokeMessageReceived(new LocalEventMessage("No charge available to perform action."));
                     return Task.CompletedTask;
                 }
-                _combatService.Blast(clientConnection.Character, clientConnection.Location, clientConnection.Character.ActionBonus);
+                _combatService.Blast(clientConnection.Character, clientConnection.Location);
                 return Task.CompletedTask;
             });
         }
@@ -154,7 +154,6 @@ namespace Radial.Services
                 _combatService.HealCharacter(clientConnection.Character,
                     target,
                     clientConnection.Location,
-                    clientConnection.Character.ActionBonus,
                     clientConnection.Location.PlayersAlive.Except(new[] { clientConnection.Character }));
 
                 if (clientConnection.Location.PlayersAlive.Any(x=>x.State == CharacterState.InCombat))

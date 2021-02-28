@@ -45,20 +45,6 @@
         }
 
         <div class="button-control-frame">
-            @if (CharacterInfo?.State == CharacterState.InCombat)
-            {
-                <div class="action-bonus-ring"
-                     style="opacity: @CharacterInfo?.ActionBonus;
-                        transform: translate(-50%, -50%) scale(@($"{CharacterInfo?.ActionBonus},{CharacterInfo?.ActionBonus}"));
-                        border-color: @(CharacterInfo?.ActionBonus > .9 ? "limegreen" : "unset")">
-
-                </div>
-            }
-            else
-            {
-                <div></div>
-            }
-
             <div>
                 <button class="btn btn-primary dpad-button top-button" title="Attack" @onclick="Attack">
                     <img src="/media/svg/sword.svg" />

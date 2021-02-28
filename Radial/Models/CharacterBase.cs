@@ -13,28 +13,6 @@ namespace Radial.Models
     {
         private static readonly long _lowestStatValue = 10;
         private CharacterState _state;
-        private double _actionBonus;
-
-        [JsonIgnore]
-        public double ActionBonus
-        {
-            get
-            {
-                if (State != CharacterState.InCombat)
-                {
-                    return 0;
-                }
-                return _actionBonus;
-            }
-            set
-            {
-                _actionBonus = value;
-            }
-        }
-
-        [JsonIgnore]
-        public bool ActionBonusIncreasing { get; set; }
-
 
         [JsonIgnore]
         public long ChargeCurrent { get; set; }

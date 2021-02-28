@@ -59,16 +59,6 @@
     border-radius: 10px;
 }
 
-.action-bonus-ring {
-    border: 5px solid magenta;
-    transition: .1s linear transform, .1s linear opacity;
-    width: 150px;
-    height: 150px;
-    border-radius: 100%;
-    position: absolute;
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0,0);
-}
 
 .target-button-frame {
     display: grid;

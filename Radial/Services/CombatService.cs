@@ -12,9 +12,8 @@ namespace Radial.Services
 {
     public interface ICombatService
     {
-        void ApplyActionBonus(IClientConnection client, TimeSpan elapsed);
-        void AttackTarget(CharacterBase npc, Location location, double actionBonus);
-        void Blast(CharacterBase attacker, Location location, double actionBonus);
+        void AttackTarget(CharacterBase npc, Location location);
+        void Blast(CharacterBase attacker, Location location);
 
         void EvaluateCombatStates(Location location);
 
@@ -22,7 +21,6 @@ namespace Radial.Services
         void HealCharacter(CharacterBase healer,
             CharacterBase primaryRecipient,
             Location location,
-            double actionBonus,
             IEnumerable<CharacterBase> otherRecipients);
 
         void InitiateNpcAttackOnSight(IClientConnection clientConnection);
@@ -41,28 +39,7 @@ namespace Radial.Services
             _levelUpService = levelUpService;
         }
 
-        public void ApplyActionBonus(IClientConnection client, TimeSpan elapsed)
-        {
-            var actionBonusChange = elapsed.TotalSeconds;
-            if (client.Character.ActionBonusIncreasing)
-            {
-                client.Character.ActionBonus = Math.Min(1, client.Character.ActionBonus + actionBonusChange);
-                if (client.Character.ActionBonus == 1)
-                {
-                    client.Character.ActionBonusIncreasing = false;
-                }
-            }
-            else
-            {
-                client.Character.ActionBonus = Math.Max(0, client.Character.ActionBonus - actionBonusChange);
-                if (client.Character.ActionBonus == 0)
-                {
-                    client.Character.ActionBonusIncreasing = true;
-                }
-            }
-        }
-
-        public void AttackTarget(CharacterBase attacker, Location location, double actionBonus)
+        public void AttackTarget(CharacterBase attacker, Location location)
         {
             if (attacker.Target?.State == CharacterState.Dead)
             {
@@ -89,7 +66,7 @@ namespace Radial.Services
             }
 
             // TODO: Add attribute points when implemented.
-            var attackPower = Math.Round(attacker.ChargeCurrent * (1 + actionBonus));
+            var attackPower = Math.Round(attacker.ChargeCurrent * RollForAction(attacker));
             attacker.ChargeCurrent = 0;
 
             _clientManager.SendToAllAtLocation(location, new LocalEventMessage($"{attacker.Name} attacks {attacker.Target.Name}!", "text-danger"));
@@ -102,7 +79,7 @@ namespace Radial.Services
 
         }
 
-        public void Blast(CharacterBase attacker, Location location, double actionBonus)
+        public void Blast(CharacterBase attacker, Location location)
         {
             var targets = location.CharactersAlive.Where(x =>
                 x.Type != attacker.Type);
@@ -117,12 +94,12 @@ namespace Radial.Services
                 return;
             }
 
-            var attackPower = attacker.ChargeCurrent * (1 + actionBonus);
+            var attackPower = attacker.ChargeCurrent * RollForAction(attacker);
             attacker.ChargeCurrent = 0;
 
             for (var i = 0; i < targets.Count(); i++)
             {
-                attackPower *= .9;
+                attackPower *= .8;
             }
 
             attackPower = Math.Round(attackPower);
@@ -140,6 +117,18 @@ namespace Radial.Services
                     attacker.Target = null;
                     KillCharacter(target, overkill, location);
                 }
+            }
+        }
+
+        private double RollForAction(CharacterBase attacker)
+        {
+            if (attacker is PlayerCharacter)
+            {
+                return (double)Calculator.RandInstance.Next(75, 101) / 100;
+            }
+            else
+            {
+                return (double)Calculator.RandInstance.Next(50, 101) / 100;
             }
         }
 
@@ -180,15 +169,33 @@ namespace Radial.Services
                     }
                     else
                     {
-                        var npcLowOnHealth = Calculator.GetRandom(location.Npcs.Where(x => x.EnergyPercent < .2));
+                        if (location.NpcsAlive.Count() > 1 &&
+                            !location.NpcsAlive.Any(x => x.IsGuarding))
+                        {
+                            npc.IsGuarding = true;
+                        }
+                        else if (location.NpcsAlive.Count() == 1 &&
+                            npc.IsGuarding)
+                        {
+                            npc.IsGuarding = false;
+                        }
+                        
+
+                        if (npc.IsGuarding && npc.ChargeCurrent < 1)
+                        {
+                            continue;
+                        }
+
+
+                        var npcLowOnHealth = Calculator.GetRandom(location.Npcs.Where(x => x.EnergyPercent < .5));
                         // TODO: Decision tree based on attributes, other characters at the location, etc.
                         if (npcLowOnHealth is not null && Calculator.RollForBool(npc.ChargePercent))
                         {
-                            HealCharacter(npc, npc, location, Calculator.RandInstance.NextDouble(), location.Npcs.Except(new[] { npc }));
+                            HealCharacter(npc, npc, location, location.Npcs.Except(new[] { npc }));
                         }
                         else if (Calculator.RollForBool(npc.ChargePercent))
                         {
-                            AttackTarget(npc, location, Calculator.RandInstance.NextDouble());
+                            AttackTarget(npc, location);
                         }
                     }
                 }
@@ -198,7 +205,6 @@ namespace Radial.Services
         public void HealCharacter(CharacterBase healer,
             CharacterBase primaryRecipient,
             Location location,
-            double actionBonus,
             IEnumerable<CharacterBase> otherRecipients)
         {
 
@@ -212,7 +218,7 @@ namespace Radial.Services
                 healer.Target = healer;
             }
 
-            var healPower = Math.Round(healer.ChargeCurrent * (1 + actionBonus));
+            var healPower = Math.Round(healer.ChargeCurrent * RollForAction(healer));
             healer.ChargeCurrent = 0;
 
             primaryRecipient.EnergyCurrent = (long)Math.Min(primaryRecipient.EnergyMax, primaryRecipient.EnergyMax + healPower);

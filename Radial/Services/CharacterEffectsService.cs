@@ -20,7 +20,7 @@ namespace Radial.Services
                 if (character.IsGuarding)
                 {
                     // TODO: Add guard bonus.
-                    character.GuardAmount += (long)Math.Round(character.ChargeRate * .1 * timeMultiplier * 1.5);
+                    character.GuardAmount += (long)Math.Round(character.ChargeRate * .1 * timeMultiplier);
                 }
                 else if (character.ChargeCurrent != character.ChargeMax)
                 {
