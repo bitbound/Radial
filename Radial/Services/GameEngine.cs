@@ -25,6 +25,8 @@ namespace Radial.Services
         private DateTimeOffset _lastOneSecondTick = DateTimeOffset.Now;
         private DateTimeOffset _lastThreeSecondTick;
         private double _timeMultiplier;
+        private DateTimeOffset _lastHalfSecondTick;
+
         public GameEngine(IWorld world, IClientManager clientManager, IServiceProvider serviceProvider, ILogger<GameEngine> logger)
         {
             _world = world;
@@ -74,6 +76,7 @@ namespace Radial.Services
                     using var scope = _serviceProvider.CreateScope();
                  
                     await RunImmediateActions(scope);
+                    await RunHalfSecondActions(scope);
                     await RunOneSecondActions(scope);
                     await RunThreeSecondActions(scope);
                     SendStateUpdates();
@@ -92,6 +95,23 @@ namespace Radial.Services
             await inputDispatcher.DispatchInputs();
         }
 
+        private Task RunHalfSecondActions(IServiceScope scope)
+        {
+            if (DateTimeOffset.Now - _lastHalfSecondTick < TimeSpan.FromSeconds(.5))
+            {
+                return Task.CompletedTask;
+            }
+            var locations = _clientManager.Clients.Select(x => x.Location).Distinct();
+            var effectsService = scope.ServiceProvider.GetRequiredService<ICharacterEffectsService>();
+
+            foreach (var location in locations)
+            {
+                effectsService.ApplyChargeRecovery(location, DateTimeOffset.Now - _lastHalfSecondTick);
+            }
+
+            _lastHalfSecondTick = DateTimeOffset.Now;
+            return Task.CompletedTask;
+        }
         private Task RunOneSecondActions(IServiceScope scope)
         {
             if (DateTimeOffset.Now - _lastOneSecondTick < TimeSpan.FromSeconds(1))
@@ -99,7 +119,6 @@ namespace Radial.Services
                 return Task.CompletedTask;
             }
 
-            var effectsService = scope.ServiceProvider.GetRequiredService<ICharacterEffectsService>();
             var encounterService = scope.ServiceProvider.GetRequiredService<IEncounterService>();
             var combatService = scope.ServiceProvider.GetRequiredService<ICombatService>();
             var locations = _clientManager.Clients.Select(x => x.Location).Distinct();
@@ -111,7 +130,6 @@ namespace Radial.Services
 
             foreach (var location in locations)
             {
-                effectsService.ApplyChargeRecovery(location, _timeMultiplier);
                 combatService.EvaluateCombatStates(location);
             }
 

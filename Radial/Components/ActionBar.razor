@@ -14,12 +14,11 @@
             Location: X: @(Location?.XCoord) | Y: @(Location?.YCoord) | Z: @(Location?.ZCoord)
         </div>
         <div>
-            <span class="text-info">Target:</span>
-            <span>@(CharacterInfo?.Target?.Name) [@(CharacterInfo?.Target?.EnergyPercentFormatted)]</span>
+
         </div>
         <div>
-            <span class="text-info">Guard:</span>
-            <span>@(CharacterInfo?.GuardAmount)</span>
+            <span class="text-info">Target:</span>
+            <span>@(CharacterInfo?.Target?.Name) [@(CharacterInfo?.Target?.EnergyPercentFormatted)]</span>
         </div>
     </div>
     @if (CharacterInfo?.EnergyCurrent < 1)

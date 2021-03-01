@@ -66,7 +66,7 @@ namespace Radial.Services
             }
 
             // TODO: Add attribute points when implemented.
-            var attackPower = Math.Round(attacker.ChargeCurrent * RollForAction(attacker));
+            var attackPower = RollForAction(attacker);
             attacker.ChargeCurrent = 0;
 
             _clientManager.SendToAllAtLocation(location, new LocalEventMessage($"{attacker.Name} attacks {attacker.Target.Name}!", "text-danger"));
@@ -86,7 +86,9 @@ namespace Radial.Services
 
             if (attacker is PlayerCharacter)
             {
-                targets = targets.Cast<Npc>().Where(x => x.AggressionModel == AggressionModel.PlayerOnSight);
+                targets = targets.Cast<Npc>().Where(x => 
+                    x.AggressionModel == AggressionModel.PlayerOnSight ||
+                    x.State == CharacterState.InCombat);
             }
 
             if (!targets.Any())
@@ -94,7 +96,7 @@ namespace Radial.Services
                 return;
             }
 
-            var attackPower = attacker.ChargeCurrent * RollForAction(attacker);
+            var attackPower = RollForAction(attacker);
             attacker.ChargeCurrent = 0;
 
             for (var i = 0; i < targets.Count(); i++)
@@ -117,18 +119,6 @@ namespace Radial.Services
                     attacker.Target = null;
                     KillCharacter(target, overkill, location);
                 }
-            }
-        }
-
-        private double RollForAction(CharacterBase attacker)
-        {
-            if (attacker is PlayerCharacter)
-            {
-                return (double)Calculator.RandInstance.Next(75, 101) / 100;
-            }
-            else
-            {
-                return (double)Calculator.RandInstance.Next(50, 101) / 100;
             }
         }
 
@@ -169,17 +159,21 @@ namespace Radial.Services
                     }
                     else
                     {
-                        if (location.NpcsAlive.Count() > 1 &&
-                            !location.NpcsAlive.Any(x => x.IsGuarding))
+                        var aggressiveNpcs = location.NpcsAlive.Where(x => 
+                            x.State == CharacterState.InCombat ||
+                            x.AggressionModel == AggressionModel.PlayerOnSight);
+                            
+                        if (aggressiveNpcs.Count() > 1 &&
+                            !aggressiveNpcs.Any(x => x.IsGuarding))
                         {
                             ToggleGuard(npc, location);
                         }
-                        else if (location.NpcsAlive.Count() == 1 &&
+                        else if (aggressiveNpcs.Count() == 1 &&
                             npc.IsGuarding)
                         {
                             ToggleGuard(npc, location);
                         }
-                        
+
 
                         if (npc.IsGuarding && npc.ChargeCurrent < 1)
                         {
@@ -218,7 +212,7 @@ namespace Radial.Services
                 healer.Target = healer;
             }
 
-            var healPower = Math.Round(healer.ChargeCurrent * RollForAction(healer));
+            var healPower = RollForAction(healer);
             healer.ChargeCurrent = 0;
 
             primaryRecipient.EnergyCurrent = (long)Math.Min(primaryRecipient.EnergyMax, primaryRecipient.EnergyMax + healPower);
@@ -299,19 +293,22 @@ namespace Radial.Services
                 _clientManager.SendToAllAtLocation(location, new LocalEventMessage($"{target.Name} guards {attacker.Target.Name} from the attack.", "text-info"));
             }
 
-            if (target.IsGuarding && target.GuardAmount > 0)
+            if (target.IsGuarding && target.ChargeCurrent > 0)
             {
-                var startGuard = target.GuardAmount;
+                var startGuard = target.ChargeCurrent;
+                var modifiedBlock = RollForAction(target);
+                var blockableAmount = Math.Round(attackPower * Calculator.RandInstance.Next(50, 90) / 100);
+                var unblockableAmount = attackPower - blockableAmount;
 
-                remainingAttack = Math.Max(0, attackPower - target.GuardAmount);
-                target.GuardAmount = (long)Math.Max(0, target.GuardAmount - attackPower);
+                remainingAttack = Math.Max(0, blockableAmount - modifiedBlock) + unblockableAmount;
 
-                var guardedAmount = startGuard - target.GuardAmount;
-                _clientManager.SendToAllAtLocation(location, new LocalEventMessage($"{target.Name} blocks {guardedAmount} damage!", "text-info"));
+                target.ChargeCurrent = (long)Math.Max(0, target.ChargeCurrent - blockableAmount);
 
-                if (target.GuardAmount < 1)
+                var blockedAmount = attackPower - remainingAttack;
+                _clientManager.SendToAllAtLocation(location, new LocalEventMessage($"{target.Name} blocks {blockedAmount} damage!", "text-info"));
+
+                if (target.ChargeCurrent < 1)
                 {
-                    target.IsGuarding = false;
                     _clientManager.SendToAllAtLocation(location, new LocalEventMessage($"{target.Name}'s guard is shattered!", "text-danger"));
                 }
             }
@@ -364,6 +361,18 @@ namespace Radial.Services
                 }
 
                 _levelUpService.AddRewardsFromWin(target, location);
+            }
+        }
+
+        private double RollForAction(CharacterBase attacker)
+        {
+            if (attacker is PlayerCharacter)
+            {
+                return Math.Round(attacker.ChargeCurrent * (double)Calculator.RandInstance.Next(75, 101) / 100);
+            }
+            else
+            {
+                return Math.Round(attacker.ChargeCurrent * (double)Calculator.RandInstance.Next(50, 101) / 100);
             }
         }
     }

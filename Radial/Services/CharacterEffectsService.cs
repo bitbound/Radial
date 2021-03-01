@@ -9,25 +9,20 @@ namespace Radial.Services
 {
     public interface ICharacterEffectsService
     {
-        void ApplyChargeRecovery(Location location, double timeMultiplier);
+        void ApplyChargeRecovery(Location location, TimeSpan elapsed);
     }
     public class CharacterEffectsService : ICharacterEffectsService
     {
-        public void ApplyChargeRecovery(Location location, double timeMultiplier)
+        public void ApplyChargeRecovery(Location location, TimeSpan elapsed)
         {
             foreach (var character in location.Characters)
             {
-                if (character.IsGuarding)
-                {
-                    // TODO: Add guard bonus.
-                    character.GuardAmount += (long)Math.Round(character.ChargeRate * .1 * timeMultiplier);
-                }
-                else if (character.ChargeCurrent != character.ChargeMax)
+                if (character.ChargeCurrent != character.ChargeMax)
                 {
                     character.ChargeCurrent = (long)Math.Max(0,
                         Math.Min(
                             character.ChargeMax,
-                            character.ChargeCurrent + character.ChargeRate * .1 * timeMultiplier)
+                            Math.Ceiling(character.ChargeCurrent + character.ChargeRate * elapsed.TotalSeconds * .1))
                     );
                 }
             }

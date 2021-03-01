@@ -82,9 +82,6 @@ namespace Radial.Models
         public long Glint { get; set; }
 
         [JsonIgnore]
-        public long GuardAmount { get; set; }
-
-        [JsonIgnore]
         public Interactable Interaction { get; set; }
 
         [JsonIgnore]

@@ -113,7 +113,7 @@ namespace Radial.Services
         {
             if (clientConnection.Character.ChargePercent < 1)
             {
-                clientConnection.InvokeMessageReceived(new LocalEventMessage("You must have a full charge to escape!", "text-warning"));
+                clientConnection.InvokeMessageReceived(new LocalEventMessage("You must have full charge to escape!", "text-warning"));
                 return;
             }
 
