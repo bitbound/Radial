@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server.Circuits;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
@@ -51,6 +52,7 @@ namespace Radial
             services.AddSingleton<IWorld, World>();
             services.AddScoped<IJsInterop, JsInterop>();
             services.AddScoped<IClientConnection, ClientConnection>();
+            services.AddScoped(x => (CircuitHandler)x.GetRequiredService<IClientConnection>());
             services.AddScoped<IAppState, AppState>();
             services.AddScoped<IMessagePublisher, MessagePublisher>();
             services.AddScoped<IToastService, ToastService>();
@@ -64,7 +66,6 @@ namespace Radial
             services.AddScoped<IEncounterService, EncounterService>();
             services.AddScoped<INpcService, NpcService>();
             services.AddScoped<ILevelUpService, LevelUpService>();
-
             services.AddHostedService<GameEngine>();
         }
 

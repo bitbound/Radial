@@ -11,10 +11,11 @@ using Microsoft.AspNetCore.Identity;
 using Radial.Data.Entities;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Components.Server.Circuits;
 
 namespace Radial.Services.Client
 {
-    public interface IClientConnection : IDisposable
+    public interface IClientConnection
     {
         event EventHandler<string> Disconnected;
 
@@ -25,21 +26,21 @@ namespace Radial.Services.Client
         RadialUser User { get; }
         Task Connect();
         void Disconnect(string reason);
+
         void InvokeMessageReceived(IMessageBase message);
     }
 
-    public class ClientConnection : IClientConnection
+    public class ClientConnection : CircuitHandler, IClientConnection
     {
         private readonly AuthenticationStateProvider _authProvider;
         private readonly IClientManager _clientManager;
         private readonly IJsInterop _jsInterop;
+        private readonly ILogger<ClientConnection> _logger;
         private readonly UserManager<RadialUser> _userManager;
         private readonly IWorld _world;
-        private readonly ILogger<ClientConnection> _logger;
-        private RadialUser _user;
         private PlayerCharacter _character;
         private Location _location;
-
+        private RadialUser _user;
         public ClientConnection(
             AuthenticationStateProvider authProvider,
             UserManager<RadialUser> userManager,
@@ -135,14 +136,11 @@ namespace Radial.Services.Client
                 return _user;
             }
         }
+
         public async Task Connect()
         {
             var authState = await _authProvider.GetAuthenticationStateAsync();
-            if (authState.User?.Identity?.IsAuthenticated == true)
-            {
-                await _clientManager.AddClient(this);
-                _jsInterop.AddBeforeUnloadHandler();
-            }
+
         }
 
         public void Disconnect(string reason)
@@ -150,17 +148,30 @@ namespace Radial.Services.Client
             Disconnected?.Invoke(this, reason);
         }
 
-        public void Dispose()
-        {
-            Disconnect("Session closed by server.");
-            _clientManager.RemoveClient(this);
-
-            GC.SuppressFinalize(this);
-        }
-
         public void InvokeMessageReceived(IMessageBase message)
         {
             _ = Task.Run(() => MessageReceived?.Invoke(this, message));
+        }
+
+        public override async Task OnCircuitClosedAsync(Circuit circuit, CancellationToken cancellationToken)
+        {
+            var authState = await _authProvider.GetAuthenticationStateAsync();
+            Disconnect("Session closed.");
+            if (authState.User?.Identity?.IsAuthenticated == true)
+            {
+                await _clientManager.RemoveClient(this);
+            }
+            await base.OnCircuitClosedAsync(circuit, cancellationToken);
+        }
+        public override async Task OnCircuitOpenedAsync(Circuit circuit, CancellationToken cancellationToken)
+        {
+            var authState = await _authProvider.GetAuthenticationStateAsync();
+            if (authState.User?.Identity?.IsAuthenticated == true)
+            {
+                await _clientManager.AddClient(this);
+                _jsInterop.AddBeforeUnloadHandler();
+            }
+            await base.OnCircuitOpenedAsync(circuit, cancellationToken);
         }
     }
 }
