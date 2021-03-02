@@ -219,7 +219,7 @@ namespace Radial.Services
 
             foreach (var character in otherRecipients.Except(new[] { healer.Target }))
             {
-                character.EnergyCurrent = (long)Math.Min(primaryRecipient.EnergyMax, primaryRecipient.EnergyCurrent + healPower * .25);
+                character.EnergyCurrent = (long)Math.Min(character.EnergyMax, character.EnergyCurrent + healPower * .25);
             }
 
             if (healer == primaryRecipient)

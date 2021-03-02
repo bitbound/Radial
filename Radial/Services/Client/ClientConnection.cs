@@ -24,7 +24,6 @@ namespace Radial.Services.Client
         PlayerCharacter Character { get; }
         Location Location { get; set; }
         RadialUser User { get; }
-        Task Connect();
         void Disconnect(string reason);
 
         void InvokeMessageReceived(IMessageBase message);
@@ -137,11 +136,6 @@ namespace Radial.Services.Client
             }
         }
 
-        public async Task Connect()
-        {
-            var authState = await _authProvider.GetAuthenticationStateAsync();
-
-        }
 
         public void Disconnect(string reason)
         {
