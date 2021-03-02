@@ -14,6 +14,16 @@ namespace Radial.Models
         private static readonly long _lowestStatValue = 10;
         private CharacterState _state;
 
+
+        public long AttributeAttack { get; set; }
+        public long AttributeBlast { get; set; }
+        public long AttributeGuard { get; set; }
+        public long AttributeHeal { get; set; }
+
+        [JsonIgnore]
+        public long AttributePointsRemaining =>
+            CoreEnergy - AttributeAttack - AttributeBlast - AttributeGuard - AttributeHeal;
+
         [JsonIgnore]
         public long ChargeCurrent { get; set; }
 

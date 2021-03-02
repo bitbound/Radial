@@ -2,10 +2,101 @@
 @attribute [Authorize]
 @inject IMessagePublisher MessagePublisher
 @inject IJsInterop JsInterop
+@inject IClientConnection ClientConnection 
 @inherits AuthComponentBase
 
 
 <h3>Character</h3>
+
+<h4 class="mt-4 text-info">Attributes</h4>
+
+<div id="attributesGrid">
+    <div>
+        Points Available:
+    </div>
+    <div>
+        @(ClientConnection?.Character?.AttributePointsRemaining)
+    </div>
+    <div>
+        Attack:
+        <span class="oi oi-question-mark help-button"></span>
+    </div>
+    <div>
+        <div class="input-group attribute-input">
+            <div class="input-group-prepend">
+                <div class="input-group-text">
+                    <span class="oi oi-minus"></span>
+                </div>
+            </div>
+            <input type="text" readonly class="form-control" />
+            <div class="input-group-append">
+                <div class="input-group-text">
+                    <span class="oi oi-plus"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        Guard:
+        <span class="oi oi-question-mark help-button"></span>
+    </div>
+    <div>
+        <div class="input-group attribute-input">
+            <div class="input-group-prepend">
+                <div class="input-group-text">
+                    <span class="oi oi-minus"></span>
+                </div>
+            </div>
+            <input type="text" readonly class="form-control" />
+            <div class="input-group-append">
+                <div class="input-group-text">
+                    <span class="oi oi-plus"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        Blast:
+        <span class="oi oi-question-mark help-button"></span>
+    </div>
+    <div>
+        <div class="input-group attribute-input">
+            <div class="input-group-prepend">
+                <div class="input-group-text">
+                    <span class="oi oi-minus"></span>
+                </div>
+            </div>
+            <input type="text" readonly class="form-control" />
+            <div class="input-group-append">
+                <div class="input-group-text">
+                    <span class="oi oi-plus"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        Heal:
+        <span class="oi oi-question-mark help-button"></span>
+    </div>
+    <div>
+        <div class="input-group attribute-input">
+            <div class="input-group-prepend">
+                <div class="input-group-text">
+                    <span class="oi oi-minus"></span>
+                </div>
+            </div>
+            <input type="text" readonly class="form-control" />
+            <div class="input-group-append">
+                <div class="input-group-text">
+                    <span class="oi oi-plus"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 @code {
 
