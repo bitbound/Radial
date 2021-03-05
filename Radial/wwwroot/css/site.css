@@ -3,6 +3,7 @@
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     touch-action: manipulation;
+    overscroll-behavior-y: contain;
 }
 
 a, .btn-link {

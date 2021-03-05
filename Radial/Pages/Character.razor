@@ -2,7 +2,8 @@
 @attribute [Authorize]
 @inject IMessagePublisher MessagePublisher
 @inject IJsInterop JsInterop
-@inject IClientConnection ClientConnection 
+@inject IClientConnection ClientConnection
+@inject IModalService ModalService 
 @inherits AuthComponentBase
 
 
@@ -15,22 +16,22 @@
         Points Available:
     </div>
     <div>
-        @(ClientConnection?.Character?.AttributePointsRemaining)
+        @(PC?.AttributePointsRemaining)
     </div>
     <div>
         Attack:
-        <span class="oi oi-question-mark help-button"></span>
+        <span class="oi oi-question-mark help-button" @onclick="ShowAttackHelp"></span>
     </div>
     <div>
         <div class="input-group attribute-input">
             <div class="input-group-prepend">
-                <div class="input-group-text">
+                <div class="input-group-text" @onclick="DecreaseAttack">
                     <span class="oi oi-minus"></span>
                 </div>
             </div>
-            <input type="text" readonly class="form-control" />
+            <input type="text" readonly class="form-control text-center" value="@PC?.AttributeAttack" />
             <div class="input-group-append">
-                <div class="input-group-text">
+                <div class="input-group-text" @onclick="IncreaseAttack">
                     <span class="oi oi-plus"></span>
                 </div>
             </div>
@@ -39,17 +40,17 @@
 
     <div>
         Guard:
-        <span class="oi oi-question-mark help-button"></span>
+        <span class="oi oi-question-mark help-button" @onclick="ShowGuardHelp"></span>
     </div>
     <div>
         <div class="input-group attribute-input">
-            <div class="input-group-prepend">
+            <div class="input-group-prepend" @onclick="DecreaseGuard">
                 <div class="input-group-text">
                     <span class="oi oi-minus"></span>
                 </div>
             </div>
-            <input type="text" readonly class="form-control" />
-            <div class="input-group-append">
+            <input type="text" readonly class="form-control text-center" value="@PC?.AttributeGuard" />
+            <div class="input-group-append" @onclick="IncreaseGuard">
                 <div class="input-group-text">
                     <span class="oi oi-plus"></span>
                 </div>
@@ -59,17 +60,17 @@
 
     <div>
         Blast:
-        <span class="oi oi-question-mark help-button"></span>
+        <span class="oi oi-question-mark help-button" @onclick="ShowBlastHelp"></span>
     </div>
     <div>
         <div class="input-group attribute-input">
-            <div class="input-group-prepend">
+            <div class="input-group-prepend" @onclick="DecreaseBlast">
                 <div class="input-group-text">
                     <span class="oi oi-minus"></span>
                 </div>
             </div>
-            <input type="text" readonly class="form-control" />
-            <div class="input-group-append">
+            <input type="text" readonly class="form-control text-center" value="@PC?.AttributeBlast" />
+            <div class="input-group-append" @onclick="IncreaseBlast">
                 <div class="input-group-text">
                     <span class="oi oi-plus"></span>
                 </div>
@@ -79,17 +80,17 @@
 
     <div>
         Heal:
-        <span class="oi oi-question-mark help-button"></span>
+        <span class="oi oi-question-mark help-button" @onclick="ShowHealHelp"></span>
     </div>
     <div>
         <div class="input-group attribute-input">
-            <div class="input-group-prepend">
+            <div class="input-group-prepend" @onclick="DecreaseHeal">
                 <div class="input-group-text">
                     <span class="oi oi-minus"></span>
                 </div>
             </div>
-            <input type="text" readonly class="form-control" />
-            <div class="input-group-append">
+            <input type="text" readonly class="form-control text-center" value="@PC?.AttributeHeal" />
+            <div class="input-group-append" @onclick="IncreaseHeal">
                 <div class="input-group-text">
                     <span class="oi oi-plus"></span>
                 </div>
@@ -99,5 +100,93 @@
 </div>
 
 @code {
+    private PlayerCharacter PC => ClientConnection?.Character;
 
+    private void DecreaseAttack()
+    {
+        PC.AttributeAttack = Math.Max(0, PC.AttributeAttack - 1);
+    }
+
+    private void IncreaseAttack()
+    {
+        if (PC.AttributePointsRemaining < 1)
+        {
+            return;
+        }
+        PC.AttributeAttack++;
+    }
+
+    private void DecreaseGuard()
+    {
+        PC.AttributeGuard = Math.Max(0, PC.AttributeGuard - 1);
+    }
+
+    private void IncreaseGuard()
+    {
+        if (PC.AttributePointsRemaining < 1)
+        {
+            return;
+        }
+        PC.AttributeGuard++;
+    }
+
+    private void DecreaseHeal()
+    {
+        PC.AttributeHeal = Math.Max(0, PC.AttributeHeal - 1);
+    }
+
+    private void IncreaseHeal()
+    {
+        if (PC.AttributePointsRemaining < 1)
+        {
+            return;
+        }
+        PC.AttributeHeal++;
+    }
+
+    private void DecreaseBlast()
+    {
+        PC.AttributeBlast = Math.Max(0, PC.AttributeBlast - 1);
+    }
+
+    private void IncreaseBlast()
+    {
+        if (PC.AttributePointsRemaining < 1)
+        {
+            return;
+        }
+        PC.AttributeBlast++;
+    }
+
+    private void ShowAttackHelp()
+    {
+        ModalService.ShowModal("Attack Attribute", new[]
+        {
+            "Modifies your single-target Attack ability. " +
+            "Your total attack roll is Current Charge plus Attack Attribute, multiplied by a " +
+            "random percent between 75 and 100."
+        });
+    }
+    private void ShowGuardHelp()
+    {
+        ModalService.ShowModal("Guard Attribute", new[]
+        {
+            "Modifies your Guard ability. " +
+            "When Guard is active, you will block any single-target attacks against you or other nearby " +
+            "players. The total amount you can potentially block is Current Charge plus Guard Attribute, " +
+            "multiplied by a random percent between 75 and 100.",
+
+            "However, a percentage of the attack, between " +
+            "10 and 50, will bypass your guard.  The percentage is based on your total guard roll compared to " +
+            "the total attack roll.  Your charge is reduced by the amount blocked."
+        });
+    }
+    private void ShowBlastHelp()
+    {
+
+    }
+    private void ShowHealHelp()
+    {
+
+    }
 }

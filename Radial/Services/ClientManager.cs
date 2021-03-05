@@ -82,7 +82,7 @@ namespace Radial.Services
             foreach (var other in newLocation.Players.Where(x => x.Name != character.Name))
             {
                 var player = _clientConnections.Values.FirstOrDefault(x => x.Character.Name == other.Name);
-                player.InvokeMessageReceived(new LocalEventMessage($"{character.Name} has appeared."));
+                player?.InvokeMessageReceived(new LocalEventMessage($"{character.Name} has appeared."));
             }
             return Task.CompletedTask;
         }

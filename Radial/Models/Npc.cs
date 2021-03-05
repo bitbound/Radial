@@ -14,7 +14,8 @@ namespace Radial.Models
     {
         public Guid Id { get; init; } = Guid.NewGuid();
         public AggressionModel AggressionModel { get; init; }
-        public ConcurrentDictionary<Guid, Interactable> Dialog { get; init; } = new ConcurrentDictionary<Guid, Interactable>();
+        public ConcurrentDictionary<Guid, Interactable> Dialog { get; init; } = new();
+        public bool IsFriendly { get; set; }
         public bool IsRespawnable { get; set; }
     }
 }

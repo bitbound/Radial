@@ -18,7 +18,7 @@ namespace Radial.Services.Client
 
         ValueTask<string> Prompt(string message);
         void SetStyleProperty(ElementReference element, string propertyName, string value);
-        void StartDraggingY(string elementId, double clientY);
+        void StartDraggingY(ElementReference element, double clientY);
 
         void ScrollToEnd(ElementReference element);
 
@@ -71,9 +71,9 @@ namespace Radial.Services.Client
         {
             _jsRuntime.InvokeVoidAsync("setStyleProperty", element, propertyName, value);
         }
-        public void StartDraggingY(string elementId, double clientY)
+        public void StartDraggingY(ElementReference element, double clientY)
         {
-            _jsRuntime.InvokeVoidAsync("startDraggingY", elementId, clientY);
+            _jsRuntime.InvokeVoidAsync("startDraggingY", element, clientY);
         }
     }
 }

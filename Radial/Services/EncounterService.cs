@@ -1,4 +1,6 @@
-﻿using Radial.Services.Client;
+﻿using Radial.Enums;
+using Radial.Models;
+using Radial.Services.Client;
 using Radial.Utilities;
 using System;
 using System.Collections.Generic;
@@ -9,7 +11,7 @@ namespace Radial.Services
 {
     public interface IEncounterService
     {
-        void SpawnNpcCombatEncounters(IClientConnection client);
+        void SpawnNpcs(IClientConnection client, TimeSpan sinceLastEncounter, double oddsOfEncounter, AggressionModel? aggressionModel = null);
     }
     public class EncounterService : IEncounterService
     {
@@ -22,24 +24,36 @@ namespace Radial.Services
             _combatService = combatService;
         }
 
-        public void SpawnNpcCombatEncounters(IClientConnection client)
+
+        public void SpawnNpcs(IClientConnection client, TimeSpan sinceLastEncounter, double oddsOfEncounter, AggressionModel? aggressionModel = null)
         {
             var location = client.Location;
             var character = client.Character;
 
-            if (character.State == Enums.CharacterState.Normal &&
-                !location.IsSafeArea &&
-                DateTime.Now - character.LastCombatEncounter >= TimeSpan.FromSeconds(10) &&
-                !location.Npcs.Where(x=>x.AggressionModel > Enums.AggressionModel.OnAttacked).Any())
+            if (aggressionModel is null)
             {
-                var spawn = Calculator.RollForBool(.5);
+                aggressionModel = Calculator.GetRandomEnum<AggressionModel>();
+            }
+
+            if (character.State == CharacterState.Normal &&
+                !location.IsSafeArea &&
+                DateTimeOffset.Now - character.LastCombatEncounter >= sinceLastEncounter &&
+                !location.Npcs.Where(x => x.AggressionModel > AggressionModel.OnAttacked).Any())
+            {
+                var spawn = Calculator.RollForBool(oddsOfEncounter);
 
                 if (!spawn)
                 {
                     return;
                 }
 
-                _npcService.SpawnNpcsForParty(client, location, Enums.AggressionModel.PlayerOnSight);
+                var locationPlayerCount = location.PlayersAlive.Where(x => x.State != CharacterState.InCombat);
+                var npcsToSpawn = Calculator.RandInstance.Next(0, locationPlayerCount.Count() + 2);
+
+                for (var i = 0; i < npcsToSpawn; i++)
+                {
+                    location.AddCharacter(_npcService.GenerateRandomNpc(aggressionModel, location));
+                }
 
                 _combatService.InitiateNpcAttackOnSight(client);
             }

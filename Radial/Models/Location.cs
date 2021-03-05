@@ -23,21 +23,21 @@ namespace Radial.Models
 
         public string Description { get; set; }
 
-        public ConcurrentList<MovementDirection> Exits { get; set; } = new ConcurrentList<MovementDirection>();
+        public ConcurrentList<MovementDirection> Exits { get; set; } = new();
 
-        public ConcurrentList<Interactable> Interactables { get; set; } = new ConcurrentList<Interactable>();
+        public ConcurrentList<Interactable> Interactables { get; set; } = new();
         public bool IsEditable { get; set; }
         public bool IsSafeArea { get; set; }
         public bool IsTemporary { get; set; }
 
         public DateTimeOffset LastAccessed { get; set; }
 
-        public ConcurrentList<Npc> Npcs { get; init; } = new ConcurrentList<Npc>();
+        public ConcurrentList<Npc> Npcs { get; init; } = new();
 
         [JsonIgnore]
         public IEnumerable<Npc> NpcsAlive => Npcs.Where(x => x.State != CharacterState.Dead);
 
-        public ConcurrentList<PlayerCharacter> Players { get; init; } = new ConcurrentList<PlayerCharacter>();
+        public ConcurrentList<PlayerCharacter> Players { get; init; } = new();
 
         [JsonIgnore]
         public IEnumerable<PlayerCharacter> PlayersAlive => Players.Where(x => x.State != CharacterState.Dead);

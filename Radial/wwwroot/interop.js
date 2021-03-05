@@ -26,9 +26,7 @@ window.setStyleProperty = (element, propertyName, value) => {
     element.style[propertyName] = value;
 }
 
-window.startDraggingY = (elementId, clientY) => {
-    var element = document.getElementById(elementId);
-
+window.startDraggingY = (element, clientY) => {
     if (!element) {
         return;
     }
@@ -49,8 +47,6 @@ window.startDraggingY = (elementId, clientY) => {
         window.removeEventListener("pointermove", pointerMove);
         window.removeEventListener("pointerup", pointerUpOrLeave);
         window.removeEventListener("pointerleave", pointerUpOrLeave);
-        ev.preventDefault();
-        ev.stopPropagation();
     }
 
     pointerUpOrLeave();

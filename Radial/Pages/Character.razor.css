@@ -17,3 +17,11 @@
 .attribute-input {
     width: 300px;
 }
+
+#attributesGrid .input-group-prepend {
+    cursor: pointer;
+}
+
+#attributesGrid .input-group-append {
+    cursor: pointer;
+}

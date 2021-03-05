@@ -9,7 +9,7 @@
 @inject Radial.Services.Client.IToastService ToastService
 @inherits AuthComponentBase
 
-<button id="chat-button" class="chat-button" @onpointerdown="ChatButton_OnPointerDown" @onclick="ChatButton_OnClick">
+<button class="chat-button" @onclick="ChatButton_OnClick">
     <span class="oi oi-chat"></span>
     @if (_missedChatsCount > 0)
     {
@@ -116,11 +116,6 @@
         }
 
         StateHasChanged();
-    }
-
-    private void ChatButton_OnPointerDown(PointerEventArgs args)
-    {
-        JsInterop.StartDraggingY("chat-button", args.ClientY);
     }
 
     private void ChatInput_OnKeyPress(KeyboardEventArgs args)

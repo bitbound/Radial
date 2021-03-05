@@ -30,7 +30,6 @@ namespace Radial.Services
     public class World : IWorld
     {
         public static readonly string PurgatoryZCoord = "Purgatory";
-        public static readonly string OfflineZCoord = "Offline";
 
         private readonly IServiceProvider _serviceProvider;
 
@@ -71,6 +70,14 @@ namespace Radial.Services
                 if (!Locations.Exists(location.XYZ))
                 {
                     Locations.AddOrUpdate(location.XYZ, location);
+                }
+            }
+
+            foreach (var location in Locations.All)
+            {
+                foreach (var player in location.Players)
+                {
+                    Locations.Get(location.XYZ).Players.Remove(player);
                 }
             }
         }

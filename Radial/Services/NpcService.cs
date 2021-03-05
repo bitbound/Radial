@@ -11,34 +11,11 @@ namespace Radial.Services
 {
     public interface INpcService
     {
-        void SpawnNpcsForParty(IClientConnection clientConnection, Location location, AggressionModel? aggressionModel = null);
         Npc GenerateRandomNpc(AggressionModel? aggressionModel, Location location);
     }
 
     public class NpcService : INpcService
     {
-        private readonly IClientManager _clientManager;
-
-        public NpcService(IClientManager clientManager)
-        {
-            _clientManager = clientManager;
-        }
-
-        public void SpawnNpcsForParty(IClientConnection clientConnection, Location location, AggressionModel? aggressionModel = null)
-        {
-            if (location.IsSafeArea)
-            {
-                return;
-            }
-
-            var locationPlayerCount = location.PlayersAlive.Where(x => x.State != CharacterState.InCombat);
-            var npcsToSpawn = Calculator.RandInstance.Next(0, locationPlayerCount.Count() + 2);
-
-            for (var i = 0; i < npcsToSpawn; i++)
-            {
-                location.AddCharacter(GenerateRandomNpc(aggressionModel, location));
-            }
-        }
 
         public Npc GenerateRandomNpc(AggressionModel? aggressionModel, Location location)
         {

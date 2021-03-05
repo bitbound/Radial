@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Radial.Models;
 using System;
@@ -17,19 +18,30 @@ namespace Radial.Utilities
 {
     public class ObjectStore<T>
     {
-        private readonly ConcurrentDictionary<string, T> _cache = new ConcurrentDictionary<string, T>();
-        private readonly SemaphoreSlim _fileLock = new SemaphoreSlim(1, 1);
+        private readonly ConcurrentDictionary<string, T> _cache = new();
+        private readonly SemaphoreSlim _fileLock = new(1, 1);
 
-        private readonly TimeSpan _saveInterval = TimeSpan.FromMinutes(30);
+        private readonly TimeSpan _saveInterval;
 
         private readonly System.Timers.Timer _saveTimer;
-
+        private readonly JsonSerializerOptions _serializerOptions = new() { WriteIndented = true };
         private readonly IServiceProvider _serviceProvider;
 
         public ObjectStore(string name, IServiceProvider serviceProvider)
         {
             Name = name;
             _serviceProvider = serviceProvider;
+
+            var scope = serviceProvider.CreateScope();
+            var env = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
+            if (env.IsDevelopment())
+            {
+                _saveInterval = TimeSpan.FromMinutes(1);
+            }
+            else
+            {
+                _saveInterval = TimeSpan.FromMinutes(30);
+            }
 
             _saveTimer = new System.Timers.Timer()
             {
@@ -108,7 +120,7 @@ namespace Radial.Utilities
             {
                 await _fileLock.WaitAsync();
                 Directory.CreateDirectory(Path.GetDirectoryName(storePath));
-                await File.WriteAllTextAsync(storePath, JsonSerializer.Serialize(_cache));
+                await File.WriteAllTextAsync(storePath, JsonSerializer.Serialize(_cache, _serializerOptions));
             }
             catch (Exception ex)
             {

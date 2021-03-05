@@ -38,15 +38,6 @@ namespace Radial.WorldBuilder
             },
             new Location()
             {
-                XCoord = 0,
-                YCoord = 0,
-                ZCoord = World.OfflineZCoord,
-                Title = "Offline",
-                Description = "You're offline!  You shouldn't be seeing this!  Email the dev immediately!",
-                IsSafeArea = true
-            },
-            new Location()
-            {
                XCoord = 0,
                YCoord = 0,
                ZCoord = "0",

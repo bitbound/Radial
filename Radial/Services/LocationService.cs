@@ -21,17 +21,20 @@ namespace Radial.Services
         private readonly IClientManager _clientManager;
         private readonly ICombatService _combatService;
         private readonly INpcService _npcService;
+        private readonly IEncounterService _encounterService;
         private readonly IWorld _world;
         public LocationService(
             IWorld world, 
             IClientManager clientManager, 
             ICombatService combatService, 
-            INpcService npcService)
+            INpcService npcService, 
+            IEncounterService encounterService)
         {
             _world = world;
             _clientManager = clientManager;
             _combatService = combatService;
             _npcService = npcService;
+            _encounterService = encounterService;
         }
 
 
@@ -227,10 +230,8 @@ namespace Radial.Services
 
             if (!newLocation.NpcsAlive.Any(x => x.AggressionModel > AggressionModel.OnAttacked))
             {
-                _npcService.SpawnNpcsForParty(clientConnection, newLocation);
+                _encounterService.SpawnNpcs(clientConnection, TimeSpan.FromSeconds(3), 1);
             }
-
-            _combatService.InitiateNpcAttackOnSight(clientConnection);
         }
     }
 }

@@ -125,7 +125,7 @@ namespace Radial.Services
 
             foreach (var client in _clientManager.Clients)
             {
-                encounterService.SpawnNpcCombatEncounters(client);
+                encounterService.SpawnNpcs(client, TimeSpan.FromSeconds(10), .5, Enums.AggressionModel.PlayerOnSight);
             }
 
             foreach (var location in locations)

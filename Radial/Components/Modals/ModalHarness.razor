@@ -1,7 +1,7 @@
 ﻿@inject IModalService ModalService
 @inject IJsInterop JsInterop
-  
-<div @ref="_mainModal" 
+
+<div @ref="_mainModal"
      class="modal fade @_showClass" style="display: @_displayStyle">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -12,7 +12,12 @@
                 </button>
             </div>
             <div class="modal-body">
-                @ModalService.Body
+                @foreach (var line in ModalService?.Body ?? Array.Empty<string>())
+                {
+                    <p>
+                        @line
+                    </p>
+                }
             </div>
             <div class="modal-footer">
                 @foreach (var button in ModalService.Buttons)
@@ -39,8 +44,8 @@
             {
                 _displayStyle = "block";
                 await InvokeAsync(StateHasChanged);
-                // The fade animation won't work without a delay here.
-                await Task.Delay(100);
+            // The fade animation won't work without a delay here.
+            await Task.Delay(100);
                 _showClass = "show";
                 await InvokeAsync(StateHasChanged);
             };

@@ -12,6 +12,7 @@ using Radial.Data.Entities;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Components.Server.Circuits;
+using System.Collections.Concurrent;
 
 namespace Radial.Services.Client
 {
@@ -35,6 +36,7 @@ namespace Radial.Services.Client
         private readonly IClientManager _clientManager;
         private readonly IJsInterop _jsInterop;
         private readonly ILogger<ClientConnection> _logger;
+        private readonly ConcurrentQueue<IMessageBase> _messageQueue = new();
         private readonly UserManager<RadialUser> _userManager;
         private readonly IWorld _world;
         private PlayerCharacter _character;
@@ -144,7 +146,10 @@ namespace Radial.Services.Client
 
         public void InvokeMessageReceived(IMessageBase message)
         {
-            _ = Task.Run(() => MessageReceived?.Invoke(this, message));
+            //_ = Task.Run(() => MessageReceived?.Invoke(this, message));
+            //MessageReceived?.Invoke(this, message);
+            _messageQueue.Enqueue(message);
+            _ = Task.Run(ProcessMessages);
         }
 
         public override async Task OnCircuitClosedAsync(Circuit circuit, CancellationToken cancellationToken)
@@ -166,6 +171,17 @@ namespace Radial.Services.Client
                 _jsInterop.AddBeforeUnloadHandler();
             }
             await base.OnCircuitOpenedAsync(circuit, cancellationToken);
+        }
+
+        private void ProcessMessages()
+        {
+            lock (_messageQueue)
+            {
+                while (_messageQueue.TryDequeue(out var message))
+                {
+                    MessageReceived?.Invoke(this, message);
+                }
+            }
         }
     }
 }
