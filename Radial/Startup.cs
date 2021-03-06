@@ -38,7 +38,7 @@ namespace Radial
                options.UseSqlite(
                     Configuration.GetConnectionString("Sqlite")));
 
-            services.AddDefaultIdentity<RadialUser>(options => options.SignIn.RequireConfirmedAccount = true)
+            services.AddDefaultIdentity<RadialUser>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
             services.AddRazorPages();

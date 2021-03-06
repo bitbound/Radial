@@ -38,7 +38,7 @@ namespace Radial.Services
             if (character.State == CharacterState.Normal &&
                 !location.IsSafeArea &&
                 DateTimeOffset.Now - character.LastCombatEncounter >= sinceLastEncounter &&
-                !location.Npcs.Where(x => x.AggressionModel > AggressionModel.OnAttacked).Any())
+                !location.Npcs.Any(x => !x.IsFriendly))
             {
                 var spawn = Calculator.RollForBool(oddsOfEncounter);
 

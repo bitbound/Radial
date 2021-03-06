@@ -292,8 +292,8 @@ namespace Radial.Services
                 var blockAmountMod = RollForAction(target, target.AttributeGuard);
 
                 var unblockablePercent = Math.Min(.5, Math.Max(.1, attackPower / blockAmountMod));
-                var unblockableAmount = attackPower * unblockablePercent;
-                var blockableAmount = attackPower - unblockablePercent;
+                var unblockableAmount = Math.Round(attackPower * unblockablePercent);
+                var blockableAmount = attackPower - unblockableAmount;
 
                 remainingAttack = Math.Max(0, blockableAmount - blockAmountMod) + unblockableAmount;
 
