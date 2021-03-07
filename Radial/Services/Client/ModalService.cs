@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Components;
-using Radial.Components.Modals;
-using Radial.Models;
+﻿using Radial.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;

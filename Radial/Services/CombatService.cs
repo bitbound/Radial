@@ -101,6 +101,11 @@ namespace Radial.Services
 
             foreach (var target in targets)
             {
+                if (attacker is PlayerCharacter pc1)
+                {
+                    pc1.Stats.DamageDealt += (long)attackPower;
+                }
+
                 var overkill = attackPower - target.EnergyCurrent;
                 target.EnergyCurrent = Math.Max(0, (long)(target.EnergyCurrent - attackPower));
                 target.State = CharacterState.InCombat;
@@ -110,6 +115,10 @@ namespace Radial.Services
 
                 if (target.EnergyCurrent < 1)
                 {
+                    if (attacker is PlayerCharacter pc2)
+                    {
+                        pc2.Stats.Kills++;
+                    }
                     attacker.Target = null;
                     KillCharacter(target, overkill, location);
                 }
@@ -209,11 +218,33 @@ namespace Radial.Services
             var healPower = RollForAction(healer, healer.AttributeHeal);
             healer.ChargeCurrent = 0;
 
+            var startEnergy = primaryRecipient.EnergyCurrent;
             primaryRecipient.EnergyCurrent = (long)Math.Min(primaryRecipient.EnergyMax, primaryRecipient.EnergyCurrent + healPower);
+
+            if (primaryRecipient is PlayerCharacter primaryRec)
+            {
+                primaryRec.Stats.HealingReceived += primaryRecipient.EnergyCurrent - startEnergy;
+            }
+
+            if (healer is PlayerCharacter healerPC)
+            {
+                healerPC.Stats.HealingDone += primaryRecipient.EnergyCurrent - startEnergy;
+            }
 
             foreach (var character in otherRecipients.Except(new[] { healer.Target }))
             {
+                startEnergy = character.EnergyCurrent;
                 character.EnergyCurrent = (long)Math.Min(character.EnergyMax, character.EnergyCurrent + healPower * .25);
+
+                if (healer is PlayerCharacter healerPC2)
+                {
+                    healerPC2.Stats.HealingDone += character.EnergyCurrent - startEnergy;
+                }
+
+                if (character is PlayerCharacter targetPC)
+                {
+                    targetPC.Stats.HealingReceived += character.EnergyCurrent - startEnergy;
+                }
             }
 
             if (healer == primaryRecipient)
@@ -300,6 +331,12 @@ namespace Radial.Services
                 target.ChargeCurrent = (long)Math.Max(0, target.ChargeCurrent - blockableAmount);
 
                 var blockedAmount = attackPower - remainingAttack;
+
+                if (target is PlayerCharacter pc)
+                {
+                    pc.Stats.DamageBlocked += (long)blockedAmount;
+                }
+
                 _clientManager.SendToAllAtLocation(location, new LocalEventMessage($"{target.Name} blocks {blockedAmount} damage!", "text-info"));
 
                 if (target.ChargeCurrent < 1)
@@ -312,11 +349,26 @@ namespace Radial.Services
             target.EnergyCurrent = (long)Math.Max(0, target.EnergyCurrent - remainingAttack);
             target.State = CharacterState.InCombat;
 
+            if (target is PlayerCharacter targetPC)
+            {
+                targetPC.Stats.DamageReceived += (long)remainingAttack;
+            }
+
+            if (attacker is PlayerCharacter attackerPC)
+            {
+                attackerPC.Stats.DamageDealt += (long)attackPower;
+            }
+
             _clientManager.SendToAllAtLocation(location,
                     new LocalEventMessage($"{target.Name} takes {remainingAttack} damage! {target.EnergyPercentFormatted} remaining.", "text-danger"));
 
             if (target.EnergyCurrent < 1)
             {
+                if (attacker is PlayerCharacter attackerPC2)
+                {
+                    attackerPC2.Stats.Kills++;
+                }
+
                 attacker.Target = null;
                 KillCharacter(target, overkill, location);
             }
@@ -325,6 +377,11 @@ namespace Radial.Services
         private void KillCharacter(CharacterBase target, double overkillDamage, Location location)
         {
             target.State = CharacterState.Dead;
+
+            if (target is PlayerCharacter pc)
+            {
+                pc.Stats.Deaths++;
+            }
 
             var overkillPercentage = overkillDamage / target.EnergyMax;
 

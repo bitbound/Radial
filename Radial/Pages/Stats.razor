@@ -2,10 +2,66 @@
 @attribute [Authorize]
 @inject IMessagePublisher MessagePublisher
 @inject IJsInterop JsInterop
+@inject IClientConnection ClientConnection
 @inherits AuthComponentBase
 
-<h3>Stats</h3>
+<h3 class="mb-3">Statistics</h3>
+
+
+<h5 class="mt-3 text-info">
+    Combat
+</h5>
+<div class="stat-group">
+    <div>
+        Kills:
+    </div>
+    <div>
+        @PlayerStats?.Kills.ToString("N0")
+    </div>
+    <div>
+        Deaths:
+    </div>
+    <div>
+        @PlayerStats?.Deaths.ToString("N0")
+    </div>
+    <div>
+        Damage Dealt:
+    </div>
+    <div>
+        @PlayerStats?.DamageDealt.ToString("N0")
+    </div>
+    <div>
+        Damage Received:
+    </div>
+    <div>
+        @PlayerStats?.DamageReceived.ToString("N0")
+    </div>
+    <div>
+        Healing Done:
+    </div>
+    <div>
+        @PlayerStats?.HealingDone.ToString("N0")
+    </div>
+    <div>
+        Healing Received:
+    </div>
+    <div>
+        @PlayerStats?.HealingReceived.ToString("N0")
+    </div>
+</div>
+
+<h5 class="mt-3 text-info">
+    Misc
+</h5>
+<div class="stat-group">
+    <div>
+        Farthest Travelled:
+    </div>
+    <div>
+        @PlayerStats?.FarthestDistanceTravelled
+    </div>
+</div>
 
 @code {
-
+    private PlayerStats PlayerStats => ClientConnection?.Character?.Stats;
 }

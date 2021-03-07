@@ -200,8 +200,9 @@
         ModalService.ShowModal("Heal Attribute", new[]
        {
             "Modifies your Heal ability. " +
-            "When used, all players in the area will be healed.  The total amount healed is your " +
-            "Current Charge plus Heal Attribute, multiplied by a random percent between 75 and 100.",
+            "When used, the target player and all players in the area will be healed.  The primary target is " +
+            "healed for your Current Charge plus Heal Attribute, multiplied by a random percent between 75 and 100.  " +
+            "Other players in the area are healed for 80 percent of healing done to the primary target.",
 
             "If you a heal a player who is in combat, you will also enter combat."
         });

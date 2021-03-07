@@ -219,7 +219,7 @@ namespace Radial.Services
             oldLocation.RemoveCharacter(clientConnection.Character);
             newLocation.AddCharacter(clientConnection.Character);
             clientConnection.Location = newLocation;
-            clientConnection.Character.FarthestDistanceTravelled = (long)Calculator.GetDistanceBetween(0, 0, newLocation.XCoord, newLocation.YCoord);
+            clientConnection.Character.Stats.FarthestDistanceTravelled = (long)Calculator.GetDistanceBetween(0, 0, newLocation.XCoord, newLocation.YCoord);
 
             _clientManager.SendToOtherLocals(clientConnection, oldLocation, 
                 new LocalEventMessage($"{clientConnection.Character.Name} left to the {direction}."));

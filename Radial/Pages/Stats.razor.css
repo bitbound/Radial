@@ -1,0 +1,7 @@
+﻿.stat-group {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-auto-rows: auto;
+    grid-column-gap: 50px;
+    grid-row-gap: 10px;
+}
