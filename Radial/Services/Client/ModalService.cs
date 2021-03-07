@@ -19,7 +19,7 @@ namespace Radial.Services.Client
 
     public class ModalService : IModalService
     {
-        private readonly SemaphoreSlim _modalLock = new SemaphoreSlim(1, 1);
+        private readonly SemaphoreSlim _modalLock = new(1, 1);
 
         public event EventHandler ModalShown;
         public List<ModalButton> Buttons { get; } = new List<ModalButton>();

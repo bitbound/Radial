@@ -35,8 +35,7 @@ namespace Radial.Services
 
     public class ClientManager : IClientManager
     {
-        private static ConcurrentDictionary<string, IClientConnection> _clientConnections =
-                    new ConcurrentDictionary<string, IClientConnection>();
+        private static ConcurrentDictionary<string, IClientConnection> _clientConnections = new();
 
         private readonly IWorld _world;
 

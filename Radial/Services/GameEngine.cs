@@ -119,14 +119,8 @@ namespace Radial.Services
                 return Task.CompletedTask;
             }
 
-            var encounterService = scope.ServiceProvider.GetRequiredService<IEncounterService>();
             var combatService = scope.ServiceProvider.GetRequiredService<ICombatService>();
             var locations = _clientManager.Clients.Select(x => x.Location).Distinct();
-
-            foreach (var client in _clientManager.Clients)
-            {
-                encounterService.SpawnNpcs(client, TimeSpan.FromSeconds(10), .5, Enums.AggressionModel.PlayerOnSight);
-            }
 
             foreach (var location in locations)
             {

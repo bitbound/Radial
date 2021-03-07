@@ -31,8 +31,7 @@ namespace Radial.Services
 
     public class InputDispatcher : IInputDispatcher
     {
-        private static readonly ConcurrentDictionary<IClientConnection, Func<Task>> _inputs = 
-            new ConcurrentDictionary<IClientConnection, Func<Task>>();
+        private static readonly ConcurrentDictionary<IClientConnection, Func<Task>> _inputs = new();
         private readonly ICombatService _combatService;
         private readonly IClientManager _clientManager;
         private readonly IWorld _world;
