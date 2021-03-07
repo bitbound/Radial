@@ -163,7 +163,8 @@
         ModalService.ShowModal("Attack Attribute", new[]
         {
             "Modifies your single-target Attack ability. " +
-            "Your total attack roll is Current Charge plus Attack Attribute, multiplied by a " +
+            "When used, you will attack your current target or first non-friendly NPC in the area.  " +
+            "Your total attack damage is Current Charge plus Attack Attribute, multiplied by a " +
             "random percent between 75 and 100."
         });
     }
@@ -183,10 +184,26 @@
     }
     private void ShowBlastHelp()
     {
+        ModalService.ShowModal("Blast Attribute", new[]
+        {
+            "Modifies your Blast ability. " +
+            "When used, your current target and all attacking NPCs in the area will be hit with a blast " +
+            "of negative energy. The damage is your Current Charge plus Blast Attribute, " +
+            "multiplied by a random percent between 75 and 100.",
 
+            "The damage cannot be blocked.  However, for each target that will be hit, the damage is " +
+            "reduced by 20 percent."
+        });
     }
     private void ShowHealHelp()
     {
+        ModalService.ShowModal("Heal Attribute", new[]
+       {
+            "Modifies your Heal ability. " +
+            "When used, all players in the area will be healed.  The total amount healed is your " +
+            "Current Charge plus Heal Attribute, multiplied by a random percent between 75 and 100.",
 
+            "If you a heal a player who is in combat, you will also enter combat."
+        });
     }
 }
