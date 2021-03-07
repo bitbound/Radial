@@ -13,7 +13,7 @@
             <div id="energy-bar" class="progress-bar" style="width: @(CharacterInfo?.EnergyPercentFormatted); overflow: visible;"></div>
         </div>
         <div class="text-white resource-bar-label">
-            <span class="mr-1">@(CharacterInfo?.EnergyCurrent ?? 0)</span>
+            <span class="mr-1">@(CharacterInfo?.EnergyCurrent.ToString("N0") ?? "0")</span>
             <span class="small text-muted">(EXP: @(CharacterInfo?.ExperiencePercentFormatted))</span>
         </div>
     </div>
@@ -23,7 +23,7 @@
             <div id="charge-bar" class="progress-bar" style="width: @(CharacterInfo?.ChargePercentFormatted); overflow: visible;"></div>
         </div>
         <div class="text-white resource-bar-label">
-            @(CharacterInfo?.ChargeCurrent ?? 0)
+            @(CharacterInfo?.ChargeCurrent.ToString("N0") ?? "0")
         </div>
     </div>
 </div>

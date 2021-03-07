@@ -25,7 +25,7 @@ namespace Radial.Services
         public void AddRewardsFromWin(CharacterBase defeatedCharacter, Location location)
         {
             var glintToAdd = defeatedCharacter.Glint;
-            var totalExp = defeatedCharacter.CoreEnergy;
+            var totalExp = defeatedCharacter.CorePower;
 
             _clientManager.SendToAllAtLocation(location, new LocalEventMessage($"You've gained {totalExp} experience and {glintToAdd} glint!", "text-success"));
 
@@ -35,15 +35,15 @@ namespace Radial.Services
                 var expGain = totalExp;
                 while (expGain > 0)
                 {
-                    var expToAdd = Math.Min(expGain, player.CoreEnergy - player.Experience);
+                    var expToAdd = Math.Min(expGain, player.CorePower - player.Experience);
                     player.Experience += expToAdd;
 
-                    if (player.Experience == player.CoreEnergy)
+                    if (player.Experience == player.CorePower)
                     {
-                        player.CoreEnergy++;
+                        player.CorePower++;
                         player.EnergyCurrent = player.EnergyMax;
                         player.Experience = 0;
-                        _clientManager.SendToPlayer(player, new LocalEventMessage($"Level up! Core energy increased to {player.CoreEnergy}!", "text-success"));
+                        _clientManager.SendToPlayer(player, new LocalEventMessage($"Level up! Core energy increased to {player.CorePower}!", "text-success"));
                     }
 
                     expGain -= expToAdd;

@@ -22,13 +22,13 @@ namespace Radial.Models
 
         [JsonIgnore]
         public long AttributePointsRemaining =>
-            CoreEnergy - AttributeAttack - AttributeBlast - AttributeGuard - AttributeHeal;
+            CorePower - AttributeAttack - AttributeBlast - AttributeGuard - AttributeHeal;
 
         [JsonIgnore]
         public long ChargeCurrent { get; set; }
 
         [JsonIgnore]
-        public long ChargeMax => Math.Max(_lowestStatValue, CoreEnergyCurrent + ChargeMaxMod);
+        public long ChargeMax => Math.Max(_lowestStatValue, CorePowerCurrent + ChargeMaxMod);
 
         [JsonIgnore]
         public long ChargeMaxMod => Effects
@@ -42,7 +42,7 @@ namespace Radial.Models
         public string ChargePercentFormatted => $"{Math.Round(ChargePercent * 100)}%";
 
         [JsonIgnore]
-        public long ChargeRate => Math.Max(_lowestStatValue, CoreEnergyCurrent + ChargeRateMod);
+        public long ChargeRate => Math.Max(_lowestStatValue, CorePowerCurrent + ChargeRateMod);
 
         [JsonIgnore]
         public long ChargeRateMod => Effects
@@ -50,13 +50,13 @@ namespace Radial.Models
             .Sum(x => x.StatChange);
 
 
-        public long CoreEnergy { get; set; }
+        public long CorePower { get; set; }
 
         [JsonIgnore]
-        public long CoreEnergyCurrent => Math.Max(_lowestStatValue, CoreEnergy + CoreEnergyMod);
+        public long CorePowerCurrent => Math.Max(_lowestStatValue, CorePower + CorePowerMod);
 
         [JsonIgnore]
-        public long CoreEnergyMod => Effects
+        public long CorePowerMod => Effects
             .Where(x => x.TargetStat == CharacterEffectStat.CoreEnergy)
             .Sum(x => x.StatChange);
 
@@ -65,7 +65,7 @@ namespace Radial.Models
         public long EnergyCurrent { get; set; }
 
         [JsonIgnore]
-        public long EnergyMax => CoreEnergyCurrent + EnergyMaxMod;
+        public long EnergyMax => CorePowerCurrent + EnergyMaxMod;
 
         [JsonIgnore]
         public long EnergyMaxMod => Effects
@@ -81,10 +81,10 @@ namespace Radial.Models
         public long Experience { get; set; }
 
         [JsonIgnore]
-        public long ExperienceToLevel => CoreEnergy - Experience;
+        public long ExperienceToLevel => CorePower - Experience;
 
         [JsonIgnore]
-        public double ExperiencePercent => (double)Experience / (double)CoreEnergy;
+        public double ExperiencePercent => (double)Experience / (double)CorePower;
 
         [JsonIgnore]
         public string ExperiencePercentFormatted => $"{Math.Round(ExperiencePercent * 100)}%";

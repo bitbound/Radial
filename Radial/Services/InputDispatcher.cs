@@ -155,11 +155,6 @@ namespace Radial.Services
                     clientConnection.Location,
                     clientConnection.Location.PlayersAlive.Except(new[] { clientConnection.Character }));
 
-                if (clientConnection.Location.PlayersAlive.Any(x=>x.State == CharacterState.InCombat))
-                {
-                    clientConnection.Character.State = CharacterState.InCombat;
-                }
-
                 return Task.CompletedTask;
             });
         }

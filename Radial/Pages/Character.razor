@@ -7,17 +7,64 @@
 @inherits AuthComponentBase
 
 
-<h3>Character</h3>
+<h3 class="mb-3">Character</h3>
 
-<h4 class="mt-4 text-info">Attributes</h4>
 
-<div id="attributesGrid">
+<h4 class="mt-3 text-info">
+    Resources
+</h4>
+<div class="attribute-grid">
+    <div>
+        Core Power:
+    </div>
+    <div>
+        @PC?.CorePower.ToString("N0")
+    </div>
+    <div>
+        Core Power Mod:
+    </div>
+    <div>
+        @PC?.CorePowerMod.ToString("N0")
+    </div>
+    <div>
+        Energy Mod:
+    </div>
+    <div>
+        @PC?.EnergyMaxMod.ToString("N0")
+    </div>
+    <div>
+        Charge Mod:
+    </div>
+    <div>
+        @PC?.ChargeMaxMod.ToString("N0")
+    </div>
+    <div>
+        Charge Rate Mod:
+    </div>
+    <div>
+        @PC?.ChargeRateMod.ToString("N0")
+    </div>
+    <div>
+        Glint:
+    </div>
+    <div>
+        @PC?.Glint.ToString("N0")
+    </div>
+</div>
+
+
+<h4 class="mt-3 text-info">
+    Attributes
+</h4>
+<div class="attribute-grid">
+
     <div>
         Points Available:
     </div>
     <div>
         @(PC?.AttributePointsRemaining)
     </div>
+
     <div>
         Attack:
         <span class="oi oi-question-mark help-button" @onclick="ShowAttackHelp"></span>

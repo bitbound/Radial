@@ -111,7 +111,7 @@ namespace Radial.Areas.Identity.Pages.Account
 
                     var character = new PlayerCharacter()
                     {
-                        CoreEnergy = 100,
+                        CorePower = 100,
                         EnergyCurrent = 100,
                         Name = Input.Username,
                         Type = Enums.CharacterType.Player,

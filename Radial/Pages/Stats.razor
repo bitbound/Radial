@@ -7,10 +7,9 @@
 
 <h3 class="mb-3">Statistics</h3>
 
-
-<h5 class="mt-3 text-info">
+<h4 class="mt-3 text-info">
     Combat
-</h5>
+</h4>
 <div class="stat-group">
     <div>
         Kills:
@@ -37,6 +36,12 @@
         @PlayerStats?.DamageReceived.ToString("N0")
     </div>
     <div>
+        Damage Blocked:
+    </div>
+    <div>
+        @PlayerStats?.DamageBlocked.ToString("N0")
+    </div>
+    <div>
         Healing Done:
     </div>
     <div>
@@ -50,9 +55,9 @@
     </div>
 </div>
 
-<h5 class="mt-3 text-info">
+<h4 class="mt-3 text-info">
     Misc
-</h5>
+</h4>
 <div class="stat-group">
     <div>
         Farthest Travelled:

@@ -27,11 +27,11 @@ namespace Radial.Services
                 AggressionModel = aggressionModel.HasValue ?
                         aggressionModel.Value :
                         Calculator.RollForBool(.5) ? AggressionModel.PlayerOnSight : AggressionModel.OnAttacked,
-                CoreEnergy = Calculator.RandInstance.Next((int)(distanceFromCenter * .75), (int)distanceFromCenter + 1),
+                CorePower = Calculator.RandInstance.Next((int)(distanceFromCenter * .75), (int)distanceFromCenter + 1),
                 Type = CharacterType.NPC
             };
 
-            npc.Glint = (long)(Calculator.RandInstance.NextDouble() * npc.CoreEnergy);
+            npc.Glint = (long)(Calculator.RandInstance.NextDouble() * npc.CorePower);
             npc.EnergyCurrent = npc.EnergyMax;
             npc.ChargeCurrent = (long)(Calculator.RandInstance.NextDouble() * npc.ChargeMax);
 

@@ -215,6 +215,12 @@ namespace Radial.Services
                 healer.Target = healer;
             }
 
+            primaryRecipient = healer.Target;
+            if (primaryRecipient.State == CharacterState.InCombat)
+            {
+                healer.State = CharacterState.InCombat;
+            }
+
             var healPower = RollForAction(healer, healer.AttributeHeal);
             healer.ChargeCurrent = 0;
 
@@ -233,6 +239,11 @@ namespace Radial.Services
 
             foreach (var character in otherRecipients.Except(new[] { healer.Target }))
             {
+                if (character.State == CharacterState.InCombat)
+                {
+                    healer.State = CharacterState.InCombat;
+                }
+
                 startEnergy = character.EnergyCurrent;
                 character.EnergyCurrent = (long)Math.Min(character.EnergyMax, character.EnergyCurrent + healPower * .25);
 
