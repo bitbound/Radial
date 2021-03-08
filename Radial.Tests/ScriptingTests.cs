@@ -38,11 +38,12 @@ namespace Radial.Tests
 
             result = await result.ContinueWithAsync("DoStuff(); return PC.ChargeCurrent;", options);
             returnValue = result.ReturnValue;
-            Assert.AreEqual((Int64)1, returnValue);
+            Assert.AreEqual((long)1, returnValue);
 
             result = await result.ContinueWithAsync("DoStuff(); return PC.ChargeCurrent;", options);
             returnValue = result.ReturnValue;
-            Assert.AreEqual((Int64)2, returnValue);
+            Assert.AreEqual((long)2, returnValue);
+            Assert.AreEqual(2, globalObj.PC.ChargeCurrent);
 
         }
 
