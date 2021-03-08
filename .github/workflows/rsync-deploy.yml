@@ -30,12 +30,12 @@ jobs:
 
     - name: Restore dependencies
       run: dotnet restore
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
+      working-directory: ${{ github.workspace }}/Radial/
+      
     - name: Publish
+      working-directory: ${{ github.workspace }}/Radial/
       run: |
-        cd ${{ github.workspace }}/Radial/
-        dotnet publish --runtime linux-x64 --configuration Release --output ${{ github.workspace }}/publish/ --self-contained false -p:ExcludeApp_Data=true
+        dotnet publish --runtime linux-x64 --configuration Release --output ${{ github.workspace }}/publish/ --self-contained false -p:ExcludeApp_Data=true "${{ github.workspace }}/Radial/"
         rm -R ${{ github.workspace }}/publish/App_Data/
         rsync -r -v ${{ github.workspace }}/publish/ ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOSTNAME }}:/var/www/${{ secrets.APP_NAME }}/
         ssh ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOSTNAME }} systemctl restart ${{ secrets.APP_NAME }}
