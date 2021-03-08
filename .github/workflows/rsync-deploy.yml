@@ -1,0 +1,41 @@
+name: RSYNC Deploy
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+
+    # Install SSH Key
+    - name: Install SSH Key
+      uses: shimataro/ssh-key-action@v2.2.0
+      with:
+        # SSH private key
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        # public keys of SSH servers
+        known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+
+    - name: Restore dependencies
+      run: dotnet restore
+      working-directory: ${{ github.workspace }}/Radial/
+      
+    - name: Publish
+      working-directory: ${{ github.workspace }}/Radial/
+      run: |
+        dotnet publish --runtime linux-x64 --configuration Release --output ${{ github.workspace }}/publish/ --self-contained false -p:ExcludeApp_Data=true "${{ github.workspace }}/Radial/"
+        rm -R ${{ github.workspace }}/publish/App_Data/
+        rsync -r -v ${{ github.workspace }}/publish/ ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOSTNAME }}:/var/www/${{ secrets.APP_NAME }}/
+        ssh ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOSTNAME }} systemctl restart ${{ secrets.APP_NAME }}
