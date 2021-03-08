@@ -36,6 +36,10 @@ jobs:
       working-directory: ${{ github.workspace }}/Radial/
       run: |
         dotnet publish --runtime linux-x64 --configuration Release --output ${{ github.workspace }}/publish/ --self-contained false -p:ExcludeApp_Data=true "${{ github.workspace }}/Radial/"
-        rm -R ${{ github.workspace }}/publish/App_Data/
+        
+        if [ -d ${{ github.workspace }}/publish/App_Data/ ] ; then
+          rm -R ${{ github.workspace }}/publish/App_Data/
+        fi
+       
         rsync -r -v ${{ github.workspace }}/publish/ ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOSTNAME }}:/var/www/${{ secrets.APP_NAME }}/
         ssh ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOSTNAME }} systemctl restart ${{ secrets.APP_NAME }}
