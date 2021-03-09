@@ -10,7 +10,7 @@
 <h3 class="mb-3">Character</h3>
 
 
-<h4 class="mt-3 text-info">
+<h4 class="mt-5 text-info">
     Resources
 </h4>
 <div class="attribute-grid">
@@ -53,7 +53,7 @@
 </div>
 
 
-<h4 class="mt-3 text-info">
+<h4 class="mt-5 text-info">
     Attributes
 </h4>
 <div class="attribute-grid">
@@ -76,7 +76,7 @@
                     <span class="oi oi-minus"></span>
                 </div>
             </div>
-            <input type="text" readonly class="form-control text-center" value="@PC?.AttributeAttack" />
+            <input type="text" class="form-control text-center" @bind-value="PC.AttributeAttack" />
             <div class="input-group-append">
                 <div class="input-group-text" @onclick="IncreaseAttack">
                     <span class="oi oi-plus"></span>
@@ -96,7 +96,7 @@
                     <span class="oi oi-minus"></span>
                 </div>
             </div>
-            <input type="text" readonly class="form-control text-center" value="@PC?.AttributeGuard" />
+            <input type="text" class="form-control text-center"  @bind-value="PC.AttributeGuard" />
             <div class="input-group-append" @onclick="IncreaseGuard">
                 <div class="input-group-text">
                     <span class="oi oi-plus"></span>
@@ -116,7 +116,7 @@
                     <span class="oi oi-minus"></span>
                 </div>
             </div>
-            <input type="text" readonly class="form-control text-center" value="@PC?.AttributeBlast" />
+            <input type="text" class="form-control text-center"  @bind-value="PC.AttributeBlast" />
             <div class="input-group-append" @onclick="IncreaseBlast">
                 <div class="input-group-text">
                     <span class="oi oi-plus"></span>
@@ -136,7 +136,7 @@
                     <span class="oi oi-minus"></span>
                 </div>
             </div>
-            <input type="text" readonly class="form-control text-center" value="@PC?.AttributeHeal" />
+            <input type="text" class="form-control text-center"  @bind-value="PC.AttributeHeal" />
             <div class="input-group-append" @onclick="IncreaseHeal">
                 <div class="input-group-text">
                     <span class="oi oi-plus"></span>
@@ -215,6 +215,7 @@
             "random percent between 75 and 100."
         });
     }
+
     private void ShowGuardHelp()
     {
         ModalService.ShowModal("Guard Attribute", new[]
@@ -229,6 +230,7 @@
             "the total attack roll.  Your charge is reduced by the amount blocked."
         });
     }
+
     private void ShowBlastHelp()
     {
         ModalService.ShowModal("Blast Attribute", new[]
@@ -242,6 +244,7 @@
             "reduced by 20 percent."
         });
     }
+
     private void ShowHealHelp()
     {
         ModalService.ShowModal("Heal Attribute", new[]

@@ -1,0 +1,11 @@
+﻿.two-column-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-auto-rows: auto;
+    grid-row-gap: 20px;
+    grid-column-gap: 10px;s
+}
+
+    .two-column-grid > :nth-child(odd) {
+        align-self: center;
+    }

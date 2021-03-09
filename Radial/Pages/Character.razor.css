@@ -10,18 +10,18 @@
         align-self: center;
     }
 
+    .attribute-grid .input-group-prepend {
+        cursor: pointer;
+    }
+
+    .attribute-grid .input-group-append {
+        cursor: pointer;
+    }
+
 .help-button {
     cursor: pointer;
 }
 
 .attribute-input {
     width: 300px;
-}
-
-#attributesGrid .input-group-prepend {
-    cursor: pointer;
-}
-
-#attributesGrid .input-group-append {
-    cursor: pointer;
 }

@@ -2,10 +2,41 @@
 @attribute [Authorize]
 @inject IMessagePublisher MessagePublisher
 @inject IJsInterop JsInterop
+@inject IClientManager ClientManager
+@inject IModalService ModalService
 @inherits AuthComponentBase
 
-<h3>Social</h3>
+<h3 class="mb-3">Social</h3>
+
+
+<h4 class="mt-5 text-info">
+    Players Online
+</h4>
+
+<div class="two-column-grid">
+    <div>
+        Count:
+    </div>
+    <div>
+        @ClientManager.Clients.Count
+    </div>
+    <div>
+        Who:
+    </div>
+    <div>
+        <button class="btn btn-primary" @onclick="ShowOnlinePlayers">Show</button>
+    </div>
+</div>
+
+
+<h4 class="mt-5 text-info">
+    Party
+</h4>
+
 
 @code {
-
+    private void ShowOnlinePlayers()
+    {
+        ModalService.ShowModal("Online Players", ClientManager.Clients.Select(x => x.Character.Name).ToArray());
+    }
 }
