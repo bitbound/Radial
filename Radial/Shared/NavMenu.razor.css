@@ -71,3 +71,21 @@
     border-radius: 5px;
     margin-right: 5px;
 }
+
+.flashing-danger {
+    color: red !important;
+    animation-name: flashing-danger;
+    animation-direction: alternate;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+    animation-fill-mode: forwards;
+}
+
+@keyframes flashing-danger {
+    from {
+        color: rgba(255,0,0,0) !important;
+    }
+    to {
+        color: red !important;
+    }
+}
