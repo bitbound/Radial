@@ -66,11 +66,10 @@ namespace Radial.Services
 
             _clientManager.SendToAllAtLocation(location, new LocalEventMessage($"{attacker.Name} attacks {attacker.Target.Name}!", "text-danger"));
 
-            var target = attacker.Target;
+            attacker.State = CharacterState.InCombat;
+            attacker.Target.State = CharacterState.InCombat;
 
-            target.State = CharacterState.InCombat;
-
-            FindBlockersAndReceiveAttack(attacker, target, location, attackPower);
+            FindBlockersAndReceiveAttack(attacker, attacker.Target, location, attackPower);
 
         }
 
@@ -205,17 +204,16 @@ namespace Radial.Services
             IEnumerable<CharacterBase> otherRecipients)
         {
 
-            if (healer.Target is null || !location.Characters.Contains(primaryRecipient))
+            if (!location.Characters.Contains(primaryRecipient))
             {
-                healer.Target = Calculator.GetRandom(location.CharactersAlive.Where(x => x.Type == healer.Type && x != healer));
+                primaryRecipient = Calculator.GetRandom(location.CharactersAlive.Where(x => x.Type == healer.Type && x != healer));
             }
 
-            if (healer.Target is null)
+            if (primaryRecipient is null)
             {
-                healer.Target = healer;
+                primaryRecipient = healer;
             }
 
-            primaryRecipient = healer.Target;
             if (primaryRecipient.State == CharacterState.InCombat)
             {
                 healer.State = CharacterState.InCombat;
@@ -237,7 +235,7 @@ namespace Radial.Services
                 healerPC.Stats.HealingDone += primaryRecipient.EnergyCurrent - startEnergy;
             }
 
-            foreach (var character in otherRecipients.Except(new[] { healer.Target }))
+            foreach (var character in otherRecipients.Except(new[] { primaryRecipient }))
             {
                 if (character.State == CharacterState.InCombat)
                 {

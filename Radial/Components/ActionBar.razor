@@ -110,16 +110,16 @@
     {
         var location = ClientConnection.Location;
 
-        var currentIndex = location.Characters.IndexOf(CharacterInfo.Target);
+        var currentIndex = location.NpcsAlive.IndexOf(CharacterInfo.Target);
         if (currentIndex == -1)
         {
-            CharacterInfo.Target = location.Characters.FirstOrDefault(x => x.Type == CharacterType.NPC);
+            CharacterInfo.Target = location.NpcsAlive.FirstOrDefault(x => x.Type == CharacterType.NPC);
         }
         else
         {
-            CharacterInfo.Target = location.Characters
+            CharacterInfo.Target = location.NpcsAlive
                 .Skip(currentIndex + 1)
-                .FirstOrDefault(x => x.Type == CharacterType.NPC);
+                .FirstOrDefault();
         }
 
         ClientConnection.InvokeMessageReceived(GenericMessage.StateChanged);
@@ -129,16 +129,16 @@
     {
         var location = ClientConnection.Location;
 
-        var currentIndex = location.Characters.IndexOf(CharacterInfo.Target);
+        var currentIndex = location.PlayersAlive.IndexOf(CharacterInfo.Target);
         if (currentIndex == -1)
         {
-            CharacterInfo.Target = location.Characters.FirstOrDefault(x => x.Type == CharacterType.Player);
+            CharacterInfo.Target = location.PlayersAlive.FirstOrDefault();
         }
         else
         {
-            CharacterInfo.Target = location.Characters
+            CharacterInfo.Target = location.PlayersAlive
                 .Skip(currentIndex + 1)
-                .FirstOrDefault(x => x.Type == CharacterType.Player);
+                .FirstOrDefault();
         }
 
         ClientConnection.InvokeMessageReceived(GenericMessage.StateChanged);
