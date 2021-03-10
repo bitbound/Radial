@@ -146,8 +146,6 @@ namespace Radial.Services.Client
 
         public void InvokeMessageReceived(IMessageBase message)
         {
-            //_ = Task.Run(() => MessageReceived?.Invoke(this, message));
-            //MessageReceived?.Invoke(this, message);
             _messageQueue.Enqueue(message);
             _ = Task.Run(ProcessMessages);
         }

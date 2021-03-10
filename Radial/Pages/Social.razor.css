@@ -9,3 +9,11 @@
     .two-column-grid > :nth-child(odd) {
         align-self: center;
     }
+
+.w-300 {
+    width: 300px;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}

@@ -124,8 +124,6 @@ namespace Radial.Models
 
         public string Name { get; init; }
 
-        [JsonIgnore]
-        public string PartyId { get; set; }
 
         [JsonIgnore]
         public CharacterState State

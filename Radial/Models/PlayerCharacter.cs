@@ -21,6 +21,12 @@ namespace Radial.Models
         [JsonIgnore]
         public DateTimeOffset LastCombatEncounter { get; set; }
 
+        [JsonIgnore]
+        public Party Party { get; set; }
+
+        [JsonIgnore]
+        public List<Party> PartyInvites { get; init; } = new();
+
         public string UserId { get; set; }
     }
 }

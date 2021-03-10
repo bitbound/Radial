@@ -4,6 +4,8 @@
 @inject IJsInterop JsInterop
 @inject IClientManager ClientManager
 @inject IModalService ModalService
+@inject IClientConnection ClientConnection
+@inject IPartyService PartyService 
 @inherits AuthComponentBase
 
 <h3 class="mb-3">Social</h3>
@@ -33,8 +35,85 @@
     Party
 </h4>
 
+<div class="two-column-grid">
+
+    @if (PC?.PartyInvites?.Any() == true)
+    {
+        foreach (var invite in PC.PartyInvites)
+        {
+            <div>
+                Invite from @(invite.Leader.Name):
+            </div>
+            <div>
+                <button class="btn btn-primary mr-3">Join</button>
+                <button class="btn btn-danger">Decline</button>
+            </div>
+        }
+    } 
+
+    @if (PC?.Party is null)
+    {
+        <div>
+            Create Party:
+        </div>
+        <div>
+            <button class="btn btn-primary" @onclick="CreateNewParty">New Party</button>
+        </div>
+    }
+    else
+    {
+        @if (PC.Party.Leader == PC)
+        {
+            <div>
+                Invite Player:
+            </div>
+            <div>
+                <div class="input-group w-300">
+                    <input type="text" class="form-control" @bind-value="_inviteeName" />
+                    <div class="input-group-append cursor-pointer">
+                        <div class="input-group-text" @onclick="SendInvite">
+                            <span class="oi oi-share"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div>
+            Party Members:
+        </div>
+        <div>
+            @(PC.Party.Leader.Name) (Leader)
+        </div>
+
+        @foreach (var member in PC.Party.Members.Except(new[] { PC, PC.Party.Leader }))
+        {
+            <div>
+                
+            </div>
+            <div>
+                @member.Name
+            </div>
+        }
+    }
+
+</div>
 
 @code {
+    private string _inviteeName;
+
+    private PlayerCharacter PC => ClientConnection?.Character;
+
+    private void CreateNewParty()
+    {
+        PartyService.CreateNewParty(PC);
+    }
+
+    private void SendInvite()
+    {
+
+    }
+
     private void ShowOnlinePlayers()
     {
         ModalService.ShowModal("Online Players", ClientManager.Clients.Select(x => x.Character.Name).ToArray());

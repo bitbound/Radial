@@ -35,7 +35,7 @@ namespace Radial.Services
 
     public class ClientManager : IClientManager
     {
-        private static ConcurrentDictionary<string, IClientConnection> _clientConnections = new();
+        private readonly static ConcurrentDictionary<string, IClientConnection> _clientConnections = new();
 
         private readonly IWorld _world;
 
@@ -96,12 +96,12 @@ namespace Radial.Services
 
         public IEnumerable<IClientConnection> GetPartyMembers(IClientConnection clientConnection)
         {
-            if (string.IsNullOrWhiteSpace(clientConnection?.Character?.PartyId))
+            if (clientConnection?.Character?.Party is null)
             {
                 return new IClientConnection[] { clientConnection };
             }
 
-            return _clientConnections.Values.Where(x => x.Character.PartyId == clientConnection.Character.PartyId);
+            return _clientConnections.Values.Where(x => x.Character.Party == clientConnection.Character.Party);
         }
 
         public bool IsPlayerOnline(string username)
@@ -206,12 +206,12 @@ namespace Radial.Services
 
         public bool SendToParty(IClientConnection senderConnection, IMessageBase message)
         {
-            if (string.IsNullOrWhiteSpace(senderConnection.Character.PartyId))
+            if (senderConnection.Character.Party is null)
             {
                 return false;
             }
 
-            foreach (var connection in _clientConnections.Values.Where(x=>x.Character.PartyId == senderConnection.Character.PartyId))
+            foreach (var connection in _clientConnections.Values.Where(x=>x.Character.Party == senderConnection.Character.Party))
             {
                 connection.InvokeMessageReceived(message);
             }

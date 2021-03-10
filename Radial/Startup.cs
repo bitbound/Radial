@@ -66,6 +66,7 @@ namespace Radial
             services.AddScoped<IEncounterService, EncounterService>();
             services.AddScoped<INpcService, NpcService>();
             services.AddScoped<ILevelUpService, LevelUpService>();
+            services.AddScoped<IPartyService, PartyService>();
             services.AddHostedService<GameEngine>();
         }
 
