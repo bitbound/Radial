@@ -32,6 +32,8 @@ namespace Radial.Utilities
             Name = name;
             _serviceProvider = serviceProvider;
 
+            Load();
+
             var scope = serviceProvider.CreateScope();
             var env = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
             if (env.IsDevelopment())
@@ -51,7 +53,6 @@ namespace Radial.Utilities
             _saveTimer.Elapsed += SaveTimer_Elapsed;
             _saveTimer.Start();
 
-            Load();
         }
 
         public ICollection<T> All => _cache.Values;

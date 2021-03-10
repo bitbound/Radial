@@ -18,6 +18,8 @@ namespace Radial.Models
         /// </summary>
         public ConcurrentDictionary<Guid, Guid> InteractableStartLookup { get; init; } = new();
 
+        public bool KonamiCodeFound { get; set; }
+
         [JsonIgnore]
         public DateTimeOffset LastCombatEncounter { get; set; }
 

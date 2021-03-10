@@ -2,11 +2,12 @@
 @using Radial.Services
 @using Radial.Services.Client
 @using Radial.Utilities; 
+@using System.Collections.Concurrent
 @inject IInputDispatcher InputDispatcher
 @inject IClientConnection ClientConnection
 @inject IMessagePublisher MessagePublisher
 @inject IModalService ModalService
-@inject IAppState AppState 
+@inject IAppState AppState  
 
 <div class="action-bar-frame" tabindex="0" @onkeydown="OnKeyDown">
     <div class="action-bar-top-row">
@@ -18,16 +19,16 @@
         </div>
         <div>
             <span class="text-info">Target:</span>
-            <span>@(CharacterInfo?.Target?.Name) [@(CharacterInfo?.Target?.EnergyPercentFormatted)]</span>
+            <span>@(PC?.Target?.Name) [@(PC?.Target?.EnergyPercentFormatted)]</span>
         </div>
     </div>
-    @if (CharacterInfo?.EnergyCurrent < 1)
+    @if (PC?.EnergyCurrent < 1)
     {
         <button id="respawnButton" class="btn btn-danger" @onclick="Respawn">Respawn</button>
     }
     else
     {
-        @if (CharacterInfo?.State == CharacterState.InCombat)
+        @if (PC?.State == CharacterState.InCombat)
         {
             <div class="text-center">
                 <button id="escapeButton" class="btn btn-danger" style="transform: translate(-50%, 50%)" @onclick="Escape">Escape</button>
@@ -75,14 +76,16 @@
 </div>
 
 @code {
-    private PlayerCharacter CharacterInfo { get; set; }
+    private ConcurrentQueue<string> _keyHistory = new();
+
+    private PlayerCharacter PC { get; set; }
     private Location Location => ClientConnection?.Location;
 
     protected override Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            CharacterInfo = ClientConnection.Character;
+            PC = ClientConnection.Character;
             MessagePublisher.DataStateChanged += (sender, args) =>
             {
                 InvokeAsync(StateHasChanged);
@@ -110,14 +113,14 @@
     {
         var location = ClientConnection.Location;
 
-        var currentIndex = location.NpcsAlive.IndexOf(CharacterInfo.Target);
+        var currentIndex = location.NpcsAlive.IndexOf(PC.Target);
         if (currentIndex == -1)
         {
-            CharacterInfo.Target = location.NpcsAlive.FirstOrDefault(x => x.Type == CharacterType.NPC);
+            PC.Target = location.NpcsAlive.FirstOrDefault(x => x.Type == CharacterType.NPC);
         }
         else
         {
-            CharacterInfo.Target = location.NpcsAlive
+            PC.Target = location.NpcsAlive
                 .Skip(currentIndex + 1)
                 .FirstOrDefault();
         }
@@ -129,14 +132,14 @@
     {
         var location = ClientConnection.Location;
 
-        var currentIndex = location.PlayersAlive.IndexOf(CharacterInfo.Target);
+        var currentIndex = location.PlayersAlive.IndexOf(PC.Target);
         if (currentIndex == -1)
         {
-            CharacterInfo.Target = location.PlayersAlive.FirstOrDefault();
+            PC.Target = location.PlayersAlive.FirstOrDefault();
         }
         else
         {
-            CharacterInfo.Target = location.PlayersAlive
+            PC.Target = location.PlayersAlive
                 .Skip(currentIndex + 1)
                 .FirstOrDefault();
         }
@@ -151,7 +154,7 @@
 
     private string GetGuardStyle()
     {
-        if (CharacterInfo?.IsGuarding == true)
+        if (PC?.IsGuarding == true)
         {
             return "btn-success";
         }
@@ -165,17 +168,17 @@
 
     private void Move(MovementDirection direction)
     {
-        if (DateTimeOffset.Now - CharacterInfo.LastMoveTime < TimeSpan.FromMilliseconds(100))
+        if (DateTimeOffset.Now - PC.LastMoveTime < TimeSpan.FromMilliseconds(100))
         {
             return;
         }
 
-        if (CharacterInfo.State != CharacterState.Normal)
+        if (PC.State != CharacterState.Normal)
         {
             return;
         }
 
-        CharacterInfo.LastMoveTime = DateTimeOffset.Now;
+        PC.LastMoveTime = DateTimeOffset.Now;
 
         InputDispatcher.MoveCharacter(ClientConnection, direction);
     }
@@ -216,6 +219,31 @@
             case "Down":
                 Heal();
                 break;
+        }
+
+        if (PC?.KonamiCodeFound != true)
+        {
+            while (_keyHistory.Count > 9)
+            {
+                _keyHistory.TryDequeue(out _);
+            }
+            _keyHistory.Enqueue(args.Key.ToLower());
+
+            if (string.Join(',', _keyHistory) ==
+                "w,w,s,s,a,d,a,d,arrowdown,arrowright")
+            {
+                ModalService.ShowModal("Konami Code Entered", new[]
+                {
+                    "Oooh, look at you, Mr. Smarty Pants!  I bet you think you're pretty clever, huh? " +
+                    "Well, guess what?!  There's no Start button!  Whatcha gonna do now, huh?!",
+
+                    "... What?  The Start button isn't part of the Konami code?  Ah, crap. " +
+                    "Fine.  Here, have 10,000 glint."
+                });
+
+                PC.Glint += 10_000;
+                PC.KonamiCodeFound = true;
+            }
         }
     }
     private void OpenPowersMenu()

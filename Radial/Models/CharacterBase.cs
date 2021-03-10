@@ -13,34 +13,13 @@ namespace Radial.Models
     {
         private static readonly long _lowestStatValue = 10;
         private CharacterState _state;
-        private long _attributeAttack;
-        private long _attributeBlast;
-        private long _attributeGuard;
-        private long _attributeHeal;
 
-        public long AttributeAttack
-        {
-            get => _attributeAttack;
-            set => _attributeAttack = Math.Max(0, _attributeAttack + Math.Min(value - _attributeAttack, AttributePointsRemaining));
-        }
+        public long AttributeAttack { get; set; }
+        public long AttributeBlast { get; set; }
 
-        public long AttributeBlast
-        {
-            get => _attributeBlast;
-            set => _attributeBlast = Math.Max(0, _attributeBlast + Math.Min(value - _attributeBlast, AttributePointsRemaining));
-        }
+        public long AttributeGuard { get; set; }
 
-        public long AttributeGuard
-        {
-            get => _attributeGuard;
-            set => _attributeGuard = Math.Max(0, _attributeGuard + Math.Min(value - _attributeGuard, AttributePointsRemaining));
-        }
-
-        public long AttributeHeal
-        {
-            get => _attributeHeal;
-            set => _attributeHeal = Math.Max(0, _attributeHeal + Math.Min(value - _attributeHeal, AttributePointsRemaining));
-        }
+        public long AttributeHeal { get; set; }
 
 
         [JsonIgnore]

@@ -76,7 +76,7 @@
                     <span class="oi oi-minus"></span>
                 </div>
             </div>
-            <input type="text" class="form-control text-center" @bind-value="PC.AttributeAttack" />
+            <input type="text" class="form-control text-center" @onchange="SetAttack" value="@PC.AttributeAttack" />
             <div class="input-group-append">
                 <div class="input-group-text" @onclick="IncreaseAttack">
                     <span class="oi oi-plus"></span>
@@ -96,7 +96,7 @@
                     <span class="oi oi-minus"></span>
                 </div>
             </div>
-            <input type="text" class="form-control text-center"  @bind-value="PC.AttributeGuard" />
+            <input type="text" class="form-control text-center" @onchange="SetGuard" value="@PC.AttributeGuard" />
             <div class="input-group-append" @onclick="IncreaseGuard">
                 <div class="input-group-text">
                     <span class="oi oi-plus"></span>
@@ -116,7 +116,7 @@
                     <span class="oi oi-minus"></span>
                 </div>
             </div>
-            <input type="text" class="form-control text-center"  @bind-value="PC.AttributeBlast" />
+            <input type="text" class="form-control text-center" @onchange="SetBlast" value="@PC.AttributeBlast" />
             <div class="input-group-append" @onclick="IncreaseBlast">
                 <div class="input-group-text">
                     <span class="oi oi-plus"></span>
@@ -136,7 +136,7 @@
                     <span class="oi oi-minus"></span>
                 </div>
             </div>
-            <input type="text" class="form-control text-center"  @bind-value="PC.AttributeHeal" />
+            <input type="text" class="form-control text-center" @onchange="SetHeal" value="@PC.AttributeHeal" />
             <div class="input-group-append" @onclick="IncreaseHeal">
                 <div class="input-group-text">
                     <span class="oi oi-plus"></span>
@@ -214,6 +214,38 @@
             "Your total attack damage is Current Charge plus Attack Attribute, multiplied by a " +
             "random percent between 75 and 100."
         });
+    }
+
+    private void SetAttack(ChangeEventArgs args)
+    {
+        if (long.TryParse((string)args.Value, out var result))
+        {
+            PC.AttributeAttack = Math.Max(0, PC.AttributeAttack + Math.Min(result - PC.AttributeAttack, PC.AttributePointsRemaining));
+        }
+    }
+
+    private void SetGuard(ChangeEventArgs args)
+    {
+        if (long.TryParse((string)args.Value, out var result))
+        {
+            PC.AttributeGuard = Math.Max(0, PC.AttributeGuard + Math.Min(result - PC.AttributeGuard, PC.AttributePointsRemaining));
+        }
+    }
+
+    private void SetBlast(ChangeEventArgs args)
+    {
+        if (long.TryParse((string)args.Value, out var result))
+        {
+            PC.AttributeBlast = Math.Max(0, PC.AttributeBlast + Math.Min(result - PC.AttributeBlast, PC.AttributePointsRemaining));
+        }
+    }
+
+    private void SetHeal(ChangeEventArgs args)
+    {
+        if (long.TryParse((string)args.Value, out var result))
+        {
+            PC.AttributeHeal = Math.Max(0, PC.AttributeHeal + Math.Min(result - PC.AttributeHeal, PC.AttributePointsRemaining));
+        }
     }
 
     private void ShowGuardHelp()
