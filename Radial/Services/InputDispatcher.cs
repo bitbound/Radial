@@ -85,7 +85,7 @@ namespace Radial.Services
             QueueInput(clientConnection, () =>
             {
                 _combatService.ToggleGuard(clientConnection.Character, clientConnection.Location);
-                clientConnection.InvokeMessageReceived(GenericMessage.StateChanged);
+                clientConnection.InvokeMessageReceived(MessageBase.StateChanged);
                 return Task.CompletedTask;
             });
         }

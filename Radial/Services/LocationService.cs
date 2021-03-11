@@ -226,7 +226,7 @@ namespace Radial.Services
 
             _clientManager.SendToOtherLocals(clientConnection, newLocation,
                 new LocalEventMessage($"{clientConnection.Character.Name} entered from the {GetOppositeDirection(direction)}."));
-            clientConnection.InvokeMessageReceived(GenericMessage.LocationChanged);
+            clientConnection.InvokeMessageReceived(MessageBase.LocationChanged);
 
             if (!newLocation.NpcsAlive.Any(x => x.AggressionModel > AggressionModel.OnAttacked))
             {

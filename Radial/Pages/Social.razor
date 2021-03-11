@@ -6,6 +6,7 @@
 @inject IModalService ModalService
 @inject IClientConnection ClientConnection
 @inject IPartyService PartyService 
+@inject IToastService ToastService 
 @inherits AuthComponentBase
 
 <h3 class="mb-3">Social</h3>
@@ -39,17 +40,17 @@
 
     @if (PC?.PartyInvites?.Any() == true)
     {
-        foreach (var invite in PC.PartyInvites)
+        foreach (var party in PC.PartyInvites)
         {
             <div>
-                Invite from @(invite.Leader.Name):
+                Invite from @(party.Leader.Name):
             </div>
             <div>
-                <button class="btn btn-primary mr-3">Join</button>
-                <button class="btn btn-danger">Decline</button>
+                <button class="btn btn-primary mr-3" @onclick="() => AcceptInvite(party)">Join</button>
+                <button class="btn btn-danger" @onclick="() => DeclineInvite(party)">Decline</button>
             </div>
         }
-    } 
+    }
 
     @if (PC?.Party is null)
     {
@@ -69,8 +70,8 @@
             </div>
             <div>
                 <div class="input-group w-300">
-                    <input type="text" class="form-control" @bind-value="_inviteeName" />
-                    <div class="input-group-append cursor-pointer">
+                    <input type="text" class="form-control" placeholder="User name" @bind="_inviteeName" @bind:event="oninput" @onkeypress="SendInviteOnKeyPress" />
+                    <div class="input-group-append cursor-pointer" title="Send invite">
                         <div class="input-group-text" @onclick="SendInvite">
                             <span class="oi oi-share"></span>
                         </div>
@@ -79,22 +80,21 @@
             </div>
         }
 
-        <div>
+        <div style="align-self: start">
             Party Members:
         </div>
-        <div>
-            @(PC.Party.Leader.Name) (Leader)
-        </div>
+        <div style="align-self: start">
+            <div>
+                @(PC.Party.Leader.Name) (Leader)
+            </div>
 
-        @foreach (var member in PC.Party.Members.Except(new[] { PC, PC.Party.Leader }))
-        {
-            <div>
-                
-            </div>
-            <div>
-                @member.Name
-            </div>
-        }
+            @foreach (var member in PC.Party.Members.Except(new[] { PC.Party.Leader }))
+            {
+                <div>
+                    @member.Name
+                </div>
+            }
+        </div>
     }
 
 </div>
@@ -104,6 +104,28 @@
 
     private PlayerCharacter PC => ClientConnection?.Character;
 
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            MessagePublisher.DataStateChanged += (sender, args) =>
+            {
+                InvokeAsync(StateHasChanged);
+            };
+        }
+        return base.OnAfterRenderAsync(firstRender);
+    }
+
+    private void AcceptInvite(Party party)
+    {
+        PartyService.AcceptInvite(ClientConnection, party);
+    }
+
+    private void DeclineInvite(Party party)
+    {
+        PartyService.DeclineInvite(ClientConnection, party);
+    }
+
     private void CreateNewParty()
     {
         PartyService.CreateNewParty(PC);
@@ -111,7 +133,16 @@
 
     private void SendInvite()
     {
+        PartyService.SendInvite(ClientConnection, _inviteeName?.Trim());
+        _inviteeName = string.Empty;
+    }
 
+    private void SendInviteOnKeyPress(KeyboardEventArgs args)
+    {
+        if (args.Key.ToLower() == "enter")
+        {
+            SendInvite();
+        }
     }
 
     private void ShowOnlinePlayers()

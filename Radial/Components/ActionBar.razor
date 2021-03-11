@@ -125,7 +125,7 @@
                 .FirstOrDefault();
         }
 
-        ClientConnection.InvokeMessageReceived(GenericMessage.StateChanged);
+        ClientConnection.InvokeMessageReceived(MessageBase.StateChanged);
     }
 
     private void CycleFriendlyTarget()
@@ -144,7 +144,7 @@
                 .FirstOrDefault();
         }
 
-        ClientConnection.InvokeMessageReceived(GenericMessage.StateChanged);
+        ClientConnection.InvokeMessageReceived(MessageBase.StateChanged);
     }
 
     private void Escape()

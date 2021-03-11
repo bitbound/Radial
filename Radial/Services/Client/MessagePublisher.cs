@@ -15,16 +15,19 @@ namespace Radial.Services.Client
         event EventHandler DataStateChanged;
         event EventHandler<LocalEventMessage> LocalEventReceived;
         event EventHandler LocationChanged;
+        event EventHandler<PartyInvite> PartyInviteReceived;
     }
     public class MessagePublisher : IMessagePublisher
     {
         private readonly IClientConnection _clientConnection;
+        private readonly IToastService _toastService;
         private readonly ILogger<MessagePublisher> _logger;
 
-        public MessagePublisher(IClientConnection clientConnection, ILogger<MessagePublisher> logger)
+        public MessagePublisher(IClientConnection clientConnection, IToastService toastService, ILogger<MessagePublisher> logger)
         {
             _clientConnection = clientConnection;
             _clientConnection.MessageReceived += MessageReceived;
+            _toastService = toastService;
             _logger = logger;
         }
 
@@ -32,6 +35,7 @@ namespace Radial.Services.Client
         public event EventHandler DataStateChanged;
         public event EventHandler LocationChanged;
         public event EventHandler<LocalEventMessage> LocalEventReceived;
+        public event EventHandler<PartyInvite> PartyInviteReceived;
 
 
         private void MessageReceived(object sender, IMessageBase message)
@@ -44,13 +48,24 @@ namespace Radial.Services.Client
                         ChatReceived?.Invoke(this, message as ChatMessage);
                         break;
                     case MessageType.DataStateChanged:
-                        DataStateChanged?.Invoke(this, null);
+                        DataStateChanged?.Invoke(this, EventArgs.Empty);
                         break;
                     case MessageType.LocalEvent:
                         LocalEventReceived?.Invoke(this, message as LocalEventMessage);
                         break;
                     case MessageType.LocationChanged:
-                        LocationChanged?.Invoke(this, null);
+                        LocationChanged?.Invoke(this, EventArgs.Empty);
+                        break;
+                    case MessageType.PartyInviteReceived:
+                        var invite = message as PartyInvite;
+                        _toastService.ShowToast($"Party invite from {invite.From.Name}.");
+                        PartyInviteReceived?.Invoke(this, invite);
+                        break;
+                    case MessageType.ToastMessage:
+                        if (message is ToastMessage toastMessage)
+                        {
+                            _toastService.ShowToast(toastMessage.Message, toastMessage.ExpirationMs, toastMessage.ClassString, toastMessage.StyleOverride);
+                        }
                         break;
                     default:
                         break;

@@ -10,6 +10,8 @@ namespace Radial.Models.Enums
         ChatMessage,
         DataStateChanged,
         LocalEvent,
-        LocationChanged
+        LocationChanged,
+        PartyInviteReceived,
+        ToastMessage
     }
 }

@@ -15,7 +15,5 @@ namespace Radial.Models
         public List<PlayerCharacter> Members { get; init; } = new();
 
         public PlayerCharacter Leader { get; set; }
-
-        public List<PlayerCharacter> Invitees { get; init; } = new();
     }
 }

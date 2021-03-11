@@ -157,7 +157,7 @@ namespace Radial.Services
         {
             foreach (var client in _clientManager.Clients)
             {
-                client.InvokeMessageReceived(GenericMessage.StateChanged);
+                client.InvokeMessageReceived(MessageBase.StateChanged);
             }
         }
     }

@@ -119,6 +119,13 @@ namespace Radial.Services
                 return Task.CompletedTask;
             }
 
+            if (character.Party != null)
+            {
+                character.Party.Members.RemoveAll(x => x.Name == character.Name);
+                character.Party = null;
+                character.PartyInvites.Clear();
+            }
+
             _world.CharacterBackups.AddOrUpdate(character.Name, character);
 
             if (_clientConnections.TryRemove(character.UserId, out _))
