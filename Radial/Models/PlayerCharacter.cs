@@ -11,6 +11,9 @@ namespace Radial.Models
     {
         public PlayerStats Stats { get; set; } = new();
 
+        [JsonIgnore]
+        public Interactable CurrentInteraction { get; set; }
+
         /// <summary>
         /// A lookup for which interactable to start at when interacting with an NPC or object.
         /// The key is the NPC or object ID, the value is the interable ID at which to start.

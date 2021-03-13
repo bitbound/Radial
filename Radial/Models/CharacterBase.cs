@@ -94,9 +94,6 @@ namespace Radial.Models
         public long Glint { get; set; }
 
         [JsonIgnore]
-        public Interactable Interaction { get; set; }
-
-        [JsonIgnore]
         public bool IsGuarding { get; set; }
         [JsonIgnore]
         public DateTimeOffset LastMoveTime { get; set; }

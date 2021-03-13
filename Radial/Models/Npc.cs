@@ -17,5 +17,6 @@ namespace Radial.Models
         public ConcurrentDictionary<Guid, Interactable> Dialog { get; init; } = new();
         public bool IsFriendly { get; set; }
         public bool IsRespawnable { get; set; }
+        public string OnPlayerSightedScript { get; init; }
     }
 }

@@ -75,6 +75,11 @@ namespace Radial.Services
 
             foreach (var location in Locations.All)
             {
+                if (location.IsTemporary)
+                {
+                    Locations.Remove(location.XYZ);
+                    continue;
+                }
                 foreach (var player in location.Players)
                 {
                     Locations.Get(location.XYZ).Players.Remove(player);

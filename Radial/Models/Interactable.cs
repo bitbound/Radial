@@ -13,11 +13,9 @@ namespace Radial.Models
         public Guid Id { get; init; } = Guid.NewGuid();
 
         public string Content { get; init; }
-
+        public string OnExecutedScript { get; init; }
         public string Prompt { get; set; }
-
         public string Title { get; init; }
-
         public ConcurrentDictionary<Guid, Interactable> Interactables { get; init; } = new ConcurrentDictionary<Guid, Interactable>();
     }
 }

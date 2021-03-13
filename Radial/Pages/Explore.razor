@@ -131,7 +131,7 @@
     private void SetState()
     {
         CharacterInfo = ClientConnection.Character;
-        CurrentInteraction = CharacterInfo?.Interaction;
+        CurrentInteraction = CharacterInfo?.CurrentInteraction;
         Location = ClientConnection.Location;
         InvokeAsync(StateHasChanged);
     }

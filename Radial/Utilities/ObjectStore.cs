@@ -65,9 +65,9 @@ namespace Radial.Utilities
             return _cache.AddOrUpdate(key, item, (k, v) => item);
         }
 
-        public bool Exists(string xyz)
+        public bool Exists(string key)
         {
-            return _cache.ContainsKey(xyz);
+            return _cache.ContainsKey(key);
         }
 
         public T Find(Func<T, bool> match)
@@ -110,6 +110,11 @@ namespace Radial.Utilities
             {
                 _fileLock.Release();
             }
+        }
+
+        public void Remove(string key)
+        {
+            _cache.Remove(key, out _);
         }
 
         public async Task Save()
