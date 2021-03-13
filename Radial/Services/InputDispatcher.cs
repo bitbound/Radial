@@ -152,8 +152,7 @@ namespace Radial.Services
 
                 _combatService.HealCharacter(clientConnection.Character,
                     target,
-                    clientConnection.Location,
-                    clientConnection.Location.PlayersAlive.Except(new[] { clientConnection.Character }));
+                    clientConnection.Location);
 
                 return Task.CompletedTask;
             });

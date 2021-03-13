@@ -28,16 +28,6 @@ namespace Radial.WorldBuilder
         {
             new Location()
             {
-                XCoord = 0,
-                YCoord = 0,
-                ZCoord = World.PurgatoryZCoord,
-                Title = "Purgatory",
-                Description = "There is only absence here.  The void is like a tangible force that you can feel, " +
-                    "so powerful that the concept of your own existence becomes a confusing blur, unraveling in your own mind.",
-                IsSafeArea = true
-            },
-            new Location()
-            {
                XCoord = 0,
                YCoord = 0,
                ZCoord = "0",

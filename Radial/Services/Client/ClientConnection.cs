@@ -84,7 +84,6 @@ namespace Radial.Services.Client
                     {
                         _logger.LogError("Failed to load character.  Username: {username}", authState.User.Identity.Name);
                     }
-                    _world.PurgatoryLocation.AddCharacter(_character);
                 }
                 return _character;
             }
@@ -108,8 +107,8 @@ namespace Radial.Services.Client
                 var location = _world.Locations.Find(x => x.Characters.Contains(Character));
                 if (location is null)
                 {
-                    _world.PurgatoryLocation.AddCharacter(Character);
-                    location = _world.PurgatoryLocation;
+                    _world.StartLocation.AddCharacter(Character);
+                    location = _world.StartLocation;
                 }
 
                 return location;

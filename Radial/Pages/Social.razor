@@ -37,7 +37,14 @@
 </h4>
 
 <div class="two-column-grid">
-
+    <div>
+        <label for="autoFollowLeader">
+            Auto-Follow Party Leader:
+        </label>
+    </div>
+    <div>
+        <input type="checkbox" id="autoFollowLeader" @bind="PC.Settings.AutoFollowPartyLeader" style="height:1.5em; width:1.5em;" />
+    </div>
     @if (PC?.PartyInvites?.Any() == true)
     {
         foreach (var party in PC.PartyInvites)

@@ -20,8 +20,7 @@ namespace Radial.Services
         void ExecuteNpcActions(Location location);
         void HealCharacter(CharacterBase healer,
             CharacterBase primaryRecipient,
-            Location location,
-            IEnumerable<CharacterBase> otherRecipients);
+            Location location);
 
         void InitiateNpcAttackOnSight(IClientConnection clientConnection);
         void InitiateNpcAttackOnSight(Location location);
@@ -187,7 +186,7 @@ namespace Radial.Services
                         // TODO: Decision tree based on attributes, other characters at the location, etc.
                         if (npcLowOnHealth is not null && Calculator.RollForBool(npc.ChargePercent))
                         {
-                            HealCharacter(npc, npc, location, location.Npcs.Except(new[] { npc }));
+                            HealCharacter(npc, npc, location);
                         }
                         else if (Calculator.RollForBool(npc.ChargePercent))
                         {
@@ -200,8 +199,7 @@ namespace Radial.Services
 
         public void HealCharacter(CharacterBase healer,
             CharacterBase primaryRecipient,
-            Location location,
-            IEnumerable<CharacterBase> otherRecipients)
+            Location location)
         {
 
             if (!location.Characters.Contains(primaryRecipient))
@@ -235,7 +233,21 @@ namespace Radial.Services
                 healerPC.Stats.HealingDone += primaryRecipient.EnergyCurrent - startEnergy;
             }
 
-            foreach (var character in otherRecipients.Except(new[] { primaryRecipient }))
+
+            if (healer == primaryRecipient)
+            {
+                _clientManager.SendToAllAtLocation(location, new LocalEventMessage($"{healer.Name} self-heals for {healPower}.", "text-success"));
+            }
+            else
+            {
+                _clientManager.SendToAllAtLocation(location, new LocalEventMessage($"{healer.Name} heals {primaryRecipient.Name} for {healPower}.", "text-success"));
+            }
+
+            var otherRecipients = location.CharactersAlive
+                .Where(x => x.Type == healer.Type)
+                .Except(new[] { primaryRecipient });
+
+            foreach (var character in otherRecipients)
             {
                 if (character.State == CharacterState.InCombat)
                 {
@@ -254,15 +266,15 @@ namespace Radial.Services
                 {
                     targetPC.Stats.HealingReceived += character.EnergyCurrent - startEnergy;
                 }
-            }
 
-            if (healer == primaryRecipient)
-            {
-                _clientManager.SendToAllAtLocation(location, new LocalEventMessage($"{healer.Name} self-heals for {healPower}.", "text-success"));
-            }
-            else
-            {
-                _clientManager.SendToAllAtLocation(location, new LocalEventMessage($"{healer.Name} heals {primaryRecipient.Name} for {healPower}.", "text-success"));
+                if (healer == character)
+                {
+                    _clientManager.SendToAllAtLocation(location, new LocalEventMessage($"{healer.Name} self-heals for {healPower}.", "text-success"));
+                }
+                else
+                {
+                    _clientManager.SendToAllAtLocation(location, new LocalEventMessage($"{healer.Name} heals {character.Name} for {healPower}.", "text-success"));
+                }
             }
         }
 

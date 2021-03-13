@@ -221,6 +221,8 @@ namespace Radial.Services
             clientConnection.Location = newLocation;
             clientConnection.Character.Stats.FarthestDistanceTravelled = (long)Calculator.GetDistanceBetween(0, 0, newLocation.XCoord, newLocation.YCoord);
 
+            // TODO: Auto-follow leader.
+
             _clientManager.SendToOtherLocals(clientConnection, oldLocation, 
                 new LocalEventMessage($"{clientConnection.Character.Name} left to the {direction}."));
 

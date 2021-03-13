@@ -9,6 +9,7 @@ namespace Radial.Models
 {
     public class PlayerCharacter : CharacterBase
     {
+        public PlayerSettings Settings { get; set; } = new();
         public PlayerStats Stats { get; set; } = new();
 
         [JsonIgnore]

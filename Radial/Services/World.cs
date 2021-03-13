@@ -19,7 +19,6 @@ namespace Radial.Services
         ObjectStore<Location> Locations { get; }
         IEnumerable<Npc> Npcs { get; }
         IEnumerable<PlayerCharacter> PlayerCharacters { get; }
-        Location PurgatoryLocation { get; }
         Location StartLocation { get; }
 
         Task Save();
@@ -29,7 +28,6 @@ namespace Radial.Services
 
     public class World : IWorld
     {
-        public static readonly string PurgatoryZCoord = "Purgatory";
 
         private readonly IServiceProvider _serviceProvider;
 
@@ -49,8 +47,6 @@ namespace Radial.Services
         public IEnumerable<Npc> Npcs => Characters.OfType<Npc>();
 
         public IEnumerable<PlayerCharacter> PlayerCharacters => Characters.OfType<PlayerCharacter>();
-
-        public Location PurgatoryLocation => Locations.Get($"0,0,{PurgatoryZCoord}");
 
         public Location StartLocation => Locations.Get("0,0,0");
 

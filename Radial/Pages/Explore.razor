@@ -48,6 +48,12 @@
                                         $"[Energy: {character.EnergyPercentFormatted}]")
                                 </span>
                             }
+                            else if (character.State == CharacterState.Dead)
+                            {
+                                <span class="text-warning">
+                                    @($"{character.Name} ({character.Type}) recently died here. [Energy: {character.EnergyPercentFormatted}]")
+                                </span>
+                            }
                             else
                             {
                                 @($"{character.Name} ({character.Type}) is here. [Energy: {character.EnergyPercentFormatted}]")
