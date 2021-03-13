@@ -76,8 +76,6 @@
 </div>
 
 @code {
-    private ConcurrentQueue<string> _keyHistory = new();
-
     private PlayerCharacter PC { get; set; }
     private Location Location => ClientConnection?.Location;
 
@@ -219,31 +217,6 @@
             case "Down":
                 Heal();
                 break;
-        }
-
-        if (PC?.KonamiCodeFound != true)
-        {
-            while (_keyHistory.Count > 9)
-            {
-                _keyHistory.TryDequeue(out _);
-            }
-            _keyHistory.Enqueue(args.Key.ToLower());
-
-            if (string.Join(',', _keyHistory) ==
-                "w,w,s,s,a,d,a,d,arrowdown,arrowright")
-            {
-                ModalService.ShowModal("Konami Code Entered", new[]
-                {
-                    "Oooh, look at you, Mr. Smarty Pants!  I bet you think you're pretty clever, huh? " +
-                    "Well, guess what?!  There's no Start button!  Whatcha gonna do now, huh?!",
-
-                    "... What?  The Start button isn't part of the Konami code?  Ah, crap. " +
-                    "Fine.  Here, have 10,000 glint."
-                });
-
-                PC.Glint += 10_000;
-                PC.KonamiCodeFound = true;
-            }
         }
     }
     private void OpenPowersMenu()
