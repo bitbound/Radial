@@ -67,7 +67,10 @@
 
     <div>
         Attack:
-        <span class="oi oi-question-mark help-button" @onclick="ShowAttackHelp"></span>
+        <button class="btn btn-dark btn-sm ml-1" @onclick="ShowAttackHelp">
+            <span class="oi oi-question-mark help-button"></span>
+        </button>
+
     </div>
     <div>
         <div class="input-group attribute-input">
@@ -87,7 +90,9 @@
 
     <div>
         Guard:
-        <span class="oi oi-question-mark help-button" @onclick="ShowGuardHelp"></span>
+        <button class="btn btn-dark btn-sm ml-1" @onclick="ShowGuardHelp">
+            <span class="oi oi-question-mark help-button"></span>
+        </button>
     </div>
     <div>
         <div class="input-group attribute-input">
@@ -107,7 +112,9 @@
 
     <div>
         Blast:
-        <span class="oi oi-question-mark help-button" @onclick="ShowBlastHelp"></span>
+        <button class="btn btn-dark btn-sm ml-1" @onclick="ShowBlastHelp">
+            <span class="oi oi-question-mark help-button"></span>
+        </button>
     </div>
     <div>
         <div class="input-group attribute-input">
@@ -127,7 +134,9 @@
 
     <div>
         Heal:
-        <span class="oi oi-question-mark help-button" @onclick="ShowHealHelp"></span>
+        <button class="btn btn-dark btn-sm ml-1" @onclick="ShowHealHelp">
+            <span class="oi oi-question-mark help-button"></span>
+        </button>
     </div>
     <div>
         <div class="input-group attribute-input">
@@ -284,7 +293,7 @@
             "Modifies your Heal ability. " +
             "When used, the target player and all players in the area will be healed.  The primary target is " +
             "healed for your Current Charge plus Heal Attribute, multiplied by a random percent between 75 and 100.  " +
-            "Other players in the area are healed for 80 percent of healing done to the primary target.",
+            "Other players in the area are healed for 50 percent of healing done to the primary target.",
 
             "If you a heal a player who is in combat, you will also enter combat."
         });

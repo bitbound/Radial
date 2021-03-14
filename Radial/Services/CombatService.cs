@@ -247,6 +247,8 @@ namespace Radial.Services
                 .Where(x => x.Type == healer.Type)
                 .Except(new[] { primaryRecipient });
 
+            var secondaryHealPower = healPower * .5;
+
             foreach (var character in otherRecipients)
             {
                 if (character.State == CharacterState.InCombat)
@@ -255,7 +257,7 @@ namespace Radial.Services
                 }
 
                 startEnergy = character.EnergyCurrent;
-                character.EnergyCurrent = (long)Math.Min(character.EnergyMax, character.EnergyCurrent + healPower * .25);
+                character.EnergyCurrent = (long)Math.Min(character.EnergyMax, character.EnergyCurrent + secondaryHealPower);
 
                 if (healer is PlayerCharacter healerPC2)
                 {
@@ -269,11 +271,11 @@ namespace Radial.Services
 
                 if (healer == character)
                 {
-                    _clientManager.SendToAllAtLocation(location, new LocalEventMessage($"{healer.Name} self-heals for {healPower}.", "text-success"));
+                    _clientManager.SendToAllAtLocation(location, new LocalEventMessage($"{healer.Name} self-heals for {secondaryHealPower}.", "text-success"));
                 }
                 else
                 {
-                    _clientManager.SendToAllAtLocation(location, new LocalEventMessage($"{healer.Name} heals {character.Name} for {healPower}.", "text-success"));
+                    _clientManager.SendToAllAtLocation(location, new LocalEventMessage($"{healer.Name} heals {character.Name} for {secondaryHealPower}.", "text-success"));
                 }
             }
         }
@@ -343,7 +345,7 @@ namespace Radial.Services
             {
                 var blockAmountMod = RollForAction(target, target.AttributeGuard);
 
-                var unblockablePercent = Math.Min(.5, Math.Max(.1, attackPower / blockAmountMod));
+                var unblockablePercent = Math.Min(.5, Math.Max(.1, attackPower / blockAmountMod * .3));
                 var unblockableAmount = Math.Round(attackPower * unblockablePercent);
                 var blockableAmount = attackPower - unblockableAmount;
 
