@@ -221,8 +221,6 @@ namespace Radial.Services
             clientConnection.Location = newLocation;
             clientConnection.Character.Stats.FarthestDistanceTravelled = (long)Calculator.GetDistanceBetween(0, 0, newLocation.XCoord, newLocation.YCoord);
 
-            // TODO: Auto-follow leader.
-
             _clientManager.SendToOtherLocals(clientConnection, oldLocation, 
                 new LocalEventMessage($"{clientConnection.Character.Name} left to the {direction}."));
 
@@ -233,6 +231,23 @@ namespace Radial.Services
             if (!newLocation.NpcsAlive.Any(x => x.AggressionModel > AggressionModel.OnAttacked))
             {
                 _encounterService.SpawnNpcs(clientConnection, TimeSpan.FromSeconds(3), 1);
+            }
+
+            // If character is party leader, have members follow.
+            if (clientConnection.Character?.Party is Party party &&
+                party.Leader == clientConnection.Character)
+            {
+                var membersNearby = oldLocation.PlayersAlive
+                    .Except(new[] { clientConnection.Character })
+                    .Where(x => party.Members.Contains(x));
+
+                foreach (var member in membersNearby)
+                {
+                    if (member.Settings.AutoFollowPartyLeader)
+                    {
+                        MoveCharacter(_clientManager.FindConnection(member), direction);
+                    }
+                }
             }
         }
     }

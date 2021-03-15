@@ -20,6 +20,8 @@ namespace Radial.Services
         Task AddClient(IClientConnection clientConnection);
         void Broadcast(IMessageBase message);
 
+        IClientConnection FindConnection(PlayerCharacter member);
+
         IEnumerable<IClientConnection> GetPartyMembers(IClientConnection clientConnection);
 
         bool IsPlayerOnline(string username);
@@ -94,6 +96,11 @@ namespace Radial.Services
             };
         }
 
+        public IClientConnection FindConnection(PlayerCharacter member)
+        {
+            return _clientConnections.Values.FirstOrDefault(x => x.Character == member);
+        }
+
         public IEnumerable<IClientConnection> GetPartyMembers(IClientConnection clientConnection)
         {
             if (clientConnection?.Character?.Party is null)
@@ -156,6 +163,17 @@ namespace Radial.Services
             return Task.CompletedTask;
         }
 
+        public void SendToAllAtLocation(Location location, IMessageBase message)
+        {
+            var connections = location.Players
+                .Select(x => _clientConnections.Values.FirstOrDefault(y => y.Character.Name == x.Name));
+
+            foreach (var connection in connections)
+            {
+                connection.InvokeMessageReceived(message);
+            }
+        }
+
         public bool SendToClient(IClientConnection senderConnection, string recipient, IMessageBase dto, bool copyToSelf = false)
         {
             if (recipient is null)
@@ -199,18 +217,6 @@ namespace Radial.Services
                 connection.InvokeMessageReceived(message);
             }
         }
-
-        public void SendToAllAtLocation(Location location, IMessageBase message)
-        {
-            var connections = location.Players
-                .Select(x => _clientConnections.Values.FirstOrDefault(y => y.Character.Name == x.Name));
-
-            foreach (var connection in connections)
-            {
-                connection.InvokeMessageReceived(message);
-            }
-        }
-
         public bool SendToParty(IClientConnection senderConnection, IMessageBase message)
         {
             if (senderConnection.Character.Party is null)
@@ -225,14 +231,6 @@ namespace Radial.Services
             return true;
         }
 
-        private IEnumerable<IClientConnection> GetLocalConnections(IClientConnection senderConnection)
-        {
-            var location = senderConnection.Location;
-            return location.Players
-                .Where(x => x.Name != senderConnection.Character.Name)
-                .Select(x => _clientConnections.Values.FirstOrDefault(y => y.Character.Name == x.Name));
-        }
-
         public void SendToPlayer(PlayerCharacter player, IMessageBase localEventMessage)
         {
             var connection = _clientConnections.FirstOrDefault(x => x.Value.Character == player);
@@ -243,6 +241,14 @@ namespace Radial.Services
             }
 
             connection.Value.InvokeMessageReceived(localEventMessage);
+        }
+
+        private IEnumerable<IClientConnection> GetLocalConnections(IClientConnection senderConnection)
+        {
+            var location = senderConnection.Location;
+            return location.Players
+                .Where(x => x.Name != senderConnection.Character.Name)
+                .Select(x => _clientConnections.Values.FirstOrDefault(y => y.Character.Name == x.Name));
         }
     }
 }
