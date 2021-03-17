@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Collections.Immutable;
 
 namespace Radial.Models
 {
@@ -16,6 +12,6 @@ namespace Radial.Models
         public string OnExecutedScript { get; init; }
         public string Prompt { get; set; }
         public string Title { get; init; }
-        public ConcurrentDictionary<Guid, Interactable> Interactables { get; init; } = new ConcurrentDictionary<Guid, Interactable>();
+        public Guid[] Interactables { get; init; } = Array.Empty<Guid>();
     }
 }

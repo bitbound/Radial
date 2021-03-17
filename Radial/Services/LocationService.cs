@@ -5,9 +5,7 @@ using Radial.Services.Client;
 using Radial.Utilities;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Radial.Services
 {
@@ -131,13 +129,10 @@ namespace Radial.Services
             }
         }
 
-        public static Location GetRandomLocation(
+        public Location GetRandomLocation(
             string newXyz,
             IClientConnection clientConnection,
-            MovementDirection enterDirection,
-            IClientManager clientManager,
-            IWorld world,
-            INpcService npcService)
+            MovementDirection enterDirection)
         {
             var (xcoord, ycoord, zcoord) = ParseXyz(newXyz);
 
@@ -206,7 +201,7 @@ namespace Radial.Services
             
             if (!_world.Locations.TryGet(newXyz, out var newLocation))
             {
-                newLocation = GetRandomLocation(newXyz, clientConnection, direction, _clientManager, _world, _npcService);
+                newLocation = GetRandomLocation(newXyz, clientConnection, direction);
                 _world.Locations.AddOrUpdate(newLocation.XYZ, newLocation);
             }
             else

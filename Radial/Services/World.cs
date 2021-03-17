@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using Radial.Data.Entities;
 using Radial.Models;
 using Radial.Utilities;
 using System;
@@ -14,16 +13,16 @@ namespace Radial.Services
 {
     public interface IWorld
     {
-        IEnumerable<CharacterBase> Characters { get; }
         ObjectStore<PlayerCharacter> CharacterBackups { get; }
+        IEnumerable<CharacterBase> Characters { get; }
+        ObjectStore<Interactable> Interactables { get; }
         ObjectStore<Location> Locations { get; }
         IEnumerable<Npc> Npcs { get; }
         IEnumerable<PlayerCharacter> PlayerCharacters { get; }
         Location StartLocation { get; }
 
-        Task Save();
-
         Task Load();
+        Task Save();
     }
 
     public class World : IWorld
@@ -37,11 +36,11 @@ namespace Radial.Services
 
             Locations = new ObjectStore<Location>(nameof(Locations), _serviceProvider);
             CharacterBackups = new ObjectStore<PlayerCharacter>(nameof(CharacterBackups), _serviceProvider);
+            Interactables = new ObjectStore<Interactable>(nameof(Interactables), _serviceProvider);
         }
-        public IEnumerable<CharacterBase> Characters => Locations.All.SelectMany(x => x.Characters);
-
         public ObjectStore<PlayerCharacter> CharacterBackups { get; }
-
+        public IEnumerable<CharacterBase> Characters => Locations.All.SelectMany(x => x.Characters);
+        public ObjectStore<Interactable> Interactables { get; }
         public ObjectStore<Location> Locations { get; }
 
         public IEnumerable<Npc> Npcs => Characters.OfType<Npc>();
@@ -49,12 +48,6 @@ namespace Radial.Services
         public IEnumerable<PlayerCharacter> PlayerCharacters => Characters.OfType<PlayerCharacter>();
 
         public Location StartLocation => Locations.Get("0,0,0");
-
-        public Location LocateCharacter(string characterName)
-        {
-            return Locations.Find(x => x.Characters.Any(character => character.Name == characterName));
-        }
-
         public async Task Load()
         {
             var scope = _serviceProvider.CreateScope();
@@ -83,10 +76,15 @@ namespace Radial.Services
             }
         }
 
+        public Location LocateCharacter(string characterName)
+        {
+            return Locations.Find(x => x.Characters.Any(character => character.Name == characterName));
+        }
         public async Task Save()
         {
             await Locations.Save();
             await CharacterBackups.Save();
+            await Interactables.Save();
         }
     }
 }

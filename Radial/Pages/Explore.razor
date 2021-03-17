@@ -1,11 +1,12 @@
 ﻿@page "/explore"
 @attribute [Authorize]
-@using System.Collections.Concurrent 
+@using System.Collections.Concurrent
 @inject IInputDispatcher InputDispatcher
 @inject IMessagePublisher MessagePublisher
 @inject IClientConnection ClientConnection
-@inject IWorld World 
+@inject IWorld World
 @inject IJsInterop JsInterop
+@inject IInteractableService InteractableService
 @inherits AuthComponentBase
 
 <div class="explore-container auto-height">
@@ -30,7 +31,10 @@
                 <p class="text-info">
                     @foreach (var interactable in Location.Interactables)
                     {
-                        <div>@interactable.Prompt</div>
+                        if (InteractableService.GetInteractable(interactable, out var result))
+                        {
+                            <div>@result.Prompt</div>
+                        }
                     }
                 </p>
             }
@@ -75,7 +79,11 @@
                 <p class="text-info">
                     @foreach (var interactable in Location?.Interactables)
                     {
-                        <div>@interactable.Prompt</div>
+                        if (InteractableService.GetInteractable(interactable, out var result))
+                        {
+                            <div>@result.Prompt</div>
+                        }
+
                     }
                 </p>
             }
@@ -93,7 +101,7 @@
                     [@eventMessage.Timestamp.ToString("g")]
                 </span>
                 <span class="@eventMessage.ClassName">
-                     @eventMessage.Message
+                    @eventMessage.Message
                 </span>
             </div>
         }

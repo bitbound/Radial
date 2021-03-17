@@ -13,11 +13,6 @@ using Radial.Data;
 using Radial.Data.Entities;
 using Radial.Services;
 using Radial.Services.Client;
-using Radial.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Radial
 {
@@ -67,6 +62,7 @@ namespace Radial
             services.AddScoped<INpcService, NpcService>();
             services.AddScoped<ILevelUpService, LevelUpService>();
             services.AddScoped<IPartyService, PartyService>();
+            services.AddScoped<IInteractableService, InteractableService>();
             services.AddHostedService<GameEngine>();
         }
 

@@ -1,15 +1,9 @@
 ﻿using Radial.Enums;
-using Radial.Models;
-using Radial.Utilities;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace Radial.Models
 {
@@ -25,7 +19,8 @@ namespace Radial.Models
 
         public ConcurrentList<MovementDirection> Exits { get; set; } = new();
 
-        public ConcurrentList<Interactable> Interactables { get; set; } = new();
+         public Guid[] Interactables { get; init; } = Array.Empty<Guid>();
+
         public bool IsEditable { get; set; }
         public bool IsSafeArea { get; set; }
         public bool IsTemporary { get; set; }
