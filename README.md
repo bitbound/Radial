@@ -1,6 +1,8 @@
 # Radial
 A text-based, scriptable, online RPG built with Blazor.
 
+[![GitHub Actions](https://github.com/lucent-sea/Radial/actions/workflows/rsync-deploy.yml/badge.svg)](https://github.com/lucent-sea/Radial/actions/workflows/rsync-deploy.yml)
+
 ![Radial Screenshot](https://radialrpg.com/media/screenshot.png "Radial Screenshot")
 
 ## Introduction
