@@ -47,8 +47,6 @@ namespace Radial.Services
         public Task AddClient(IClientConnection clientConnection)
         {
             var character = clientConnection.Character;
-            var oldLocation = clientConnection.Location;
-            var newLocation = _world.StartLocation;
 
             if (character is null)
             {
@@ -60,9 +58,13 @@ namespace Radial.Services
                 existingConnection.Disconnect("You've been disconnected because you signed in from another tab or browser.");
             }
 
-            oldLocation.RemoveCharacter(character);
-            newLocation.AddCharacter(character);
-            clientConnection.Location = newLocation;
+            if (!string.IsNullOrWhiteSpace(character.LastLocation))
+            {
+                var lastLocation = _world.Locations.Get(character.LastLocation);
+                clientConnection.Location = lastLocation;
+            }
+
+            clientConnection.Location.AddCharacter(character);
 
             _clientConnections.AddOrUpdate(clientConnection.User.Id, clientConnection, (k, v) => clientConnection);
 
@@ -76,7 +78,7 @@ namespace Radial.Services
                 });
             }
 
-            foreach (var other in newLocation.Players.Where(x => x.Name != character.Name))
+            foreach (var other in clientConnection.Location.Players.Where(x => x.Name != character.Name))
             {
                 var player = _clientConnections.Values.FirstOrDefault(x => x.Character.Name == other.Name);
                 player?.InvokeMessageReceived(new LocalEventMessage($"{character.Name} has appeared."));
@@ -133,11 +135,7 @@ namespace Radial.Services
 
             if (_clientConnections.TryRemove(character.UserId, out _))
             {
-                var locationXyz = location.XYZ;
-       
                 location.RemoveCharacter(character);
-                clientConnection.Location = null;
-
 
                 foreach (var other in _clientConnections.Where(x => x.Value.User.Id != character.UserId))
                 {

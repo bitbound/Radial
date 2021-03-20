@@ -112,6 +112,7 @@ namespace Radial.Services.Client
             }
             set
             {
+                _character.LastLocation = value?.XYZ;
                 _location = value;
             }
         }

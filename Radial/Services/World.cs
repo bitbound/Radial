@@ -66,7 +66,7 @@ namespace Radial.Services
             {
                 if (location.IsTemporary)
                 {
-                    Locations.Remove(location.XYZ);
+                    Locations.Remove(location.XYZ, out _);
                     continue;
                 }
                 foreach (var player in location.Players)

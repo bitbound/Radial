@@ -18,8 +18,8 @@ namespace Radial.Services
     {
         private readonly IClientManager _clientManager;
         private readonly ICombatService _combatService;
-        private readonly INpcService _npcService;
         private readonly IEncounterService _encounterService;
+        private readonly INpcService _npcService;
         private readonly IWorld _world;
         public LocationService(
             IWorld world, 
@@ -129,10 +129,16 @@ namespace Radial.Services
             }
         }
 
-        public Location GetRandomLocation(
-            string newXyz,
-            IClientConnection clientConnection,
-            MovementDirection enterDirection)
+        public static (long xcoord, long ycoord, string zcoord) ParseXyz(string xyz)
+        {
+            var split = xyz.Split(",");
+            var x = split[0].ToString().Trim();
+            var y = split[1].ToString().Trim();
+            var z = split[2].ToString().Trim();
+            return (long.Parse(x), long.Parse(y), z);
+        }
+
+        public Location GetRandomLocation(string newXyz)
         {
             var (xcoord, ycoord, zcoord) = ParseXyz(newXyz);
 
@@ -158,16 +164,6 @@ namespace Radial.Services
 
             return newLocation;
         }
-
-        public static (long xcoord, long ycoord, string zcoord) ParseXyz(string xyz)
-        {
-            var split = xyz.Split(",");
-            var x = split[0].ToString().Trim();
-            var y = split[1].ToString().Trim();
-            var z = split[2].ToString().Trim();
-            return (long.Parse(x), long.Parse(y), z);
-        }
-
         public void MoveCharacter(IClientConnection clientConnection, MovementDirection direction)
         {
             if (clientConnection.Character.State != CharacterState.Normal)
@@ -201,7 +197,7 @@ namespace Radial.Services
             
             if (!_world.Locations.TryGet(newXyz, out var newLocation))
             {
-                newLocation = GetRandomLocation(newXyz, clientConnection, direction);
+                newLocation = GetRandomLocation(newXyz);
                 _world.Locations.AddOrUpdate(newLocation.XYZ, newLocation);
             }
             else

@@ -8,7 +8,7 @@ namespace Radial.Models
     {
         public Guid Id { get; init; } = Guid.NewGuid();
         public AggressionModel AggressionModel { get; init; }
-        public Guid[] Dialogs { get; init; } = Array.Empty<Guid>();
+        public Guid? Dialog { get; init; }
         public bool IsFriendly { get; set; }
         public bool IsRespawnable { get; set; }
         public string OnPlayerSightedScript { get; init; }

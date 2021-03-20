@@ -22,6 +22,7 @@ namespace Radial.Models
 
         [JsonIgnore]
         public DateTimeOffset LastCombatEncounter { get; set; }
+        public string LastLocation { get; set; }
 
         [JsonIgnore]
         public Party Party { get; set; }

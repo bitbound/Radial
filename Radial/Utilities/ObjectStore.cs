@@ -75,6 +75,12 @@ namespace Radial.Utilities
 
         public T Get(string key)
         {
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+
+            // In case spaces are accidentally put in the {x,y,z} format for locations.
             key = key.Replace(" ", string.Empty);
             return _cache[key];
         }
@@ -110,9 +116,9 @@ namespace Radial.Utilities
             }
         }
 
-        public void Remove(string key)
+        public bool Remove(string key, out T result)
         {
-            _cache.Remove(key, out _);
+            return _cache.Remove(key, out  result);
         }
 
         public async Task Save()
