@@ -56,3 +56,7 @@ a, .btn-link {
 .auto-height {
     opacity: 0;
 }
+
+footer {
+    overflow: hidden;
+}
