@@ -4,6 +4,7 @@ using Radial.Services.Client;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -60,8 +61,14 @@ namespace Radial.Services
 
             if (!string.IsNullOrWhiteSpace(character.LastLocation))
             {
-                var lastLocation = _world.Locations.Get(character.LastLocation);
-                clientConnection.Location = lastLocation;
+                if (_world.Locations.TryGet(character.LastLocation, out var lastLocation))
+                {
+                    clientConnection.Location = lastLocation;
+                }
+                else
+                {
+                    clientConnection.Location = _world.StartLocation;
+                }
             }
 
             clientConnection.Location.AddCharacter(character);
