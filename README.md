@@ -5,7 +5,7 @@ A text-based, scriptable, online RPG built with Blazor.
 
 Website: https://radial.lucency.co
 
-![Radial Screenshot](https://radial.lucency.co/media/screenshot.png "Radial Screenshot")
+![Radial Screenshot](./Solution%20Items/screenshot.png "Radial Screenshot")
 
 ## Introduction
 
